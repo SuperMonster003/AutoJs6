@@ -1,23 +1,23 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3578 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3582 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), 新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).
 
-数据源: ksp, 3578 行 (显式导出 2022, 原型成员 205, 返回对象成员 1351).
+数据源: ksp, 3582 行 (显式导出 2026, 原型成员 205, 返回对象成员 1351).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1685 | 369 | 0 | 1524 | 0 | 0 |
-| Node Worker | 1685 | 366 | 0 | 1527 | 0 | 0 |
-| Bun | 0 | 377 | 1674 | 1527 | 0 | 0 |
+| Node main | 1685 | 369 | 0 | 1528 | 0 | 0 |
+| Node Worker | 1685 | 366 | 0 | 1531 | 0 | 0 |
+| Bun | 0 | 377 | 1674 | 1531 | 0 | 0 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 588 / mention 278 / heading 2712 / signature 0 / example 0 |
-| dts | none 593 / name 1738 / arity 314 / typed 933 |
-| ace | none 998 / semantic 946 / static 1634 |
+| doc | none 592 / mention 278 / heading 2712 / signature 0 / example 0 |
+| dts | none 597 / name 1738 / arity 314 / typed 933 |
+| ace | none 1002 / semantic 946 / static 1634 |
 
 类型比对 (P2.4, ksp: script-modules.json 的参数 / 返回类型与 d.ts, 见 tools/api-coverage/type-map.json; 一致的行 dts 记 typed): typed 1016 / differs 0 / unmapped 252 / no-dts 0 行; 其余行没有 Kotlin 类型 (@ScriptInstall 名称, 原型成员, 返回对象成员).
 
@@ -25,14 +25,14 @@
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 2 / Node Worker 2 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
 
-名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): imgui 584 行 (Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定).
+名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): imgui 588 行 (Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定).
 
 ## 排除规则
 
 | 规则 | 状态 / 理由 | Node main | Node Worker | Bun | 等价写法 |
 |---|---|---:|---:|---:|---|
 | http-java-objects | not-portable: java-prototype | 2 | 2 | 2 | fetch / Node autojs6:fetch request options (method, headers, body) instead of the OkHttp client and request objects |
-| imgui-rhino-only | not-portable: rhino-only | 583 | 583 | 583 | engines.execScript of a Rhino script that opens the window, events.broadcast between the scripts |
+| imgui-rhino-only | not-portable: rhino-only | 587 | 587 | 587 | engines.execScript of a Rhino script that opens the window, events.broadcast between the scripts |
 | internal-exports | not-portable: rhino-only | 10 | 10 | 10 |  |
 | java-introspection | not-portable: java-prototype | 3 | 3 | 3 | java module handles (java.callInstance(handle, "getClass")) |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
@@ -45,6 +45,14 @@
 | native-timers | not-portable: runtime-native | 0 | 0 | 12 | global setTimeout / setInterval / setImmediate and their clear functions |
 | obsoleted-functions | not-portable: obsoleted | 2 | 2 | 2 |  |
 | rhino-engine | not-portable: rhino-only | 0 | 1 | 1 |  |
+
+## 最低 API 标注
+
+状态不变, 不算 pending 也不算排除: 该入口在标注的 API 级别以下不可用 (P6.1, runtime-policy.json minApi).
+
+| 规则 | minApi | 匹配 | Node main | Node Worker | Bun | 理由 |
+|---|---:|---|---:|---:|---:|---|
+| bun-plugin-min-sdk | 33 | `*` | 0 | 0 | 2051 | Bun 插件 minSdk 33: 官方二进制调用 close_range, Android 12L 及更早系统的应用 seccomp 以 SIGSYS 结束进程, API 28 实测 INSTALL_FAILED_OLDER_SDK |
 
 ## 按模块汇总
 
@@ -135,7 +143,7 @@
 | gallery | 11 | 11 | 11 | - | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | http | 21 | 20 | 20 | 20 / 20 | 20 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | images | 82 | 82 | 82 | 79 / 79 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
-| imgui | 584 | 0 | 0 | - | 0 | 0 / 584 / 0 | 0 / 584 / 0 | 0 / 584 / 0 |
+| imgui | 588 | 0 | 0 | - | 0 | 0 / 588 / 0 | 0 / 588 / 0 | 0 / 588 / 0 |
 | installer | 16 | 16 | 16 | - | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | jsox | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | keys | 12 | 12 | 12 | 12 / 12 | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 12 / 0 / 0 |
@@ -1501,6 +1509,8 @@
 | `imgui.SetNextItemShortcut` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 | `imgui.SetNextItemWidth` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 | `imgui.SetNextWindowBgAlpha` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetNextWindowCollapsed` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.SetNextWindowFocus` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 | `imgui.SetNextWindowPos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 | `imgui.SetNextWindowSize` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 | `imgui.SetNextWindowSizeConstraints` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
@@ -1783,6 +1793,8 @@
 | `imgui.setNextItemShortcut` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 | `imgui.setNextItemWidth` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 | `imgui.setNextWindowBgAlpha` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setNextWindowCollapsed` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
+| `imgui.setNextWindowFocus` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 | `imgui.setNextWindowPos` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 | `imgui.setNextWindowSize` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
 | `imgui.setNextWindowSizeConstraints` | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) | not-portable: rhino-only (imgui-rhino-only) |
