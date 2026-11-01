@@ -66,7 +66,7 @@ class ScriptModuleInstallsTest {
             DifferentialRhino().use { rhino -> compare(rhino, case, module) }
         }
         assertTrue("Install hooks differ from their declarations:\n" + failures.joinToString("\n"), failures.isEmpty())
-        assertEquals("declared install names", 101 + 584, names)
+        assertEquals("declared install names", 101 + 588, names)
     }
 
     @Test

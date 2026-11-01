@@ -5892,6 +5892,14 @@ imgui.SetNextWindowBgAlpha	EW-	function name='SetNextWindowBgAlpha' length=0
 imgui.SetNextWindowBgAlpha.arity	--C	number '0'
 imgui.SetNextWindowBgAlpha.length	--C	number '0'
 imgui.SetNextWindowBgAlpha.name	--C	string 'SetNextWindowBgAlpha'
+imgui.SetNextWindowCollapsed	EW-	function name='SetNextWindowCollapsed' length=0
+imgui.SetNextWindowCollapsed.arity	--C	number '0'
+imgui.SetNextWindowCollapsed.length	--C	number '0'
+imgui.SetNextWindowCollapsed.name	--C	string 'SetNextWindowCollapsed'
+imgui.SetNextWindowFocus	EW-	function name='SetNextWindowFocus' length=0
+imgui.SetNextWindowFocus.arity	--C	number '0'
+imgui.SetNextWindowFocus.length	--C	number '0'
+imgui.SetNextWindowFocus.name	--C	string 'SetNextWindowFocus'
 imgui.SetNextWindowPos	EW-	function name='SetNextWindowPos' length=0
 imgui.SetNextWindowPos.arity	--C	number '0'
 imgui.SetNextWindowPos.length	--C	number '0'
@@ -6966,6 +6974,14 @@ imgui.setNextWindowBgAlpha	EW-	function name='setNextWindowBgAlpha' length=0
 imgui.setNextWindowBgAlpha.arity	--C	number '0'
 imgui.setNextWindowBgAlpha.length	--C	number '0'
 imgui.setNextWindowBgAlpha.name	--C	string 'setNextWindowBgAlpha'
+imgui.setNextWindowCollapsed	EW-	function name='setNextWindowCollapsed' length=0
+imgui.setNextWindowCollapsed.arity	--C	number '0'
+imgui.setNextWindowCollapsed.length	--C	number '0'
+imgui.setNextWindowCollapsed.name	--C	string 'setNextWindowCollapsed'
+imgui.setNextWindowFocus	EW-	function name='setNextWindowFocus' length=0
+imgui.setNextWindowFocus.arity	--C	number '0'
+imgui.setNextWindowFocus.length	--C	number '0'
+imgui.setNextWindowFocus.name	--C	string 'setNextWindowFocus'
 imgui.setNextWindowPos	EW-	function name='setNextWindowPos' length=0
 imgui.setNextWindowPos.arity	--C	number '0'
 imgui.setNextWindowPos.length	--C	number '0'

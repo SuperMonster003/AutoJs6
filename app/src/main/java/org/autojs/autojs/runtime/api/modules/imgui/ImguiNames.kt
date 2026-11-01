@@ -51,7 +51,7 @@ object ImguiNames {
         "isKeyChordPressed", "shortcut", "setNextItemShortcut", "getClipboardText", "setClipboardText", "beginDragDropSource", "setDragDropPayload",
         "endDragDropSource", "beginDragDropTarget", "acceptDragDropPayload", "endDragDropTarget", "getDragDropPayload", "withDragDropSource",
         "withDragDropTarget", "pushClipRect", "popClipRect", "beginMultiSelect", "endMultiSelect", "setNextItemSelectionUserData",
-        "isItemToggledSelection", "selectionStorage",
+        "isItemToggledSelection", "selectionStorage", "setNextWindowFocus", "setNextWindowCollapsed",
     )
 
     /** PascalCase aliases of [FUNCTIONS] (`Begin` for `begin`, `PushID` for `pushId`), functions as well. */
@@ -87,7 +87,7 @@ object ImguiNames {
         "IsKeyChordPressed", "Shortcut", "SetNextItemShortcut", "GetClipboardText", "SetClipboardText", "BeginDragDropSource", "SetDragDropPayload",
         "EndDragDropSource", "BeginDragDropTarget", "AcceptDragDropPayload", "EndDragDropTarget", "GetDragDropPayload", "WithDragDropSource",
         "WithDragDropTarget", "PushClipRect", "PopClipRect", "BeginMultiSelect", "EndMultiSelect", "SetNextItemSelectionUserData",
-        "IsItemToggledSelection", "SelectionStorage",
+        "IsItemToggledSelection", "SelectionStorage", "SetNextWindowFocus", "SetNextWindowCollapsed",
     )
 
     /** Constant groups of the plugin API (flag and enum tables, theme and font names), read through getters. */

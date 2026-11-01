@@ -142,6 +142,12 @@ if (EXPECT_MISSING) {
         assert(selection.size === 3 && selection.has(3), 'selectionStorage size = ' + selection.size);
         return names.length + ' functions, MultiSelectFlags, selectionStorage';
     });
+    check('r7 names', function () {
+        var names = ['setNextWindowFocus', 'SetNextWindowFocus', 'setNextWindowCollapsed', 'SetNextWindowCollapsed'];
+        var missing = names.filter(function (name) { return typeof imgui[name] !== 'function'; });
+        assert(missing.length === 0, 'missing ' + missing.join(', '));
+        return names.length + ' functions';
+    });
     check('backend', function () {
         var caps = imgui.getBackendCapabilities();
         assert(caps && typeof caps === 'object', 'caps = ' + caps);

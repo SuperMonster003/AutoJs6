@@ -1403,6 +1403,8 @@ install imgui:SetNextItemSelectionUserData	kind="function" attributes=4 global="
 install imgui:SetNextItemShortcut	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SetNextItemWidth	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SetNextWindowBgAlpha	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:SetNextWindowCollapsed	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:SetNextWindowFocus	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SetNextWindowPos	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SetNextWindowSize	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:SetNextWindowSizeConstraints	kind="function" attributes=4 global="NONE" target=null arity=null
@@ -1685,6 +1687,8 @@ install imgui:setNextItemSelectionUserData	kind="function" attributes=4 global="
 install imgui:setNextItemShortcut	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:setNextItemWidth	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:setNextWindowBgAlpha	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:setNextWindowCollapsed	kind="function" attributes=4 global="NONE" target=null arity=null
+install imgui:setNextWindowFocus	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:setNextWindowPos	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:setNextWindowSize	kind="function" attributes=4 global="NONE" target=null arity=null
 install imgui:setNextWindowSizeConstraints	kind="function" attributes=4 global="NONE" target=null arity=null
