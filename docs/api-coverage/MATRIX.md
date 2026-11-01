@@ -15,7 +15,7 @@
 
 | 列 | 取值 |
 |---|---|
-| doc | none 592 / mention 274 / heading 2712 / signature 0 / example 0 |
+| doc | none 588 / mention 278 / heading 2712 / signature 0 / example 0 |
 | dts | none 593 / name 1738 / arity 314 / typed 933 |
 | ace | none 998 / semantic 946 / static 1634 |
 
@@ -32,7 +32,7 @@
 | 规则 | 状态 / 理由 | Node main | Node Worker | Bun | 等价写法 |
 |---|---|---:|---:|---:|---|
 | http-java-objects | not-portable: java-prototype | 2 | 2 | 2 | fetch / Node autojs6:fetch request options (method, headers, body) instead of the OkHttp client and request objects |
-| imgui-rhino-only | not-portable: rhino-only | 583 | 583 | 583 | engines.execScript of a Rhino script that opens the imgui window; events.broadcast between the two scripts (documentation imgui page) |
+| imgui-rhino-only | not-portable: rhino-only | 583 | 583 | 583 | engines.execScript of a Rhino script that opens the window, events.broadcast between the scripts |
 | internal-exports | not-portable: rhino-only | 10 | 10 | 10 |  |
 | java-introspection | not-portable: java-prototype | 3 | 3 | 3 | java module handles (java.callInstance(handle, "getClass")) |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
