@@ -1468,3 +1468,57 @@ HEAD 导出副本 `E:/.cache/aj6-closeout-bump-head` (宿主 6f2e66ca3, KSP 取�
 
 - `tools/nodejs/api/test-worker-host-modules.js` 在 HEAD 上本来就失败 (console.input 的断言过期), 不在 Node CI.
 - Node 的 test-flow.js / test-flow-tools.js / test-worker-flow.js 不在 Node CI 的 build.yml 里, 只由本节这类手动门禁覆盖.
+
+## 22. P5.2f-2 卡 A: imgui 排除规则 (2026-11-01, 子会话 api-cov-imgui-exclude)
+
+### 22.1 结论
+
+pending 基线 583 / 583 / 583 -> 0 / 0 / 0, Node main, Worker 与 Bun 都没有 pending 行了. Q213 (b): imgui 583 行三列 not-portable / rhino-only, `imgui.__pluginId` 仍归 internal-exports. 矩阵行数不变. doc / d.ts / Ace 列不变, `deferredNameGate.imgui` 保留, 由卡 B / C / D 收口.
+
+### 22.2 数字
+
+| 列 | not-portable 前 | not-portable 后 | pending 前 | pending 后 |
+|---|---:|---:|---:|---:|
+| Node main | 941 | 1524 | 583 | 0 |
+| Node Worker | 944 | 1527 | 583 | 0 |
+| Bun | 944 | 1527 | 583 | 0 |
+
+`pending-baseline.json` 按 Q40 (a) 只减, decisions 新增 Q213 (b). 规则按 `imgui.*` 匹配, 以后的 imgui 新名称不再产生 pending, Q122 的基线登记到此结束.
+
+本卡进行中 imgui R7 登记了 ImGui 1.18.0 的 4 个名称 (宿主 89f6a01ae, setNextWindowFocus / setNextWindowCollapsed 及别名): 全部由规则覆盖, pending 保持 0, 基线不变, 只是矩阵 3578 -> 3582 行, not-portable 变成 1528 / 1531 / 1531 (3e45564eb), imgui 584 -> 588 行. Q215 (a) 的 "新名称自动覆盖" 由此得到验证. 新名称仍要重生成 MATRIX.md 与 imgui 页运行时表, 否则 check.py 报过期.
+
+### 22.3 文档
+
+- imgui 页运行时表: 改动前 584 行都是差异项, 只因内部导出 `imgui.__pluginId` 的规则不同, 新规则下单元格变长后 `api/imgui.md` 会到 420 KB. 生成器改为内部导出不影响一列的 "一致" 判定, 这一页其他 API 只占一格, 页面 82 KB -> 5 KB.
+- 新增 "在 Node.js / Bun 中使用" 一节, 示例由 `device_imgui_escape.py --doc` 与脚本逐字比对.
+- changelog 只写 zh-Hans.
+
+### 22.4 真机
+
+真机 Xiaomi 968e9f18 28 / 28 (Node 与 Bun 各跑文档示例, 行为核实, 主脚本先退出三个用例; 宿主 6551, ImGui 1.18.0, Node 2.0.0 / 340, Bun 0.21.0 / 296; Bun 授权跑完还原)
+
+脚本 `tools/api-coverage/device_imgui_escape.py`, 三个用例: example 跑文档示例原文, details 核实页面写的行为, leave 让主脚本先退出. 另外统计宿主悬浮窗个数, 确认窗口出现后又消失.
+
+实测结论:
+
+- 2.3 的第一点成立: Node 与 Bun 都能用 engines.execScript 启动 Rhino 脚本打开 imgui 窗口, 帧回调持续运行, 窗口关闭后 Rhino 脚本自行结束.
+- 第二点成立: Bun 走同一条路径, 启动的执行 spawnDepth 为 1, 可在 engines.all() 看到. arguments 含对象时两边都拒绝 (Node ERR_AUTOJS6_BRIDGE_PERMISSION_DENIED, Bun INVALID_REQUEST).
+- 第三点: 主脚本到面板用 arguments, 之后两个方向都用 events.broadcast. 对象和数组不保持, 用 JSON 文本 (Q218).
+- timeoutMs 只限启动调用. 主脚本结束时窗口不关闭, 其他脚本发广播仍能关闭它.
+- `ready` 在 createWindow 返回前同步触发, 之后注册的 session.on("ready") 收不到 (Q219).
+
+### 22.5 门禁
+
+HEAD 副本: `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` 退出 0, failures 空; `tools/api-coverage` 单测 121 个通过 (3 个跳过); Ace `generate-runtime-api-queries.mjs --check --host ../AutoJs6` changed false; `generator/test-runtime-support.js` 11 项通过; `normalize-markdown.py --check` changed 0.
+
+### 22.6 提交
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 41e93cb07 / 118851624 | 规则, test_p5_2f1 |
+| 宿主 | 54678f1c0 / cf9749ba7 / 3e45564eb | MATRIX, 基线 |
+| 宿主 | b6a719dcd | device_imgui_escape.py |
+| 文档 | edbd218 / 34bbc9a | imgui 页, 生成器, changelog, 运行时表 |
+| 文档 | 5e0724d | 生成物 (由同时提交的宿主小修卡一起重生成) |
+| Offline Docs | 08fcf64 | 捆绑页 (同上) |
+| 宿主 | (本节所在提交) | 本节, ROADMAP 落点, IMGUI-PLAN |

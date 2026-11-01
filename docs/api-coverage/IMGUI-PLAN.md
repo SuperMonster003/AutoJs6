@@ -116,7 +116,7 @@ R6 新增 11 行: beginMultiSelect / endMultiSelect (帧内容器), setNextItemS
 
 `engines.execScript` 在 Node 与 Bun 都已可用 (附录 D D-14 决定不排除): Node 的宿主路由 `NodeBridgeEngineDispatchService.executeScript` 用 `StringScriptSource` 走宿主的正常脚本执行路径; Bun 开放同名方法, 需要 `engines.exec` 授权 (`BunAutomationBridge.checkEngines`). 所以 Node / Bun 脚本应该可以启动一段 Rhino 脚本来开 imgui 窗口, 帧回调在 Rhino 里同步运行, 不受上面的约束.
 
-未核实的三点, 留给实施卡: 这段 Rhino 脚本确实能打开窗口 (需一台真机冒烟, Node 与 Bun 各一次); Bun 的 execScript 是否走同一条执行路径 (本次只读到授权检查, 没有读到派发); 它与 Node / Bun 主脚本怎样通信 (矩阵里没有 `events.broadcast` 行, 不能假定, 需要在实施时确定并写进文档). 这三点不成立时, (b) 仍然成立, 只是文档里的逃生口要改写.
+2026-11-01 卡 A 已上真机核实, 三点都成立, 结果见 BASELINE 第 22 节; 通信用 execScript 的 arguments 与 events.broadcast, 对象要转 JSON 文本 (Q218). 以下是当时的原文. 未核实的三点, 留给实施卡: 这段 Rhino 脚本确实能打开窗口 (需一台真机冒烟, Node 与 Bun 各一次); Bun 的 execScript 是否走同一条执行路径 (本次只读到授权检查, 没有读到派发); 它与 Node / Bun 主脚本怎样通信 (矩阵里没有 `events.broadcast` 行, 不能假定, 需要在实施时确定并写进文档). 这三点不成立时, (b) 仍然成立, 只是文档里的逃生口要改写.
 
 `rhino.run` 不是这条路: 它是 JSON-only 的限时执行 (`NodeBridgeRhinoExecutionService`), 撑不起常驻窗口.
 
@@ -162,7 +162,7 @@ PLUGIN-APIS.md 8.2 的旧估算 (约 349 个标题, 194 个别名, 约 85 个成
 
 | 卡 | 开始条件 | 并行 | 工作量 |
 |---|---|---|---|
-| A. 排除规则 | 现在就能发: 收尾卡已完成, R6 已落地 | 可与 R7 同时做 | 1 张小卡, 手写约 60 行 |
+| A. 排除规则 | 已完成 (2026-11-01, api-cov-imgui-exclude, 见 ROADMAP P5.2 子条) | 可与 R7 同时做 | 1 张小卡, 手写约 60 行 |
 | B. 文档 | A 完成且 R7 发布后 | 与 C 并行 | 约 1.5 个子会话, 文档约 7500 行 |
 | C. 声明 | R7 发布后 | 与 B 并行 | 约 0.5 个子会话 |
 | D. 成员登记与收口 | B 与 C 都完成后 | 最后做 | 约 0.5 个子会话, 工具约 50-80 行加测试 |
