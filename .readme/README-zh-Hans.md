@@ -567,6 +567,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` cXy/cYx 的 false 模式未强制使用绝对坐标, 横屏宽高比换算倒置及单独设置基数后部分调用异常的问题
 * `修复` setScaleBases 的第二个参数无效或基数已设置时, 提前修改另一方向并占用其设置机会的问题
 * `修复` 界面重建与脚本读取屏幕尺寸并发时, device.width/height 及坐标换算读取到零尺寸的问题
+* `修复` device.keepAwake/keepScreenOn/keepScreenDim 未指定超时时持有的唤醒锁在脚本结束后仍未释放的问题
 * `修复` Node.js pinyin/pinyin4j 仅转换少量内置字典文字的问题, 现使用已安装的拼音插件
 * `修复` Node.js 控制台窗口和样式控制方法调用后没有实际效果的问题
 * `修复` Bun 脚本结束时同步结果早于输出回调导致末尾日志丢失的问题

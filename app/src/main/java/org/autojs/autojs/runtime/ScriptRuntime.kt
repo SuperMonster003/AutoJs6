@@ -865,6 +865,12 @@ class ScriptRuntime private constructor(builder: Builder) {
         scope.own(Stage.AI, "ai.close") { ai.close() }
         scope.own(Stage.TTS, "tts.close") { tts.close() }
 
+        // The wake lock of device.keepAwake / keepScreenOn / keepScreenDim without a timeout outlived the script (a partial wake
+        // lock kept the CPU awake until the runtime was finalized); release it with the script, after its exit handlers.
+        // zh-CN: device.keepAwake / keepScreenOn / keepScreenDim 不带超时时的唤醒锁曾在脚本结束后继续持有 (部分唤醒锁让 CPU 一直醒着,
+        // 直到运行时被终结); 现随脚本一起释放, 在 exit 处理器之后.
+        scope.own(Stage.DEVICE, "device.cancelKeepingAwake") { device.cancelKeepingAwake() }
+
         // The gesture dispatcher installed on this script's bridge runs on the servant looper just quit by loopers.recycle.
         // The bridge may stay referenced as the process-wide default bridge (AccessibilityService.bridge), so drop the dispatcher,
         // which holds this runtime (docs/memory/ROADMAP.md H17); nodes found through the bridge then use a standalone automator.

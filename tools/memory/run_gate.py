@@ -47,6 +47,7 @@ SCENARIOS = {
     "S4d": "s04dMatchTemplateOneShot",
     "S4e": "s04eThreadedImages",
     "S4f": "s04fCaptureScreenNoRecycle",
+    "S4g": "s04gIntervalCaptureOcr",
     "S5": "s05UiWithWebView",
     "S6": "s06Floaty",
     "S7": "s07EventsKeysSensors",
@@ -62,7 +63,7 @@ SCENARIOS = {
     "S16": "s16NestedUiScripts",
 }
 MODES = {"normal": "N", "force": "F"}
-CAPTURE_SCENARIOS = {"S4a", "S4f"}
+CAPTURE_SCENARIOS = {"S4a", "S4f", "S4g"}
 # Scenarios that fix their own loop counts in GateScenarios.kt (the memoryGateWarmups / memoryGateIterations arguments
 # do not apply to them); --attach checks a device-side report against these instead of the call's values.
 SCENARIO_PARAMS = {"S4f": {"warmups": 1, "iterations": 3}}
@@ -779,7 +780,7 @@ def main():
     parser.add_argument("--dump-after-last", action="store_true",
                         help="Bridge suite: one more heap dump right after the last run of every scenario, before the gate waits for "
                              "collection, with the bridge class paths and a class histogram (docs/memory-phase2 C31); kept and pulled with --hprof")
-    parser.add_argument("--capture", choices=("off", "on"), default="off", help="Run S4a / S4f (bridge: ND8) with the PROJECT_MEDIA app-op set to allow for its duration, then reset to default (ROADMAP Q3)")
+    parser.add_argument("--capture", choices=("off", "on"), default="off", help="Run S4a / S4f / S4g (bridge: ND8) with the PROJECT_MEDIA app-op set to allow for its duration, then reset to default (ROADMAP Q3)")
     parser.add_argument("--warmups", type=int, default=2)
     parser.add_argument("--iterations", type=int, default=20)
     parser.add_argument("--poll-ms", type=int, default=10000)

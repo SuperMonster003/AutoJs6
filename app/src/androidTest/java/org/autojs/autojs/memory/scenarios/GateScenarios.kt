@@ -91,14 +91,17 @@ class GateScenario(
 }
 
 /**
- * Scenario matrix S1-S16 (docs/memory/ROADMAP.md T2; S4 is split into S4a-S4f as in appendix A; S13 / S14 were added by P4.1 / P4.2,
- * S15 / S16 by P4.4). Scripts use ES5 syntax so that every Rhino language level accepts them.
- * zh-CN: 场景矩阵 S1-S16 (docs/memory/ROADMAP.md T2; S4 按附录 A 拆为 S4a-S4f; S13 / S14 由 P4.1 / P4.2 新增, S15 / S16 由 P4.4 新增).
- * 脚本使用 ES5 语法, 以便任何 Rhino 语言级别都能接受.
+ * Scenario matrix S1-S16 (docs/memory/ROADMAP.md T2; S4 is split into S4a-S4g as in appendix A; S13 / S14 were added by P4.1 / P4.2,
+ * S15 / S16 by P4.4, S4g by a group report of 2026-11-01). Scripts use ES5 syntax so that every Rhino language level accepts them.
+ * zh-CN: 场景矩阵 S1-S16 (docs/memory/ROADMAP.md T2; S4 按附录 A 拆为 S4a-S4g; S13 / S14 由 P4.1 / P4.2 新增, S15 / S16 由 P4.4 新增,
+ * S4g 来自 2026-11-01 的群反馈). 脚本使用 ES5 语法, 以便任何 Rhino 语言级别都能接受.
  */
 object GateScenarios {
 
     const val PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.imgui"
+
+    /** The ML Kit OCR plugin S4g detects text with (`ocr.mode = 'mlkit'`). */
+    const val MLKIT_OCR_PLUGIN_PACKAGE = "io.github.supermonster003.autojs6.plugin.mlkitocr"
 
     private fun q(value: String?) = JSONObject.quote(value.orEmpty())
 
@@ -238,6 +241,64 @@ object GateScenarios {
                 if (open > 1) throw new Error('memory gate: ' + open + ' media images are open after a capture');
             }
             gateStat('totalMs', Date.now() - total);
+            """
+        },
+        GateScenario(
+            "S4g", "setInterval + captureScreen + ocr.detect (ML Kit OCR plugin) + keepAwake, two exit handlers", "H5 / H14 / group report 2026-11-01",
+            capture = true, normalTimeoutMs = 120_000,
+            notes = "the script of a group report on 6.7.0 (run and stopped from the editor repeatedly): a timer loop captures the screen " +
+                "and detects text through the ML Kit OCR plugin, holds a partial wake lock without a timeout and releases everything in " +
+                "two exit handlers, one of them polling with setTimeout while a capture is in progress; N: exit() after 3 ticks; F: stopped " +
+                "while the loop runs. The swipe the report's script does on a hit is left out (no hit on the home screen; S7 covers gestures)",
+        ) { _, _ ->
+            """
+            if (!images.requestScreenCapture()) throw new Error('memory gate: screen capture was not granted');
+            ocr.mode = 'mlkit';
+            device.keepAwake(android.os.PowerManager.PARTIAL_WAKE_LOCK);
+            var img = null, processing = false, ticks = 0, lines = 0, hits = 0;
+            var tid = setInterval(function () {
+                if (processing) return;
+                processing = true;
+                try {
+                    images.recycle(img);
+                    img = images.captureScreen();
+                    if (!img) throw new Error('memory gate: captureScreen returned null');
+                    var results = ocr.detect(img);
+                    lines += results.length;
+                    for (var i = 0; i < results.length; i++) {
+                        var t = results[i];
+                        if (t.label && t.label.indexOf('memory gate') >= 0 && (t.confidence || 0) >= 0.3) hits++;
+                    }
+                    ticks++;
+                    gateStat('ticks', ticks);
+                    gateStat('ocrLines', lines);
+                    gateStat('hits', hits);
+                    if (!FORCE && ticks >= 3) exit();
+                } finally {
+                    images.recycle(img);
+                    img = null;
+                    processing = false;
+                }
+            }, 100);
+            events.on('exit', function () {
+                clearInterval(tid);
+                images.recycle(img);
+                img = null;
+                device.cancelKeepingAwake();
+            });
+            events.on('exit', function () {
+                clearInterval(tid);
+                function safeRelease() {
+                    if (processing) {
+                        setTimeout(safeRelease, 200);
+                        return;
+                    }
+                    images.recycle(img);
+                    img = null;
+                    device.cancelKeepingAwake();
+                }
+                safeRelease();
+            });
             """
         },
         GateScenario(

@@ -32,7 +32,7 @@ class RuntimeResourceScopeTest {
                 "ROOT_MODE", "COMPOSE", "INTERRUPT_STATUS", "FLOATY", "EXIT_EVENT", "WEB_VIEWS",
                 "MAIL", "INSTALLER", "EPUB", "GALLERY", "TERMINAL", "SPEECH", "AI", "TTS",
                 "THREADS", "IMAGES", "PLUGINS", "EVENTS", "MEDIA", "LOOPERS", "ACCESSIBILITY_TAP", "ACCESSIBILITY_OWNER", "SHELL",
-                "SCREEN_CAPTURER", "SCREEN_CAPTURE_SERVICE", "SENSORS", "TIMERS", "UI", "CLOSEABLES", "CLASS_LOADERS",
+                "SCREEN_CAPTURER", "SCREEN_CAPTURE_SERVICE", "SENSORS", "DEVICE", "TIMERS", "UI", "CLOSEABLES", "CLASS_LOADERS",
             ),
             Stage.entries.map { it.name },
         )

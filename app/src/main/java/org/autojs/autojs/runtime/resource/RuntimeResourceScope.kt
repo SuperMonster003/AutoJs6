@@ -123,6 +123,14 @@ class RuntimeResourceScope @JvmOverloads constructor(
         /** `sensors.unregisterAll`. */
         SENSORS,
 
+        /**
+         * `device.cancelKeepingAwake`: the wake lock that `device.keepAwake` / `keepScreenOn` / `keepScreenDim` hold without a
+         * timeout, after the `exit` handlers so that they may still use `device`.
+         * zh-CN: `device.cancelKeepingAwake`: `device.keepAwake` / `keepScreenOn` / `keepScreenDim` 不带超时时持有的唤醒锁, 放在 `exit`
+         * 处理器之后, 处理器里仍可使用 `device`.
+         */
+        DEVICE,
+
         /** `timers.recycle`. */
         TIMERS,
 

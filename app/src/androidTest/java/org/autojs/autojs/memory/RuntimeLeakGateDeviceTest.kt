@@ -132,6 +132,7 @@ class RuntimeLeakGateDeviceTest {
     @Test fun s04dMatchTemplateOneShot() = gate("S4d")
     @Test fun s04eThreadedImages() = gate("S4e")
     @Test fun s04fCaptureScreenNoRecycle() = gate("S4f")
+    @Test fun s04gIntervalCaptureOcr() = gate("S4g")
     @Test fun s05UiWithWebView() = gate("S5")
     @Test fun s06Floaty() = gate("S6")
     @Test fun s07EventsKeysSensors() = gate("S7")
@@ -490,13 +491,16 @@ class RuntimeLeakGateDeviceTest {
     // region Scenario requirements and fixtures
 
     private fun skipReason(scenario: GateScenario): String? = when (scenario.id) {
-        "S4a", "S4f" -> if (captureAllowed) null else "screen capture needs MediaProjection consent for every run; " +
-            "pass memoryGateCapture=on once the maintainer has agreed how consent is given"
+        "S4a", "S4f" -> captureSkipReason()
+        "S4g" -> captureSkipReason() ?: pluginSkipReason(GateScenarios.MLKIT_OCR_PLUGIN_PACKAGE)
         "S6", "S14" -> if (Settings.canDrawOverlays(context)) null else "the host has no overlay permission"
         "S12" -> pluginSkipReason()
         "S13" -> speechSkipReason()
         else -> null
     }
+
+    private fun captureSkipReason(): String? = if (captureAllowed) null else "screen capture needs MediaProjection consent for every run; " +
+        "pass memoryGateCapture=on once the maintainer has agreed how consent is given"
 
     // S13 needs a speech plugin the host may use: 3-Macaw Speech or 3-Stone AI, installed, enabled and authorized (appendix C Q13).
     // zh-CN: S13 需要宿主可用的语音插件: 3-Macaw Speech 或 3-Stone AI, 已安装, 已启用且已授权 (附录 C Q13).
@@ -505,8 +509,7 @@ class RuntimeLeakGateDeviceTest {
         return if (available) null else "no speech plugin (3-Macaw Speech or 3-Stone AI) is installed, enabled and authorized"
     }
 
-    private fun pluginSkipReason(): String? {
-        val name = GateScenarios.PLUGIN_PACKAGE
+    private fun pluginSkipReason(name: String = GateScenarios.PLUGIN_PACKAGE): String? {
         try {
             context.packageManager.getPackageInfo(name, 0)
         } catch (_: Exception) {
