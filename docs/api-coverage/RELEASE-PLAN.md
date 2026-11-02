@@ -166,6 +166,7 @@ P7.2 每完成一个仓库填一行, 不改已填的行.
 | AutoJs6-Plugin-Three-Folio-EPUB | 2026-11-02 | 暂不发 (只推不发) | 不适用 | d385add -> 34658be. prepush 6 / 6. run 41417404682 Build integrity, 41417405045 Markdown integrity, 41417404984 Icon Studio recipe, 41417404779 Icon geometry 全绿 |
 | AutoJs6-Plugin-Three-Stamp-Mail | 2026-11-02 | 暂不发 (只推不发) | 不适用 | a26a16e -> 59b8b37 -> df5234a. prepush 6 / 6. 第一次 run 41417418202 的 API 24 / 35 模拟器作业红: RuntimeMailAccountFixtureTest 是手动造数据用的 fixture, 没传端口参数时报空值. 修复 df5234a 没传参数时跳过, 写法同 PerformanceDeviceTest. 第二次 run 41419830661 Build integrity, 41419830707 Markdown integrity 绿 |
 | 宿主 `Script API coverage` 重跑 | 2026-11-02 | 不适用 | 不适用 | 暂停 (Q274: 宿主暂无 push 计划), 无 run id; 这次远端门禁验收要等宿主推送后补做 |
+| AutoJs6-Plugin-Ace-Editor (6d7ac38, 上面已填行的补充) | 2026-11-02 | 不适用 | 不适用 | 这笔只加 docs/development/release-2.49.0.md. run 41438052512 第一次红 2 项时序用例 (magnifierDrawsTheSelectionUnderTheText; recordsM0EditorPerformanceBaseline 66 ms 超 50 ms 预算), 同样的代码在 8d9e26a 全绿; 只重跑失败作业, 第二次绿. 41438052410 Markdown integrity 绿 |
 | AutoJs6-Documentation (第二次推送, 上面已填行的补充) | 2026-11-02 | 无 | 不适用 | 78f6c85 -> 8d152d2: Q283 (a) 随 Offline Docs 发版完成 B6, `auto-generate.py --check` 现在通过, versionCode 181 -> 182. run 41435950792 Markdown integrity 绿 |
 
 ## F. 本卡新待决
