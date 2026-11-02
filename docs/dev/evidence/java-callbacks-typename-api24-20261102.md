@@ -75,7 +75,7 @@ API 25 `google_apis` x86 上, 同一构建的 `RuntimeJavaCallbacksNativeTest` 7
 
 修前失败的两项报 `callStatic: java.lang.ClassNotFoundException: org.autojs.fixture.runtime.DexFixture`, 都停在 `java.loadDex('fixture.dex')` 之后. API 26 以下 `DexClassLoader` 的优化输出是 `<optimizedDirectory>/<文件名>.dex`, 而 `RuntimeJavaSession.loadFiles` 把 `code-N.dex` 放在优化目录本身, 输入和输出成了同一个文件. `AndroidClassLoader.loadDex` 早已用 `optimized` 子目录隔离 (a28d384eea), 桥接的这条路径漏了. 修法相同: 优化目录改为执行目录下的 `optimized`. API 26 起系统忽略这个参数. `RuntimeJavaCallbacksNativeTest.rawDexRunsAndItsStagedCopyStaysIntact` 在宿主层覆盖这一点, 需要夹具, 所以不在默认集.
 
-未覆盖: 7.x 真机, 以及 `arm64-v8a`, `armeabi-v7a` 的 Node 包在 7.x 上的运行. `RuntimeJavaCallbacksPackagedDeviceTest`.
+未覆盖: 7.x 真机, `arm64-v8a` 与 `armeabi-v7a` 的 Node 包在 7.x 上的运行, 以及打包路径 (`RuntimeJavaCallbacksPackagedDeviceTest`).
 
 ## 设备脚本
 
