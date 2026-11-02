@@ -1,17 +1,22 @@
 """Runs the Rhino related instrumented tests of the host on devices and prints one line per test.
 
 Usage: py -3.12 -I -u tools/rhino/device_rhino_check.py -s SERIAL [-s SERIAL ...] [--install] [--class NAME ...] [--inrt]
+       [--callback-fixtures DIR]
 
 Meant for a Rhino jar update (Rhino-For-AutoJs6 AGENTS.md, section 5): the production script engine, block scoping and
 the Uint8Array Base64 / hex methods (RhinoConstScopingDeviceTest), class syntax and classes that extend Java classes
 (RhinoClassSyntaxDeviceTest), Unicode property escapes, ui XML bindings, Java reflection and class loading, images.resize
 arguments, the class file converters and the desugared java.nio.file (ClassFileDexerDeviceTest, JavaNioDesugarDeviceTest),
-and the script looper cases that need neither accessibility nor the overlay permission. Run it on API 24 as
-well, the release the Android fallbacks of Rhino exist for.
+the type names of the Java bridge (the two RuntimeJavaCallbacksNativeTest cases that need no fixture) and the script looper
+cases that need neither accessibility nor the overlay permission. Run it on API 24 as well, the release the Android
+fallbacks of Rhino exist for.
 
 With --install the debug APK and its test APK built by :app:assembleAppDebug :app:assembleAppDebugAndroidTest are
 installed first (adb install -r -t, data is kept); the script prints the md5 of the installed host package before and
 after, so the original package can be put back and compared. Without --install the installed packages are used.
+
+With --callback-fixtures the callback.jar and fixture.dex of tools/api-coverage/build-java-callback-fixtures.py (its --output
+directory) are pushed to where the fixture cases of RuntimeJavaCallbacksNativeTest read them, after any install.
 
 With --inrt the cases of RhinoClassSyntaxDeviceTest run in the packaged path instead: the inrt debug APK built by
 :app:assembleInrtDebug gets them as its project (assets/project), is signed with the key of the host (sign.properties,
@@ -42,8 +47,10 @@ INRT_PACKAGE = "org.autojs.autojs6.inrt"
 INRT_TAG = "RhinoClassCase"
 INRT_TIMEOUT_SECONDS = 180
 APP_PACKAGE = "org.autojs.autojs6"
+CALLBACK_FIXTURES = f"/sdcard/Android/data/{APP_PACKAGE}/files/java-callback-fixtures"
 RUNNER = "org.autojs.autojs6.test/androidx.test.runner.AndroidJUnitRunner"
 LOOPER = "org.autojs.autojs.core.looper.ScriptLooperCompatibilityDeviceTest"
+JAVA_CALLBACKS = "org.autojs.autojs.engine.RuntimeJavaCallbacksNativeTest"
 DEFAULT_CLASSES = [
     "org.autojs.autojs.engine.RhinoConstScopingDeviceTest",
     "org.autojs.autojs.engine.RhinoClassSyntaxDeviceTest",
@@ -54,6 +61,8 @@ DEFAULT_CLASSES = [
     "org.autojs.autojs.rhino.AndroidClassLoaderRawDexDeviceTest",
     "org.autojs.autojs.rhino.ClassFileDexerDeviceTest",
     "org.autojs.autojs.rhino.JavaNioDesugarDeviceTest",
+    f"{JAVA_CALLBACKS}#typeNamesMatchThePlatformFromApi26",
+    f"{JAVA_CALLBACKS}#superCallsResolveArrayAndNestedParameterTypes",
 ] + [
     f"{LOOPER}#{name}"
     for name in (
@@ -110,6 +119,15 @@ def run(serial, classes):
             current = {}
     crashed = "INSTRUMENTATION_RESULT: shortMsg" in out or "Process crashed" in out
     return results, crashed, out
+
+
+def push_callback_fixtures(serial, folder):
+    """The files stay on the device; an uninstall of the host removes them."""
+    adb(serial, "shell", "mkdir", "-p", CALLBACK_FIXTURES)
+    for name in ("callback.jar", "fixture.dex"):
+        adb(serial, "push", str(pathlib.Path(folder) / name), f"{CALLBACK_FIXTURES}/{name}")
+    # On an API 35 AVD the app gets EACCES on files the shell pushed into its external directory; API 24 refuses the chmod.
+    adb(serial, "shell", "chmod", "-R", "a+rwX", CALLBACK_FIXTURES, check=False)
 
 
 def read_signing_properties():
@@ -225,6 +243,7 @@ def main():
     parser.add_argument("--install", action="store_true", help="install the debug APK and its test APK first")
     parser.add_argument("--class", dest="classes", action="append", help="test class or Class#method (default: the Rhino set)")
     parser.add_argument("--inrt", action="store_true", help="run the class syntax cases in the inrt debug APK instead")
+    parser.add_argument("--callback-fixtures", metavar="DIR", help="push callback.jar and fixture.dex from DIR first")
     args = parser.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
     failed = 0
@@ -239,6 +258,8 @@ def main():
                 adb(serial, "install", "-r", "-t", str(apk))
                 print(f"installed {apk.name}")
             print(f"host md5 after install: {installed_md5(serial)}")
+        if args.callback_fixtures:
+            push_callback_fixtures(serial, args.callback_fixtures)
         results, crashed, raw = run(serial, args.classes or DEFAULT_CLASSES)
         for name, status, trace in results:
             first = trace.strip().splitlines()[0][:200] if trace.strip() else ""

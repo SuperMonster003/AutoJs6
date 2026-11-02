@@ -55,4 +55,20 @@ class RuntimeJavaSubclassGeneratorTest {
         }) as JavaSubclassFixture.ParentInterface
         assertEquals("implemented",value.inherited());assertEquals("inherited-default",value.defaultName())
     }
+    @Test fun typeNamesMatchClassGetTypeName() {
+        val anonymous=object:Runnable {override fun run()=Unit}.javaClass
+        val primitives=listOf(Boolean::class,Byte::class,Short::class,Char::class,Int::class,Long::class,Float::class,Double::class)
+        val references=primitives.map { it.javaObjectType }+listOf(Any::class.java,String::class.java,Thread.State::class.java,Map.Entry::class.java,
+            JavaSubclassFixture.ParentInterface::class.java,Loader::class.java,anonymous)
+        val elements=primitives.map { it.javaPrimitiveType!! }+references
+        val arrays=elements.flatMap { element -> generateSequence<Class<*>>(element) { java.lang.reflect.Array.newInstance(it,0).javaClass }.drop(1).take(3).toList() }
+        for(type in listOf<Class<*>>(Void.TYPE)+elements+arrays)assertEquals(type.name,type.typeName,RuntimeJavaSubclassGenerator.typeName(type))
+    }
+    @Test fun keysSpellParametersAsSourceTypeNames() {
+        fun key(type:Class<*>,name:String,vararg parameters:Class<*>)=RuntimeJavaSubclassGenerator.key(type.getDeclaredMethod(name,*parameters))
+        assertEquals("write(byte[],int,int)",key(java.io.ByteArrayOutputStream::class.java,"write",ByteArray::class.java,Int::class.javaPrimitiveType!!,Int::class.javaPrimitiveType!!))
+        assertEquals("removeEldestEntry(java.util.Map\$Entry)",key(LinkedHashMap::class.java,"removeEldestEntry",Map.Entry::class.java))
+        assertEquals("deepToString(java.lang.Object[])",key(java.util.Arrays::class.java,"deepToString",Array<Any>::class.java))
+        assertEquals("run()",key(Runnable::class.java,"run"))
+    }
 }

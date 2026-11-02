@@ -133,7 +133,7 @@ internal class RuntimeJavaSession(
             "callSuper" -> {
                 val frame = frames[payload.getString("callbackInvocationId")] ?: error("callSuper requires an active callback")
                 val data = JSONObject().put("handle",payload.getString("handle")).put("method",RuntimeJavaSubclassGenerator.superName(frame.index))
-                    .put("args",payload.optJSONArray("args") ?: JSONArray()).put("parameterTypes",JSONArray(frame.method.parameterTypes.map { it.typeName }))
+                    .put("args",payload.optJSONArray("args") ?: JSONArray()).put("parameterTypes",JSONArray(frame.method.parameterTypes.map(RuntimeJavaSubclassGenerator::typeName)))
                 val result = ControlledJavaInteropPolicy.execute("call",data,handles,context)
                 result.error?.let { error(it.message) };result.value
             }

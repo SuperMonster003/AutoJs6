@@ -28,7 +28,13 @@ internal object RuntimeJavaSubclassGenerator {
         val points=part.codePoints().toArray()
         points.isNotEmpty() && Character.isJavaIdentifierStart(points[0]) && points.drop(1).all(Character::isJavaIdentifierPart)
     }
-    fun key(method: Method) = method.name + method.parameterTypes.joinToString(",", "(", ")") { it.typeName }
+    fun key(method: Method) = method.name + method.parameterTypes.joinToString(",", "(", ")") { typeName(it) }
+    /** The result of [Class.getTypeName], which Android only has from API 26: `int[][]`, `java.util.Map$Entry`. */
+    fun typeName(type: Class<*>): String {
+        var element = type;var dimensions = 0
+        while (element.isArray) { element = element.componentType!!;dimensions++ }
+        return element.name + "[]".repeat(dimensions)
+    }
     fun superName(index: Int) = "__autojs6_super_$index"
     private fun signature(type: Class<*>): String = primitiveSignatures[type] ?: if (type.isArray) type.name.replace('.', '/') else "L${type.name.replace('.', '/')};"
     private fun signature(method: Method) = method.parameterTypes.joinToString("", "(", ")") { signature(it) } + signature(method.returnType)
@@ -80,7 +86,7 @@ internal object RuntimeJavaSubclassGenerator {
         methods.forEachIndexed { index, method ->
             writer.startMethod(method.name, signature(method), ClassFileWriter.ACC_PUBLIC)
             writer.addLoadThis();writer.add(ByteCode.GETFIELD, own, FIELD, "L$HANDLER;")
-            writer.addLoadThis();writer.addPush(index);writer.addPush(method.parameterCount);writer.add(ByteCode.ANEWARRAY, "java/lang/Object")
+            writer.addLoadThis();writer.addPush(index);writer.addPush(method.parameterTypes.size);writer.add(ByteCode.ANEWARRAY, "java/lang/Object")
             var local = 1
             method.parameterTypes.forEachIndexed { slot, type ->
                 writer.add(ByteCode.DUP);writer.addPush(slot);load(writer, type, local);local += slots(type)

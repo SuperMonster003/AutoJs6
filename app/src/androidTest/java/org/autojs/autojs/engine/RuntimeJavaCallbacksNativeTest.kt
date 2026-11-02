@@ -1,5 +1,6 @@
 package org.autojs.autojs.engine
 
+import android.os.Build
 import androidx.test.platform.app.InstrumentationRegistry
 import org.json.JSONArray
 import org.json.JSONObject
@@ -54,6 +55,40 @@ class RuntimeJavaCallbacksNativeTest {
             val next=request(provider,"call",JSONObject().put("handle",handle).put("method","run"));event(provider,client)
             ok(request(provider,"release",JSONObject().put("handle",handle)));assertFalse(next.get(3,TimeUnit.SECONDS).ok)
             assertEquals("0",provider.nativeDiagnostics()["embedded_script.java.pending_callbacks"])
+        } finally {provider.destroy()}
+    }
+    /** Class.getTypeName only exists from API 26; the names below reach scripts as signatures and come back in callSuper. */
+    @Test fun typeNamesMatchThePlatformFromApi26() {
+        val names=mapOf<Class<*>,String>(Int::class.javaPrimitiveType!! to "int",String::class.java to "java.lang.String",ByteArray::class.java to "byte[]",
+            Array<IntArray>::class.java to "int[][]",Map.Entry::class.java to "java.util.Map\$Entry",emptyArray<Map.Entry<*,*>>().javaClass to "java.util.Map\$Entry[]",
+            Array<Array<String>>::class.java to "java.lang.String[][]")
+        for((type,name) in names) {
+            assertEquals(name,RuntimeJavaSubclassGenerator.typeName(type))
+            if(Build.VERSION.SDK_INT>=26)assertEquals(name,type.typeName)
+        }
+    }
+    @Test fun superCallsResolveArrayAndNestedParameterTypes() {
+        val provider=AndroidNodeBridgeCapabilityProvider(context);val client="super-${UUID.randomUUID()}"
+        fun instance(base:String,key:String):String {
+            val name=JSONObject(ok(request(provider,"defineClass",JSONObject().put("client",client).put("callback","$client-$base").put("extends",base)
+                .put("methods",JSONArray().put(key))))).getString("__autojs6JavaClass")
+            return JSONObject(ok(request(provider,"new",JSONObject().put("className",name)))).getString("__autojs6JavaHandle")
+        }
+        fun callSuper(event:JSONObject)=ok(request(provider,"callSuper",JSONObject().put("handle",event.getJSONObject("receiver").getString("__autojs6JavaHandle"))
+            .put("callbackInvocationId",event.getString("id")).put("args",event.getJSONArray("args"))))
+        fun complete(event:JSONObject,value:Any)=ok(request(provider,"completeCallback",JSONObject().put("client",client).put("id",event.getString("id")).put("value",value)))
+        try {
+            val stream=instance("java.io.ByteArrayOutputStream","write(byte[],int,int)")
+            val written=request(provider,"call",JSONObject().put("handle",stream).put("method","write").put("args",JSONArray().put(JSONArray().put(1).put(2).put(3)).put(0).put(2)))
+            val write=event(provider,client)
+            assertEquals("write(byte[],int,int)",write.getString("signature"));assertEquals("write(byte[],int,int)",write.getString("key"))
+            assertEquals("null",callSuper(write));assertEquals("true",complete(write,JSONObject.NULL));assertEquals("null",ok(written))
+            assertEquals("[1,2]",ok(request(provider,"call",JSONObject().put("handle",stream).put("method","toByteArray"))))
+            val thread=instance("java.lang.Thread","setUncaughtExceptionHandler(java.lang.Thread\$UncaughtExceptionHandler)")
+            val set=request(provider,"call",JSONObject().put("handle",thread).put("method","setUncaughtExceptionHandler").put("args",JSONArray().put(JSONObject.NULL)))
+            val handler=event(provider,client)
+            assertEquals("setUncaughtExceptionHandler(java.lang.Thread\$UncaughtExceptionHandler)",handler.getString("signature"))
+            assertEquals("null",callSuper(handler));assertEquals("true",complete(handler,JSONObject.NULL));assertEquals("null",ok(set))
         } finally {provider.destroy()}
     }
     @Test fun loadersAreExecutionLocalAndOwnedReadOnlyCacheIsRemoved() {
