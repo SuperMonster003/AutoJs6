@@ -7,8 +7,11 @@ import android.util.Log
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.rhino.AutoJsContext
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.modules.ScriptMessages
 import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage
 import org.autojs.autojs.util.RhinoUtils.isMainThread
+import org.autojs.autojs6.R
+import org.mozilla.javascript.AsyncTracker
 import org.mozilla.javascript.Context
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
@@ -33,6 +36,11 @@ class Loopers(val scriptRuntime: ScriptRuntime) {
     private var mLooperQuitHandlers = ThreadLocal<CopyOnWriteArrayList<LooperQuitHandler>>()
     private var mTimers = scriptRuntime.timers
     private var mThreads = scriptRuntime.threads
+
+    // The async functions of the threads that ended because nothing was left, for the warning at the end of the script. The
+    // trackers, not their counts: another thread can still resume such a function.
+    // zh-CN: 因无事可做而结束的线程上的 async 函数, 用于脚本结束时的警告. 保存 tracker 而不是数量: 其他线程仍可能恢复这些函数.
+    private val mEndedThreadAwaits = CopyOnWriteArrayList<AsyncTracker>()
     private val mServantLooper = ServantLooperHolder<Looper>(
         starter = { publish, fail ->
             ThreadCompat {
@@ -116,7 +124,11 @@ class Loopers(val scriptRuntime: ScriptRuntime) {
      * zh-CN: 当前线程等待 Promise 用的闩 (`Promise.prototype.wait`): 线程在等待期间运行自己 timer 上已到期的回调, UI 线程不阻塞
      * (docs/augment/ROADMAP.md Q26).
      */
-    fun newSettlementLatch() = SettlementLatch(mTimers.timerForCurrentThread?.callbackQueueForCurrentThread(), mayBlock = !isMainThread())
+    fun newSettlementLatch() = SettlementLatch(
+        mTimers.timerForCurrentThread?.callbackQueueForCurrentThread(),
+        mayBlock = !isMainThread(),
+        microtasks = { (Context.getCurrentContext() as? AutoJsContext)?.runMicrotasks() },
+    )
 
     fun addLooperQuitHandler(looperQuitHandler: LooperQuitHandler?) {
         val list: CopyOnWriteArrayList<LooperQuitHandler> = mLooperQuitHandlers.get()
@@ -150,16 +162,64 @@ class Loopers(val scriptRuntime: ScriptRuntime) {
 
     private fun queueIdle(): Boolean {
         val looper = Looper.myLooper() ?: return true
+        runMicrotasks(looper)
         if (looper == mMainLooper) {
             if (!shouldQuitLooper()) return true
             if (mThreads.hasRunningThreads()) return true
             val looperQuitHandler = mMainLooperQuitHandler ?: return true
             if (!looperQuitHandler.shouldQuit()) return true
+            warnAboutPendingAwaits()
         } else {
             if (!shouldQuitLooper()) return true
+            keepPendingAwaits()
         }
         looper.quit()
         return true
+    }
+
+    /**
+     * The checkpoint before the looper decides that nothing is left, for what no top call ended on this thread. MessageQueue only
+     * logs what an IdleHandler throws, so a failure leaves as that of a timer callback.
+     * zh-CN: Looper 判定无事可做之前的检查点, 用于本线程上没有顶层调用收尾的情况. MessageQueue 只记录 IdleHandler 抛出的异常, 因此失败时按 timer 回调的方式处理.
+     */
+    private fun runMicrotasks(looper: Looper) {
+        if (Thread.currentThread().isInterrupted) return
+        val context = Context.getCurrentContext() as? AutoJsContext ?: return
+        try {
+            Timer.runCallback({ looper == Looper.getMainLooper() }, { scriptRuntime.exit(it) }) {
+                context.microtaskCheckpoint(scriptRuntime.eventLoop)
+            }
+        } catch (e: Exception) {
+            Handler(looper).post { throw e }
+        }
+    }
+
+    private fun endedByItself() = !Thread.currentThread().isInterrupted && !scriptRuntime.isExiting
+
+    private fun keepPendingAwaits() {
+        val context = Context.getCurrentContext() ?: return
+        if (endedByItself()) mEndedThreadAwaits += AsyncTracker.of(context)
+    }
+
+    /**
+     * Warns once when the script ends because nothing is left to run while async functions wait for a Promise: a pending Promise
+     * does not keep a script alive (appendix C Q7 of Rhino-For-AutoJs6). `exit()` and a manual stop end the script on purpose.
+     * zh-CN: 脚本因无事可做而结束, 而 async 函数仍在等待 Promise 时警告一次: 未落定的 Promise 不会让脚本继续运行 (Rhino-For-AutoJs6 附录 C Q7). exit() 与手动停止是有意结束, 不提示.
+     */
+    private fun warnAboutPendingAwaits() {
+        if (!endedByItself()) return
+        val trackers = listOfNotNull(Context.getCurrentContext()?.let { AsyncTracker.of(it) }) + mEndedThreadAwaits
+        val count = trackers.sumOf { it.pendingCount() }
+        val first = trackers.firstNotNullOfOrNull { it.firstPending() } ?: return
+        scriptRuntime.console.warn(
+            ScriptMessages.resource(
+                R.string.warn_async_functions_pending_at_script_end,
+                "The script ended with %1\$d async function(s) still waiting for a Promise, the first at %2\$s:%3\$d. A pending Promise does not keep a script running",
+                count,
+                first.sourceName().toString(),
+                first.lineNumber(),
+            )
+        )
     }
 
     private fun shouldQuitLooper(): Boolean {

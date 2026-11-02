@@ -1,15 +1,14 @@
-"""ROADMAP P4.2 / Q95: the global Promise on a device (PromiseConstructor; promise.js with the switch off until P5.2).
+"""ROADMAP P4.2 / Q95: the global Promise on a device (the built-in Promise of Rhino since P9.5 of Rhino-For-AutoJs6).
 
     py -3.12 -I tools/augment/device_promise_check.py -s SERIAL [--sample] [--scenarios] [--bench]
 
 --sample runs the app sample "协程/协程HelloWorld" (app/src/main/assets-app/sample) as a project, as the app runs it,
 and checks its console lines in order ("Hello, Continuation!", "1 秒后...", "2 秒后...", "1 + 2 = 3", the file read);
 --scenarios runs bench/promise_smoke/scenarios (a project with the continuation feature: order of reactions against the
-timers, thenable adoption, await in its forms, callbacks settled on other threads, Flow await(), wait(), the unhandled
-rejection warning) and prints its "AJ6P42" lines; --bench runs bench/promise_smoke/bench (a project with the continuation
-feature: queued reactions are awaited, so the looper runs them; "queued+wait" runs them by one wait(), Q105) and prints
-microseconds per operation. The rejected await of --scenarios shows an error toast (existing
-behavior of popException); no tap is needed.
+timers, thenable adoption, await in its forms, callbacks settled on other threads, Flow await(), wait(), the report of an
+unhandled rejection) and checks each "AJ6P42" line against SCENARIOS; --bench runs bench/promise_smoke/bench (a project with
+the continuation feature: queued reactions are awaited, so the looper runs them; "queued+wait" runs them by one wait(), Q105)
+and prints microseconds per operation.
 
 Scripts start through RunIntentActivity, results are read from the GlobalConsole lines of logcat (those logged since
 each script started, as logcat -c does not always clear the buffer). The device directory /sdcard/Download/aj6-augment-bench/p42 is removed afterwards.
@@ -34,6 +33,28 @@ DEVICE_DIR = "/sdcard/Download/aj6-augment-bench/p42"
 LAUNCHER = HERE / "bench" / "bootstrap_smoke" / "launch_project.js"
 
 SAMPLE_LINES = ["Hello, Continuation!", "1 秒后...", "2 秒后...", "1 + 2 = 3", "读取文件 hello.txt: Nothing"]
+
+# What each line of bench/promise_smoke/scenarios must print.
+SCENARIOS = {
+    "impl": " function true",
+    "A2-order": "p1,p2,timeout0,immediate",
+    "A5-thenable": "after,then",
+    "A4-adopt": "t1,t2,t3,adopted,t4",
+    "K1-await": "7",
+    "K1-await-later": "t",
+    "K1-await-rejected": "caught no",
+    "K2-loop": "0,1,2",
+    "K3-threads": "from thread",
+    "K3-java-thread": "from java thread",
+    "K5-adapter": "adapter",
+    "T1-callback-thread": "java:main,threads:other",
+    "K4-flow-await": "5",
+    "K4-flow-toPromise-await": "6",
+    "W1-wait": "1",
+    "W1-wait-timer": "2",
+    "W1-wait-thread": "3",
+    "W1-wait-rejected": "threw w",
+}
 
 
 def push_dir(serial, local, remote):
@@ -104,17 +125,24 @@ def scenarios(args):
     push_dir(args.serial, SMOKE / "scenarios", remote_dir)
     remote = launch_project(args.serial, remote_dir, "scenarios")
     lines, done = watch(args.serial, remote, lambda ls: any("AJ6P42 done" in l for l in ls), args.wait)
+    actual = {}
     for line in lines:
         start = line.find("AJ6P42 ")
         if start >= 0 and "AJ6P42 done" not in line:
-            print("scenario " + line[start + 7:])
-    unhandled = any("Possible Unhandled Promise Rejection" in l and "aj6p42 unhandled" in l for l in lines)
-    print(f"scenario B5-unhandled-warning {unhandled}")
+            key, _, value = line[start + 7:].partition(" ")
+            actual[key] = value
+    failed = [key for key, want in SCENARIOS.items() if actual.get(key) != want]
+    for key in failed:
+        print(f"scenario {key}: FAIL, want {SCENARIOS[key]!r}, got {actual.get(key)!r}")
+    # The text of the report follows the language of the device; the message of the script does not.
+    reports = sum("aj6p42 unhandled" in l for l in lines)
+    print(f"scenario B5-unhandled-report: {'PASS' if reports >= 1 else 'FAIL'} ({reports} lines)")
+    print(f"scenarios: {len(SCENARIOS) - len(failed)} / {len(SCENARIOS)} PASS")
     if not done:
         print(f"scenarios: no end line within {args.wait} s")
         for line in lines[-5:]:
             print(f"  last: {line[:160]}")
-    return done
+    return done and not failed and reports >= 1
 
 
 def bench(args):

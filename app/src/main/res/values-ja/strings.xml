@@ -383,6 +383,7 @@
     <string name="error_connect_to_remote">リモートサーバーに接続できません. %s</string>
     <string name="error_connection_failed_with_host">\"%1$s\" への接続に失敗しました.</string>
     <string name="error_connection_timed_out">接続がタイムアウトしました (%d ミリ秒)</string>
+    <string name="error_continuation_cannot_suspend_here">ここではコルーチンを中断できません. async 関数では await キーワードを, Promise のコールバックでは then() を使用してください</string>
     <string name="error_continuation_resume_called_without_suspend">resume() メソッドは suspend() の後に呼び出す必要があります</string>
     <string name="error_continuation_suspend_called_more_than_once">suspend() メソッドは一度だけコールされるべきです</string>
     <string name="error_corresponding_github_release_may_not_published">対応する GitHub のリリースがまだ公開されていない可能性があります</string>
@@ -531,6 +532,7 @@
     <string name="error_plugin_returned_invalid_variant">%1$s プラグインが無効な variant を返しました: %2$s.</string>
     <string name="error_port_num_over_65535">65535 を超えるポート番号</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">プロジェクトのメインスクリプトファイル \"%1$s\" が存在しません</string>
+    <string name="error_promise_uncaught_rejection">未処理の Promise 拒否: %s</string>
     <string name="error_promise_wait_blocks_ui_thread">Promise が未確定の間, Promise.prototype.wait() は UI スレッドをブロックできません. then() を使うか, コルーチン内で await() を使うか, サブスレッドで wait() を呼び出してください</string>
     <string name="error_put_value_into_json">\"値 %s を JSON に入れることができません\" というメッセージが表示されます</string>
     <string name="error_refresh_failed">更新に失敗しました</string>
@@ -3335,6 +3337,7 @@
     <string name="text_zero_means_unlimited">0 は無制限を意味します</string>
     <string name="ui_android_attribute_unknown">%1$s は %2$s の属性ではないため無視しました</string>
     <string name="ui_android_attribute_unsupported">%2$s の %1$s はこの端末では設定できないため無視しました</string>
+    <string name="warn_async_functions_pending_at_script_end">スクリプトは終了しましたが, %1$d 個の async 関数がまだ Promise を待っています. 最初の位置は %2$s:%3$d です. 未確定の Promise はスクリプトの実行を維持しません</string>
     <string name="warn_continue_operation_without_saving_settings">設定が保存されていません. 続行しますか?</string>
     <string name="warn_exit_without_saving_settings">設定が保存されていません. 終了しますか?</string>
     <string name="warning_apk_native_page_alignment_unsupported">ネイティブライブラリ %1$s のアラインメントは %2$d バイトです. 生成された APK はページサイズが 16 KB の端末で動作しない可能性があります. ライブラリまたはプラグインを更新してください.</string>

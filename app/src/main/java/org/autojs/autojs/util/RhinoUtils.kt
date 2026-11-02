@@ -1369,7 +1369,7 @@ object RhinoUtils {
         return null
     }
 
-    fun handleAsyncOperation(scriptRuntime: ScriptRuntime, func: () -> Any?): NativeObject {
+    fun handleAsyncOperation(scriptRuntime: ScriptRuntime, func: () -> Any?): Scriptable {
         return handleAsyncOperation(scriptRuntime, func) { it }
     }
 
@@ -1377,8 +1377,23 @@ object RhinoUtils {
         scriptRuntime: ScriptRuntime,
         operation: () -> T,
         uiMapper: (T) -> Any?,
-    ): NativeObject {
+    ): Scriptable {
         val promiseAdapter = ScriptPromiseAdapter()
+        val uiHandler = Handler(Looper.getMainLooper())
+
+        // The operation keeps the script running, and a Promise of its own would not (Rhino-For-AutoJs6 appendix C Q7). The token
+        // goes one message after the settlement, which is when its reactions have reached the thread of an awaiting function.
+        // zh-CN: 操作期间脚本保持运行, Promise 本身不保活 (Rhino-For-AutoJs6 附录 C Q7). 令牌在落定之后的下一条消息释放, 此时反应已到达 await 所在线程.
+        val waitToken = Looper.myLooper()?.let { scriptRuntime.loopers.waitWhenIdleToken() }
+        val settling = { settle: () -> Unit ->
+            Runnable {
+                try {
+                    settle()
+                } finally {
+                    uiHandler.post { waitToken?.release() }
+                }
+            }
+        }
 
         // Use Android Thread directly to avoid coupling with JS threads/loopers here.
         // zh-CN: 直接使用 Android Thread, 避免在此处与 JS 线程/Looper 机制强耦合.
@@ -1390,7 +1405,7 @@ object RhinoUtils {
 
                 // Resolve on UI thread so that UI scripts can safely touch `ui.*` in then().
                 // zh-CN: 在 UI 线程 resolve, 让 UI 脚本在 then() 中可安全操作 `ui.*`.
-                Handler(Looper.getMainLooper()).post {
+                uiHandler.post(settling {
                     try {
                         // Map result on UI thread (e.g. wrap Java objects into Rhino objects).
                         // zh-CN: 在 UI 线程映射结果 (例如将 Java 对象包装为 Rhino 对象).
@@ -1399,19 +1414,17 @@ object RhinoUtils {
                     } catch (t: Throwable) {
                         promiseAdapter.reject(t)
                     }
-                }
+                })
             } catch (t: Throwable) {
                 // Reject on UI thread for consistent callback threading.
                 // zh-CN: 在 UI 线程 reject, 保持回调线程一致性.
-                Handler(Looper.getMainLooper()).post {
-                    promiseAdapter.reject(t)
-                }
+                uiHandler.post(settling { promiseAdapter.reject(t) })
             }
         }.start()
 
         // Convert ScriptPromiseAdapter into a JavaScript Promise.
         // zh-CN: 将 ScriptPromiseAdapter 转换为 JavaScript Promise.
-        return callFunction(scriptRuntime, scriptRuntime.js_ResultAdapter, "promise", arrayOf(promiseAdapter)) as NativeObject
+        return callFunction(scriptRuntime, scriptRuntime.js_ResultAdapter, "promise", arrayOf(promiseAdapter)) as Scriptable
     }
 
     @JvmStatic

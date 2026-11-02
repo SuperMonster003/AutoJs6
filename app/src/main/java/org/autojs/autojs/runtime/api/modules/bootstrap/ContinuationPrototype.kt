@@ -68,17 +68,19 @@ object ContinuationPrototype {
      * belongs to the script, not to the Promise that `then` / `catch` returned: it came to `catch` and resumed the same
      * continuation a second time, or ended as a warning about an unhandled rejection (docs/api-coverage/ROADMAP.md Q205). It is
      * thrown again from the timer, where it is what any uncaught error of a callback is. Without a suspension (`await()` where
-     * no coroutine can be captured, which the caller already got as an exception) no script ran, and the failed resume stays
-     * a rejection of that Promise.
+     * no coroutine can be captured, which the caller already got as an exception) nothing is left to resume, and a second error
+     * would only repeat the first.
      * zh-CN: 在所等待 Promise 的反应里运行恢复. 脚本的剩余部分在其中运行, 它未捕获的错误属于脚本, 而不是 then / catch 返回的 Promise: 原先它会到达 catch 并再次恢复同一协程,
      * 或只成为一条未处理拒绝的警告 (docs/api-coverage/ROADMAP.md Q205). 这里改由 timer 重新抛出, 与回调中任何未捕获的错误相同. 没有挂起时 (await() 在无法捕获协程的位置调用,
-     * 调用方已经收到异常) 没有脚本运行, 失败的恢复仍是该 Promise 的拒绝.
+     * 调用方已经收到异常) 没有可恢复的内容, 第二个错误只是重复第一个.
      */
-    private inline fun inReaction(cx: Context, scope: VarScope, suspended: Boolean, resume: () -> Any?): Any? = try {
-        resume()
-    } catch (e: RhinoException) {
-        if (!suspended) throw e
-        call(cx, scope, name(cx, scope, "setImmediate"), method(scope, "", 0) { _, _, _, _ -> throw e })
+    private inline fun inReaction(cx: Context, scope: VarScope, suspended: Boolean, resume: () -> Any?): Any? = when {
+        !suspended -> Undefined.instance
+        else -> try {
+            resume()
+        } catch (e: RhinoException) {
+            call(cx, scope, name(cx, scope, "setImmediate"), method(scope, "", 0) { _, _, _, _ -> throw e })
+        }
     }
 
     /**

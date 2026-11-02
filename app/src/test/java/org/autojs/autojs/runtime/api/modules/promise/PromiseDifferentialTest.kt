@@ -1,98 +1,116 @@
 package org.autojs.autojs.runtime.api.modules.promise
 
 import org.autojs.autojs.runtime.api.modules.ScriptModuleExpectations
-import org.autojs.autojs.runtime.api.modules.promise.PromiseHarness.Impl
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.NativePromise
 
 /**
- * The global Promise of both switch states side by side (roadmap P4.2, appendix C Q95): each scenario runs in a fresh
- * [PromiseHarness] with [PromiseConstructor] (through the global `setImmediate` and posting its jobs itself), and the logs
- * must be those of `assets/modules/promise.js`, recorded before P5.2 removed it ([ScriptModuleExpectations]; the
- * evaluation's results of docs/augment/P4-2-promise-eval.md §2 pinned them until then), except for the differences of
- * appendix E "P4.2" ([KNOWN]:
- * the instance properties that Q96 dropped, receivers that are not instances, the surface of the functions it hands out).
- * The scenarios are the 23 of docs/augment/P4-2-promise-eval.md §4.1 (A order, B errors, C surface, K coroutines, W wait,
- * T threads) and the D ones of the implementation (replaced `_immediateFn` / `setImmediate` / `_unhandledRejectionFn`,
- * receivers that are not instances, thenables that misbehave, not-a-function messages, many queued reactions and
- * `wait()`, the functions it hands out and error positions).
+ * The global Promise against `assets/modules/promise.js`, which it replaced (roadmap P4.2, appendix C Q95): each scenario runs
+ * in a fresh [PromiseHarness], and the log must be that of the module, recorded before P5.2 removed it
+ * ([ScriptModuleExpectations]; the results of docs/augment/P4-2-promise-eval.md §2 pinned them until then), except for the
+ * differences in [KNOWN]. Since P9.5 of Rhino-For-AutoJs6 the Promise is the built-in one of Rhino (T12, Q5), so [KNOWN] holds
+ * what the standard does differently from the module, and appendix E "Promise (路线 A)" tells them apart. The scenarios are the
+ * 23 of docs/augment/P4-2-promise-eval.md §4.1 (A order, B errors, C surface, K coroutines, W wait, T threads) and the D ones
+ * of the implementation (replaced `_immediateFn` / `setImmediate` / `_unhandledRejectionFn`, receivers that are not instances,
+ * thenables that misbehave, not-a-function messages, many queued reactions and `wait()`, the functions it hands out and error
+ * positions).
  *
- * zh-CN: 开关两态的全局 Promise 并排比较 (ROADMAP P4.2, 附录 C Q95): 每个场景在新的 [PromiseHarness] 中以 [PromiseConstructor] (经全局 setImmediate,
- * 以及自行投递任务) 运行, 日志必须与 P5.2 删除前记录的 promise.js 结果相同 (此前由评估文档 §2 的结果固定), 附录 E "P4.2" 的差异除外 ([KNOWN]: Q96 去掉的实例属性, 非实例接收者, 交出的函数的表面).
- * 场景为评估文档 §4.1 的 23 个与实施时新增的 D 组.
+ * zh-CN: 全局 Promise 对照被它取代的 promise.js (ROADMAP P4.2, 附录 C Q95): 每个场景在新的 [PromiseHarness] 中运行, 日志必须与 P5.2 删除前记录的 promise.js 结果相同
+ * ([ScriptModuleExpectations], 此前由评估文档 §2 的结果固定), [KNOWN] 中的差异除外. Rhino-For-AutoJs6 P9.5 起 Promise 是 Rhino 内建的 (T12, Q5), [KNOWN] 记录的是标准与原模块的差异,
+ * 各项在附录 E "Promise (路线 A)" 中说明. 场景为评估文档 §4.1 的 23 个与实施时新增的 D 组.
  */
 class PromiseDifferentialTest {
 
     @Test
-    fun bothStatesLogTheSame() {
+    fun logsAreThoseOfTheModuleButForTheKnownDifferences() {
         val differences = ArrayList<String>()
         SCENARIOS.forEach { (id, source) ->
-            val reference = ScriptModuleExpectations.obsolete("module: $id")
-            listOf(Impl.KOTLIN, Impl.KOTLIN_POSTED).forEach { impl ->
-                val actual = runOne(impl, source)
-                val expected = KNOWN[id] ?: reference
-                if (actual != expected) differences += "$id $impl\n  module: $reference\n  expected: $expected\n  actual: $actual"
-            }
+            val reference = ScriptModuleExpectations.obsolete("module: $id").replace("(suspended) ; ", "")
+            val actual = runOne(source)
+            val expected = KNOWN[id] ?: reference
+            if (actual != expected) differences += "$id\n  module: $reference\n  expected: $expected\n  actual: $actual"
         }
         assertTrue(differences.joinToString("\n"), differences.isEmpty())
     }
 
     @Test
-    fun flowAwaitSuspendsFromKotlinInBothStates() {
+    fun flowAwaitSuspendsFromKotlin() {
         // Q97: `FlowNativeObject.await` suspends through PromiseSuspension (it worked for the module's Promise as well).
         // zh-CN: Q97: FlowNativeObject.await 经 PromiseSuspension 挂起 (对原模块的 Promise 同样有效).
-        Impl.entries.forEach { impl ->
-            assertEquals(impl.name, "(suspended) ; kotlin await k ; later 3 ; rejected ; caught Error: no", runOne(impl, """
-                log('kotlin await ' + kotlinAwait(Promise.resolve('k')));
-                log('later ' + kotlinAwait(new Promise(r => setTimeout(() => r(3), 5))));
-                log('rejected');
-                try { log('got ' + kotlinAwait(Promise.reject(new Error('no')))); } catch (e) { log('caught ' + e); }
-            """))
-        }
+        assertEquals("kotlin await k ; later 3 ; rejected ; caught Error: no", runOne("""
+            log('kotlin await ' + kotlinAwait(Promise.resolve('k')));
+            log('later ' + kotlinAwait(new Promise(r => setTimeout(() => r(3), 5))));
+            log('rejected');
+            try { log('got ' + kotlinAwait(Promise.reject(new Error('no')))); } catch (e) { log('caught ' + e); }
+        """))
     }
 
     @Test
-    fun instancesAreNativeObjectsInBothStates() {
-        // Kotlin callers of the old augment package take a Promise as a NativeObject (RhinoUtils.handleAsyncOperation for
-        // images.loadAsync and the http Async functions, images.requestScreenCaptureAsync): with the switch on by default
-        // (P5.1), images.loadAsync threw a ClassCastException.
-        // zh-CN: 旧 augment 包的 Kotlin 调用方把 Promise 当作 NativeObject (images.loadAsync 与 http 的 Async 函数所用的
-        // RhinoUtils.handleAsyncOperation, images.requestScreenCaptureAsync): 开关默认开启 (P5.1) 后 images.loadAsync 曾抛 ClassCastException.
-        Impl.entries.forEach { impl ->
-            PromiseHarness(impl).use { harness ->
-                listOf("new Promise(function () {})", "Promise.resolve(1)", "Promise.resolve(1).then(function (v) { return v; })", "Promise.all([])").forEach { source ->
-                    val value = harness.eval(source)
-                    assertTrue("$impl $source: ${value?.javaClass?.name}", value is NativeObject)
-                }
+    fun instancesAreNativePromises() {
+        // What the Kotlin callers get (RhinoUtils.handleAsyncOperation for images.loadAsync and the http Async functions,
+        // images.requestScreenCaptureAsync) is no NativeObject any more: those casts threw a ClassCastException once before (P5.1).
+        // zh-CN: Kotlin 调用方得到的不再是 NativeObject (images.loadAsync 与 http 的 Async 函数所用的 RhinoUtils.handleAsyncOperation,
+        // images.requestScreenCaptureAsync): 这些强制转换以前就抛过 ClassCastException (P5.1).
+        PromiseHarness().use { harness ->
+            listOf("new Promise(function () {})", "Promise.resolve(1)", "Promise.resolve(1).then(function (v) { return v; })", "Promise.all([])").forEach { source ->
+                val value = harness.eval(source)
+                assertTrue("$source: ${value?.javaClass?.name}", value is NativePromise)
             }
         }
     }
 
-    private fun runOne(impl: Impl, source: String): String = try {
-        PromiseHarness(impl).use { it.run(source.trimIndent()).joinToString(" ; ") }
+    private fun runOne(source: String): String = try {
+        PromiseHarness().use { it.run(source.trimIndent()).joinToString(" ; ") }
     } catch (e: Throwable) {
         "harness error: $e"
     }
 
     companion object {
 
-        /** What [PromiseConstructor] knowingly does differently (appendix E "Promise (路线 A)"). */
+        /** What differs from the module, by the reason (appendix E "Promise (路线 A)"). */
         val KNOWN = mapOf(
-            // Q205 of docs/api-coverage/ROADMAP.md: await() throws a rejection at the call (it handed it back as its value after a
-            // toast); no `try` is around this one, so the script ends with it.
-            "K1-await-basic" to "(suspended) ; await 7 ; await later t ; task error: JavaScriptException Error: no",
-            // Q205: no "popException" of a resume that fails; the failure stays a warning about the unhandled rejection.
-            "K6-await-in-then" to "inner await error JavaException: java.lang.IllegalStateException: Ca ; warn Possible Unhandled Promise Rejection: JavaException: java.lang.IllegalStateException: resume called without suspend",
-            // Q96: no own `_state` / `_handled` / `_value` / `_deferreds`.
-            "C2-surface-instance" to " [object Object] [object Object] true true",
-            // Settling what is not an instance does nothing; the module wrote `_state` on it and failed in `_.finale`.
-            "D6-not-an-instance" to "then via catch null function ; rejected undefined ; catch undefined ; primitive undefined ; derived undefined ; adopted rejected undefined",
-            "D9-constructor-replaced" to "Sub noop 0 ; sub 1 ; plain object ctor 2 ; chained",
+            // Reactions are microtasks in the ticks of the standard (Q5): before the next timer callback, two more ticks to adopt a
+            // Promise, the `then` of a thenable in a job of its own. `wait()` has nothing to run but them.
+            "A2-vs-timers" to "p1 ; p2 ; timeout0 ; immediate ; timeout-default",
+            "A4-adopt-own" to "t1 ; t2 ; t3 ; adopted x ; t4",
+            "A5-thenable-sync" to "after resolve ; then called ; value 5",
+            "W2-wait-order" to "wait x ; after ; immediate before",
+            "D3-replaced-setImmediate" to "then 2 ; timeout path 3",
+            // Rejections without a handler are reported to the console (Q6, `unhandled` here) at the end of the turn: what the turn
+            // still handles is not reported, and neither `Promise._immediateFn` nor `_unhandledRejectionFn` exists.
+            "B5-unhandled" to "handled at once ; unhandled Error: lost ; unhandled Error: late handled ; handled late",
+            "D2-replaced-immediateFn" to "then 1 ; unhandled Error: lost ; timeout first",
+            "D4-replaced-unhandled" to "unhandled x ; unhandled y",
+            "D10-adoption-chains" to "caught adopted ; chain late",
+            // The surface of the standard: no plain object between `Promise` and `Function.prototype`, methods that are not
+            // enumerable, the tag of the class, `any` and `withResolvers`, the messages of Rhino.
+            "B4-self-resolve" to "TypeError: No promise self-resolution",
+            "C1-surface-ctor" to "function Promise 1 true function   function function ;  await,catch,constructor,finally,then,wait ; call TypeError \"Constructor Promise\" may only be invoked from a \"new\" expression. ; new 1 TypeError Expecting the first argument to be a function",
+            "C2-surface-instance" to " [object Promise] [object Promise] true true",
+            "D14-constructor-property-attributes" to "name --C, length --C, arity ---, prototype ---",
+            // The statics take an iterable, not an array or anything with a length.
+            "C3-statics" to "resolve identity true ; all empty 0 ; all 5 TypeError: Cannot find function Symbol(Symbol.iterator). ; settled null Cannot call method \"Symbol(Symbol.iterator)\" of null ; race {} Cannot find function Symbol(Symbol.iterator). ; all string a,b ; settled [{\"status\":\"rejected\",\"reason\":\"x\"},{\"status\":\"fulfilled\",\"value\":1}] ; race fast ; all rejects first ; all 1,2,3",
+            // `allSettled` on a constructor without `resolve` rejects at once, which leaves the rejection of its argument unhandled.
+            "D8-statics" to "custom ctor ; resolve 7 ; 2 1 1 0 0 1 1 then ; resolvers 1 1 function ; race replaced 7 ; all thenable threw t ; unhandled 2 ; unhandled TypeError: Expecting the first argument to be a function ; unhandled TypeError: Cannot find function Symbol(Symbol.iterator).",
+            // `finally` passes on what is not a function, as `then` does.
+            "D5-finally-not-function" to "undefined: undefined",
+            // Only an instance has the slots of a Promise, whatever its prototype: the first `then` throws, and an object is not
+            // kept by `Promise.resolve` because of its `constructor`.
+            "D6-not-an-instance" to "main error: EcmaError TypeError: \"this\" is not an instance of class NativePromise",
+            "D7-thenables" to "fake kept false ; getter threw getter ; function value function ; first wins 1 ; then threw before",
+            // The constructor of a derived Promise is its `Symbol.species`, not its `constructor` as such.
+            "D9-constructor-replaced" to "sub 1 ; plain object ctor 2 ; chained",
+            "D12-not-a-function-messages" to "catch on {} TypeError: Cannot find function then. ; then 1 then is not a function, it is number. ; wait on {} Cannot find function then in object [object Object]. ; allSettled TypeError",
             // Resolving functions have no prototype; the constructor cannot be applied to an instance (the module set it up
             // again); its TypeError is at the script line (the module's at line 0).
-            "D13-functions-and-positions" to "resolver prototype undefined undefined ; reapply TypeError: Promises must be constructed via new ; new 1 at line 5 ; call at line 6 ; kept 1 ; wait threw w at line 0",
+            "D13-functions-and-positions" to "resolver prototype undefined undefined ; reapply TypeError: \"Constructor Promise\" may only be invoked from a \"new\" expression. ; new 1 at line 5 ; call at line 6 ; kept 1 ; wait threw w at line 0",
+            // Q205 of docs/api-coverage/ROADMAP.md: await() throws a rejection at the call (it handed it back as its value after a
+            // toast); no `try` is around this one, so the script ends with it.
+            "K1-await-basic" to "await 7 ; await later t ; task error: JavaScriptException Error: no",
+            // A TypeError that says what to do, once: the resume after it has nothing to resume (P9.5).
+            "K6-await-in-then" to "inner await error TypeError: A coroutine cannot suspend here. Use th",
         )
 
         val SCENARIOS = listOf(
@@ -275,7 +293,7 @@ class PromiseDifferentialTest {
                 Promise.race([7]).then(v => log('race replaced ' + v));
                 Promise.resolve = resolve;
                 log(Promise.prototype.then.length, Promise.prototype.catch.length, Promise.prototype.finally.length, Promise.prototype.await.length,
-                    Promise.prototype.wait.length, Promise.all.length, Promise.resolve.length, Promise._immediateFn.length, Promise.prototype.then.name);
+                    Promise.prototype.wait.length, Promise.all.length, Promise.resolve.length, Promise.prototype.then.name);
                 new Promise((res, rej) => log('resolvers ' + res.length + ' ' + rej.length + ' ' + typeof res));
             """,
             "D9-constructor-replaced" to """

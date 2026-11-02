@@ -10,6 +10,7 @@ import org.autojs.autojs.runtime.api.modules.ScriptModule
 import org.autojs.autojs.runtime.api.modules.images.ImagesCall.Companion.ABSENT
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.Undefined
 import org.autojs.autojs.core.opencv.Mat as AutoJsMat
 import org.opencv.core.Point as OpencvPoint
@@ -67,7 +68,7 @@ class ImagesModule(private val runtime: ScriptRuntime) {
     fun load(src: Any?): ImageWrapper? = Images.load(runtime, call("load", src).path(0, "src").args)
 
     @ScriptFunction
-    fun loadAsync(src: Any?): NativeObject = Images.loadAsync(runtime, call("loadAsync", src).path(0, "src").args)
+    fun loadAsync(src: Any?): Scriptable = Images.loadAsync(runtime, call("loadAsync", src).path(0, "src").args)
 
     @ScriptFunction
     fun clip(image: Any?, region: Any?, y: Any? = ABSENT, width: Any? = ABSENT, height: Any? = ABSENT): ImageWrapper =
@@ -84,7 +85,7 @@ class ImagesModule(private val runtime: ScriptRuntime) {
         Images.requestScreenCapture(runtime, call("requestScreenCapture", first, second).screenCapture().args)
 
     @ScriptFunction(global = ScriptGlobal.ALSO)
-    fun requestScreenCaptureAsync(first: Any? = ABSENT, second: Any? = ABSENT): NativeObject =
+    fun requestScreenCaptureAsync(first: Any? = ABSENT, second: Any? = ABSENT): Scriptable =
         Images.requestScreenCaptureAsync(runtime, call("requestScreenCaptureAsync", first, second).screenCapture().args)
 
     @ScriptFunction

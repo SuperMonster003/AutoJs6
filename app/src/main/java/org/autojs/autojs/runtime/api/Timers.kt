@@ -54,6 +54,16 @@ class Timers(scriptRuntime: ScriptRuntime) {
         }
     }
 
+    /**
+     * The timer that runs on [thread], whichever thread asks (for [getTimerForThread] the UI timer depends on the calling thread).
+     * zh-CN: 运行在 [thread] 上的 timer, 与调用线程无关 ([getTimerForThread] 的 UI timer 取决于调用线程).
+     */
+    fun timerOfThread(thread: Thread): Timer? = when (thread) {
+        mThreads.mainThread -> mainTimer
+        Looper.getMainLooper().thread -> mUiTimer
+        else -> TimerThread.getTimerForThread(thread)
+    }
+
     fun getTimerForId(id: Double): Timer? {
         return when (val timerId = getTimerId(id)) {
             TIMER_ID_MAIN -> mainTimer

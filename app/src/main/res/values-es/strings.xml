@@ -382,6 +382,7 @@
     <string name="error_connect_to_remote">No se puede conectar con el servidor remoto: %s</string>
     <string name="error_connection_failed_with_host">No se pudo conectar a \"%1$s\".</string>
     <string name="error_connection_timed_out">La conexión agotó el tiempo de espera (%d ms)</string>
+    <string name="error_continuation_cannot_suspend_here">Una corrutina no puede suspenderse aquí. Usa la palabra clave await en una función async y then() en una devolución de llamada de Promise</string>
     <string name="error_continuation_resume_called_without_suspend">El método resume() debe ser llamado después de suspender()</string>
     <string name="error_continuation_suspend_called_more_than_once">El método suspender() debería llamarse sólo una vez</string>
     <string name="error_corresponding_github_release_may_not_published">Es posible que la versión correspondiente de GitHub no se haya publicado todavía</string>
@@ -530,6 +531,7 @@
     <string name="error_plugin_returned_invalid_variant">El plugin %1$s devolvió una variante no válida: %2$s.</string>
     <string name="error_port_num_over_65535">Número de puerto superior a 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">El archivo de script principal del proyecto \"%1$s\" no existe</string>
+    <string name="error_promise_uncaught_rejection">Rechazo de Promise no capturado: %s</string>
     <string name="error_promise_wait_blocks_ui_thread">Promise.prototype.wait() no puede bloquear el hilo de la interfaz de usuario mientras la Promise está pendiente. Usa then(), await() en una corrutina o llama a wait() en un subhilo</string>
     <string name="error_put_value_into_json">No se puede poner el valor %s en JSON</string>
     <string name="error_refresh_failed">Error al actualizar</string>
@@ -3334,6 +3336,7 @@
     <string name="text_zero_means_unlimited">0 significa sin límite</string>
     <string name="ui_android_attribute_unknown">%1$s no es un atributo de %2$s y se ignoró</string>
     <string name="ui_android_attribute_unsupported">%1$s de %2$s no se puede aplicar en este dispositivo y se ignoró</string>
+    <string name="warn_async_functions_pending_at_script_end">El script terminó con %1$d función(es) async aún esperando una Promise, la primera en %2$s:%3$d. Una Promise pendiente no mantiene el script en ejecución</string>
     <string name="warn_continue_operation_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres continuar?</string>
     <string name="warn_exit_without_saving_settings">La configuracion no se ha guardado. ¿Seguro que quieres salir?</string>
     <string name="warning_apk_native_page_alignment_unsupported">La biblioteca nativa %1$s tiene una alineación de %2$d bytes. El APK generado puede ser incompatible con páginas de 16 KB. Actualice la biblioteca o el plugin.</string>

@@ -41,6 +41,7 @@ import org.autojs.autojs.util.RhinoUtils.isUiThread
 import org.autojs.autojs.util.RhinoUtils.js_json_stringify
 import org.autojs.autojs.util.RhinoUtils.newNativeObject
 import org.autojs.autojs.util.RhinoUtils.withRhinoContext
+import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.Context
@@ -189,7 +190,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun requestAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..3) {
+        fun requestAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Scriptable = ensureArgumentsLengthInRange(args, 1..3) {
             val (url, options, callback) = it
             requestAsyncRhinoWithRuntime(scriptRuntime, url, options, callback)
         }
@@ -197,7 +198,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         @JvmStatic
         @JvmOverloads
         @RhinoFunctionBody
-        fun requestAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): NativeObject {
+        fun requestAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): Scriptable {
 
             val prepared = prepareRequest(scriptRuntime, url, options)
 
@@ -244,7 +245,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun headAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..3) {
+        fun headAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Scriptable = ensureArgumentsLengthInRange(args, 1..3) {
             val (url, options, callback) = it
             headAsyncRhinoWithRuntime(scriptRuntime, url, options, callback)
         }
@@ -262,7 +263,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         @JvmStatic
         @JvmOverloads
         @RhinoFunctionBody
-        fun headAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): NativeObject {
+        fun headAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): Scriptable {
             val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.headAsync must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_HEAD)
@@ -271,7 +272,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun getAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..3) {
+        fun getAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Scriptable = ensureArgumentsLengthInRange(args, 1..3) {
             val (url, options, callback) = it
             getAsyncRhinoWithRuntime(scriptRuntime, url, options, callback)
         }
@@ -279,7 +280,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         @JvmStatic
         @JvmOverloads
         @RhinoFunctionBody
-        fun getAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): NativeObject {
+        fun getAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, options: Any? = null, callback: Any? = null): Scriptable {
             val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.getAsync must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_GET)
@@ -305,7 +306,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun putAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..4) {
+        fun putAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Scriptable = ensureArgumentsLengthInRange(args, 1..4) {
             val (url, data, options, callback) = it
             putAsyncRhinoWithRuntime(scriptRuntime, url, data, options, callback)
         }
@@ -325,7 +326,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         @JvmStatic
         @JvmOverloads
         @RhinoFunctionBody
-        fun putAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): NativeObject {
+        fun putAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): Scriptable {
             val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.putAsync must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_PUT)
@@ -350,14 +351,14 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun deleteAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..4) {
+        fun deleteAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Scriptable = ensureArgumentsLengthInRange(args, 1..4) {
             val (url, data, options, callback) = it
             deleteAsyncRhinoWithRuntime(scriptRuntime, url, data, options, callback)
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun delAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..4) {
+        fun delAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Scriptable = ensureArgumentsLengthInRange(args, 1..4) {
             val (url, data, options, callback) = it
             deleteAsyncRhinoWithRuntime(scriptRuntime, url, data, options, callback)
         }
@@ -377,7 +378,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         @JvmStatic
         @JvmOverloads
         @RhinoFunctionBody
-        fun deleteAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): NativeObject {
+        fun deleteAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): Scriptable {
             val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.deleteAsync must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_DELETE)
@@ -395,7 +396,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun postAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..4) {
+        fun postAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Scriptable = ensureArgumentsLengthInRange(args, 1..4) {
             val (url, data, options, callback) = it
             postAsyncRhinoWithRuntime(scriptRuntime, url, data, options, callback)
         }
@@ -403,7 +404,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         @JvmStatic
         @JvmOverloads
         @RhinoFunctionBody
-        fun postAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): NativeObject {
+        fun postAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any? = null, options: Any? = null, callback: Any? = null): Scriptable {
             val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.postAsync must be a JavaScript Object" }
             put(niceOptions, KEY_METHOD to METHOD_POST)
@@ -433,7 +434,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun postJsonAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..4) {
+        fun postJsonAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Scriptable = ensureArgumentsLengthInRange(args, 1..4) {
             val (url, data, options, callback) = it
             postJsonAsyncRhinoWithRuntime(scriptRuntime, url, data, options, callback)
         }
@@ -441,7 +442,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         @JvmStatic
         @JvmOverloads
         @RhinoFunctionBody
-        fun postJsonAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any?, options: Any? = null, callback: Any? = null): NativeObject {
+        fun postJsonAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, data: Any?, options: Any? = null, callback: Any? = null): Scriptable {
             val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.postJsonAsync must be a JavaScript Object" }
             put(niceOptions, KEY_CONTENT_TYPE to Mime.APPLICATION_JSON)
@@ -467,7 +468,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun postMultipartAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsLengthInRange(args, 1..4) {
+        fun postMultipartAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Scriptable = ensureArgumentsLengthInRange(args, 1..4) {
             val (url, files, options, callback) = it
             postMultipartAsyncRhinoWithRuntime(scriptRuntime, url, files, options, callback)
         }
@@ -475,7 +476,7 @@ class Http(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         @JvmStatic
         @JvmOverloads
         @RhinoFunctionBody
-        fun postMultipartAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, files: Any?, options: Any? = null, callback: Any? = null): NativeObject {
+        fun postMultipartAsyncRhinoWithRuntime(scriptRuntime: ScriptRuntime, url: Any?, files: Any?, options: Any? = null, callback: Any? = null): Scriptable {
             val niceOptions = if (options.isJsNullish()) newNativeObject(scriptRuntime.topLevelScope) else options
             require(niceOptions is NativeObject) { "Argument \"options\" ${options.jsBrief()} for http.postMultipartAsync must be a JavaScript Object" }
             listOf(

@@ -8,7 +8,6 @@ import org.autojs.autojs.runtime.exception.ScriptInterruptedException
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
 import org.autojs.autojs6.R
 import org.mozilla.javascript.Context
-import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.VarScope
 import org.mozilla.javascript.lc.type.TypeInfo
 import java.io.File
@@ -18,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * Created by Stardust on Apr 5, 2017.
  */
-open class AndroidContextFactory(private val cacheDirectory: File) : ContextFactory() {
+open class AndroidContextFactory(private val cacheDirectory: File) : EventLoopContextFactory() {
 
     private val mContextCount = AtomicInteger()
 

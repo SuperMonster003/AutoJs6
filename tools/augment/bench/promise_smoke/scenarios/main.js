@@ -1,6 +1,6 @@
 // ROADMAP P4.2: the Promise behaviors of docs/augment/P4-2-promise-eval.md that only the engine shows (timers, threads,
 // coroutines, Flow), in a project with the continuation feature. Run by device_promise_check.py; one "AJ6P42 <id> <value>"
-// line per item. The rejected await shows the error toast of popException (existing behavior).
+// line per item.
 var MARK = 'AJ6P42';
 var MAIN = String(java.lang.Thread.currentThread().getName());
 
@@ -26,7 +26,7 @@ setImmediate(function () { order.push('immediate'); });
 continuation.delay(100);
 out('A2-order', order.join());
 
-// A foreign thenable: its then is called at once (promise.js) or in a job.
+// A foreign thenable: its then is called in a job (at once in promise.js).
 var seq = [];
 new Promise(function (r) { r({ then: function (f) { seq.push('then'); f(5); } }); });
 seq.push('after');
@@ -44,8 +44,11 @@ out('A4-adopt', ticks.join());
 // Coroutines.
 out('K1-await', Promise.resolve(7).await());
 out('K1-await-later', new Promise(function (r) { setTimeout(function () { r('t'); }, 20); }).await());
-var rejected = Promise.reject(new Error('no')).await();
-out('K1-await-rejected', (rejected instanceof Error) + ' ' + rejected.message);
+try {
+    Promise.reject(new Error('no')).await();
+} catch (e) {
+    out('K1-await-rejected', 'caught ' + e.message);
+}
 var got = [];
 for (var i = 0; i < 3; i++) got.push(new Promise(function (r) { setTimeout(function () { r(got.length); }, 10); }).await());
 out('K2-loop', got.join());
@@ -89,7 +92,7 @@ try {
     out('W1-wait-rejected', 'threw ' + e.message);
 }
 
-// The unhandled rejection warning: device_promise_check.py looks for the console line.
+// The report of an unhandled rejection: device_promise_check.py looks for the console line.
 Promise.reject(new Error('aj6p42 unhandled'));
 continuation.delay(50);
 

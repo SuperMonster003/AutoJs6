@@ -384,6 +384,7 @@
     <string name="error_connect_to_remote">원격 서버에 연결할 수 없습니다: %s</string>
     <string name="error_connection_failed_with_host">\"%1$s\"에 연결하지 못했습니다.</string>
     <string name="error_connection_timed_out">연결 시간 초과 (%d 밀리초)</string>
+    <string name="error_continuation_cannot_suspend_here">여기서는 코루틴을 일시 중단할 수 없습니다. async 함수에서는 await 키워드를, Promise 콜백에서는 then() 을 사용하세요</string>
     <string name="error_continuation_resume_called_without_suspend">메소드 resume() 가 suspend() 후 호출해야합니다.</string>
     <string name="error_continuation_suspend_called_more_than_once">메소드 suspend() 는 한 번만 호출해야합니다</string>
     <string name="error_corresponding_github_release_may_not_published">해당 GitHub 릴리스는 아직 게시되지 않았을 수 있습니다</string>
@@ -532,6 +533,7 @@
     <string name="error_plugin_returned_invalid_variant">%1$s 플러그인이 잘못된 variant를 반환했습니다: %2$s.</string>
     <string name="error_port_num_over_65535">65535 이상의 포트 번호</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">프로젝트 메인 스크립트 파일 \"%1$s\" 이 존재하지 않습니다</string>
+    <string name="error_promise_uncaught_rejection">처리되지 않은 Promise 거부: %s</string>
     <string name="error_promise_wait_blocks_ui_thread">Promise 가 아직 처리되지 않은 동안 Promise.prototype.wait() 는 UI 스레드를 차단할 수 없습니다. then() 을 사용하거나, 코루틴에서 await() 를 사용하거나, 하위 스레드에서 wait() 를 호출하십시오</string>
     <string name="error_put_value_into_json">가치 %s 를 JSON 에 넣을 수 없습니다</string>
     <string name="error_refresh_failed">새로고침에 실패했습니다</string>
@@ -3336,6 +3338,7 @@
     <string name="text_zero_means_unlimited">0은 제한 없음을 의미합니다</string>
     <string name="ui_android_attribute_unknown">%1$s은(는) %2$s의 속성이 아니므로 무시했습니다</string>
     <string name="ui_android_attribute_unsupported">%2$s의 %1$s은(는) 이 기기에서 설정할 수 없어 무시했습니다</string>
+    <string name="warn_async_functions_pending_at_script_end">스크립트가 종료되었지만 async 함수 %1$d개가 아직 Promise 를 기다리고 있습니다. 첫 번째 위치는 %2$s:%3$d 입니다. 대기 중인 Promise 는 스크립트를 계속 실행하지 않습니다</string>
     <string name="warn_continue_operation_without_saving_settings">설정이 저장되지 않았습니다. 계속할까요?</string>
     <string name="warn_exit_without_saving_settings">설정이 저장되지 않았습니다. 종료할까요?</string>
     <string name="warning_apk_native_page_alignment_unsupported">네이티브 라이브러리 %1$s의 정렬은 %2$d바이트입니다. 생성된 APK는 페이지 크기가 16 KB인 기기에서 실행되지 않을 수 있습니다. 라이브러리 또는 플러그인을 업데이트하세요.</string>

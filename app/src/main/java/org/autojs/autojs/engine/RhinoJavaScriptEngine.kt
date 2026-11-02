@@ -29,6 +29,7 @@ import org.autojs.autojs.rhino.extension.AnyExtensions.jsBrief
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.defineProp
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.ScriptRuntime
+import org.autojs.autojs.runtime.api.modules.promise.PromiseSuspension
 import org.autojs.autojs.runtime.api.modules.proxy.PaintProxyObject
 import org.autojs.autojs.script.JavaScriptSource
 import org.autojs.autojs.util.RhinoUtils.callFunction
@@ -204,6 +205,7 @@ open class RhinoJavaScriptEngine(private val androidContext: android.content.Con
         scriptable.defineProp("global", scriptable.globalThis, PERMANENT)
         scriptable.defineProp("__engine__", this, READONLY or DONTENUM or PERMANENT)
         scriptable.defineProp("Promise", runtime.js_Promise, READONLY or PERMANENT)
+        PromiseSuspension.install(scriptable)
         scriptable.defineProp("ResultAdapter", runtime.js_ResultAdapter, READONLY or PERMANENT)
 
         this.withTimeConsuming("script-init") {

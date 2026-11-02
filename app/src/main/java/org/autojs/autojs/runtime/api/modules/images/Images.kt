@@ -61,6 +61,7 @@ import org.autojs.autojs.util.RhinoUtils.undefined
 import org.mozilla.javascript.Callable
 import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.NativeObject
+import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
 import org.opencv.core.CvType
@@ -154,7 +155,7 @@ class Images(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun loadAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsOnlyOne(args) { src ->
+        fun loadAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Scriptable = ensureArgumentsOnlyOne(args) { src ->
             val url = coerceString(src)
             handleAsyncOperation(scriptRuntime) { scriptRuntime.images.load(url) }
         }
@@ -254,21 +255,21 @@ class Images(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.
         @JvmStatic
         @RhinoRuntimeFunctionInterface
-        fun requestScreenCaptureAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): NativeObject = ensureArgumentsAtMost(args, 2) { argList ->
+        fun requestScreenCaptureAsync(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Scriptable = ensureArgumentsAtMost(args, 2) { argList ->
             if (scriptRuntime.images.hasActiveScreenCapturer()) {
                 return@ensureArgumentsAtMost callFunction(
                     scriptRuntime,
                     scriptRuntime.js_Promise,
                     "resolve",
                     arrayOf(true),
-                ) as NativeObject
+                ) as Scriptable
             }
             callFunction(
                 scriptRuntime,
                 scriptRuntime.js_ResultAdapter,
                 "promise",
                 arrayOf(requestScreenCaptureInternal(scriptRuntime, *argList)),
-            ) as NativeObject
+            ) as Scriptable
         }
 
         // @Reference to module __images__.js from Auto.js Pro 9.3.11 by SuperMonster003 on Dec 19, 2023.

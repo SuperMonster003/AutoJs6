@@ -311,13 +311,14 @@ class Timer {
 
         /**
          * Runs a script callback of setTimeout / setInterval / setImmediate. A [ContinuationPending] ends the callback but is not
-         * its failure: a coroutine resumed in it (continuation.delay, or any Promise.await, as promise.js settles through
-         * setImmediate) suspended again, and the continuation is captured until it is resumed. It formerly exited the script on
+         * its failure: a coroutine resumed in it (continuation.delay; `Promise.prototype.await` resumes in a microtask of the
+         * checkpoint, AutoJsContext.microtaskCheckpoint, which handles this itself) suspended again, and the continuation is
+         * captured until it is resumed. It formerly exited the script on
          * the main looper (UI mode) and cancelled the callback of setInterval elsewhere (docs/augment/ROADMAP.md Q23).
          * Other exceptions exit the script on the main looper and propagate elsewhere, as before.
          *
          * zh-CN: 运行 setTimeout / setInterval / setImmediate 的脚本回调. ContinuationPending 会结束回调, 但不是回调的失败: 回调中恢复的协程
-         * (continuation.delay, 以及任何 Promise.await, 因为 promise.js 经 setImmediate 结算) 再次挂起, 协程已被捕获, 等待之后恢复. 原先它在主 Looper 上 (UI 模式)
+         * (continuation.delay; `Promise.prototype.await` 在检查点的微任务中恢复, 由 AutoJsContext.microtaskCheckpoint 自行处理) 再次挂起, 协程已被捕获, 等待之后恢复. 原先它在主 Looper 上 (UI 模式)
          * 会结束脚本, 在其他 Looper 上会使 setInterval 的回调被取消 (docs/augment/ROADMAP.md Q23). 其他异常照旧: 在主 Looper 上结束脚本, 其他情况继续抛出.
          */
         internal fun runCallback(isOnMainLooper: () -> Boolean, exit: (Throwable) -> Unit, call: () -> Unit) {

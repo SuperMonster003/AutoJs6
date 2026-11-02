@@ -1,6 +1,5 @@
 package org.autojs.autojs.runtime.api.modules.promise
 
-import org.autojs.autojs.runtime.api.modules.promise.PromiseHarness.Impl
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -15,25 +14,23 @@ import org.junit.Test
  */
 class AwaitRejectionTest {
 
-    private fun run(source: String, impl: Impl = Impl.KOTLIN_POSTED) = PromiseHarness(impl).use { it.run(source.trimIndent()).joinToString(" ; ") }
+    private fun run(source: String) = PromiseHarness().use { it.run(source.trimIndent()).joinToString(" ; ") }
 
     private val forms = listOf("p.await()", "kotlinAwait(p)", "continuation.await(p)")
 
     @Test
     fun everyAwaitThrowsTheErrorAtTheCall() = forms.forEach { form ->
-        Impl.entries.forEach { impl ->
-            assertEquals(form, "(suspended) ; caught RangeError boom true ; after", run("""
-                var p = Promise.reject(new RangeError('boom')), value = 'kept';
-                try { value = $form; log('no'); } catch (e) { log('caught ' + e.name + ' ' + e.message + ' ' + (value === 'kept')); }
-                log('after');
-            """, impl))
-        }
+        assertEquals(form, "caught RangeError boom true ; after", run("""
+            var p = Promise.reject(new RangeError('boom')), value = 'kept';
+            try { value = $form; log('no'); } catch (e) { log('caught ' + e.name + ' ' + e.message + ' ' + (value === 'kept')); }
+            log('after');
+        """))
     }
 
     @Test
     fun aReasonThatIsNotAnErrorIsThrownAsWell() = forms.forEach { form ->
         listOf("'text'" to "string:text", "7" to "number:7", "false" to "boolean:false", "null" to "object:null", "undefined" to "undefined:undefined").forEach { (reason, expected) ->
-            assertEquals("$form $reason", "(suspended) ; $expected", run("""
+            assertEquals("$form $reason", "$expected", run("""
                 var p = Promise.reject($reason);
                 try { $form; log('no'); } catch (e) { log(typeof e + ':' + e); }
             """))
@@ -42,7 +39,7 @@ class AwaitRejectionTest {
 
     @Test
     fun aLaterRejectionThrowsAfterTheScriptSuspended() = forms.forEach { form ->
-        assertEquals(form, "(suspended) ; caught late", run("""
+        assertEquals(form, "caught late", run("""
             var p = new Promise((_, reject) => setTimeout(() => reject('late'), 5));
             try { $form; log('no'); } catch (e) { log('caught ' + e); }
         """))
@@ -50,7 +47,7 @@ class AwaitRejectionTest {
 
     @Test
     fun aRejectionFromAnotherThreadThrowsOnTheScriptThread() = forms.forEach { form ->
-        assertEquals(form, "(suspended) ; caught from other on main", run("""
+        assertEquals(form, "caught from other on main", run("""
             var p = new Promise((_, reject) => otherThread(() => reject('from other')));
             try { $form; log('no'); } catch (e) { log('caught ' + e + ' on ' + where()); }
         """))
@@ -58,7 +55,7 @@ class AwaitRejectionTest {
 
     @Test
     fun theHandlersOfTheCallersRun() = forms.forEach { form ->
-        assertEquals(form, "(suspended) ; finally inner ; finally outer ; caught x", run("""
+        assertEquals(form, "finally inner ; finally outer ; caught x", run("""
             var p = Promise.reject('x');
             function inner() { try { return $form + 1; } finally { log('finally inner'); } }
             function outer() { try { return inner() + 1; } finally { log('finally outer'); } }
@@ -68,7 +65,7 @@ class AwaitRejectionTest {
 
     @Test
     fun theScriptGoesOnAwaitingAfterCatching() = forms.forEach { form ->
-        assertEquals(form, "(suspended) ; error 0 ; ok 1 ; error 2 ; done", run("""
+        assertEquals(form, "error 0 ; ok 1 ; error 2 ; done", run("""
             for (var i = 0; i < 3; i++) {
                 var p = i % 2 ? Promise.resolve(i) : Promise.reject(i);
                 try { log('ok ' + $form); } catch (e) { log('error ' + e); }
@@ -79,7 +76,7 @@ class AwaitRejectionTest {
 
     @Test
     fun aResolvedAwaitStaysAsItWas() = forms.forEach { form ->
-        assertEquals(form, "(suspended) ; value 5 ; undefined", run("""
+        assertEquals(form, "value 5 ; undefined", run("""
             var p = Promise.resolve(5);
             log('value ' + $form);
             p = Promise.resolve();
@@ -89,7 +86,7 @@ class AwaitRejectionTest {
 
     @Test
     fun whatNoScriptCatchesIsAnUncaughtErrorOfTheScript() = forms.forEach { form ->
-        assertEquals(form, "(suspended) ; task error: JavaScriptException Error: lost", run("""
+        assertEquals(form, "task error: JavaScriptException Error: lost", run("""
             var p = Promise.reject(new Error('lost'));
             log('value ' + $form);
             log('not reached');
@@ -100,7 +97,7 @@ class AwaitRejectionTest {
     fun anErrorAfterAFinishedAwaitDoesNotResumeItAgain() = forms.forEach { form ->
         // The script threw out of `then(resume)` into `catch(resumeError)`, so everything after the await ran a second time.
         // zh-CN: 脚本的错误从 then(resume) 抛入 catch(resumeError), await 之后的全部代码因此再运行一遍.
-        assertEquals(form, "(suspended) ; got 1 ; task error: JavaScriptException Error: after", run("""
+        assertEquals(form, "got 1 ; task error: JavaScriptException Error: after", run("""
             var p = Promise.resolve(1);
             log('got ' + $form);
             throw new Error('after');
@@ -108,7 +105,7 @@ class AwaitRejectionTest {
     }
 
     @Test
-    fun aRejectionDoesNotReachTheThenOfTheAwait() = assertEquals("(suspended) ; caught x ; caught y", run("""
+    fun aRejectionDoesNotReachTheThenOfTheAwait() = assertEquals("caught x ; caught y", run("""
         function fails(reason) { return Promise.reject(reason); }
         try { fails('x').await(); } catch (e) { log('caught ' + e); }
         try { fails('y').await(); } catch (e) { log('caught ' + e); }
@@ -124,13 +121,12 @@ class AwaitRejectionTest {
                 var p = Promise.resolve(1);
                 try { $form; log('no'); } catch (e) { log('cannot suspend'); }
             });
-            console.warn = function () {};
             setTimeout(() => log('still running'), 5);
         """))
     }
 
     @Test
-    fun resumeErrorThrowsAtCreatorAwait() = assertEquals("(suspended) ; caught failed ; done", run("""
+    fun resumeErrorThrowsAtCreatorAwait() = assertEquals("caught failed ; done", run("""
         var cont = continuation.create();
         setTimeout(() => cont.resumeError('failed'), 1);
         try { cont.await(); log('no'); } catch (e) { log('caught ' + e); }

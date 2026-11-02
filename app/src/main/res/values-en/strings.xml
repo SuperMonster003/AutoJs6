@@ -379,6 +379,7 @@
     <string name="error_connect_to_remote">Cannot connect to the remote server: %s</string>
     <string name="error_connection_failed_with_host">Failed to connect to \"%1$s\".</string>
     <string name="error_connection_timed_out">Connection timed out after %d ms</string>
+    <string name="error_continuation_cannot_suspend_here">A coroutine cannot suspend here. Use the await keyword in an async function, and then() in a callback of a Promise</string>
     <string name="error_continuation_resume_called_without_suspend">Method resume() should be called after suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">Method suspend() should be only called once</string>
     <string name="error_corresponding_github_release_may_not_published">Corresponding GitHub release may have not been published yet</string>
@@ -527,6 +528,7 @@
     <string name="error_plugin_returned_invalid_variant">%1$s plugin returned invalid variant: %2$s.</string>
     <string name="error_port_num_over_65535">Port number over 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">Project main script file \"%1$s\" does not exist</string>
+    <string name="error_promise_uncaught_rejection">Uncaught (in promise) %s</string>
     <string name="error_promise_wait_blocks_ui_thread">Promise.prototype.wait() cannot block the UI thread while the Promise is pending. Use then(), await() in a coroutine, or call wait() in a sub-thread</string>
     <string name="error_put_value_into_json">Cannot put value %s into JSON</string>
     <string name="error_refresh_failed">Refresh failed</string>
@@ -3331,6 +3333,7 @@
     <string name="text_zero_means_unlimited">0 means unlimited</string>
     <string name="ui_android_attribute_unknown">%1$s is not an attribute of %2$s and was ignored</string>
     <string name="ui_android_attribute_unsupported">%1$s of %2$s cannot be set on this device and was ignored</string>
+    <string name="warn_async_functions_pending_at_script_end">The script ended with %1$d async function(s) still waiting for a Promise, the first at %2$s:%3$d. A pending Promise does not keep a script running</string>
     <string name="warn_continue_operation_without_saving_settings">The settings has not been saved, are you sure to continue the operation?</string>
     <string name="warn_exit_without_saving_settings">The settings has not been saved, are you sure to exit?</string>
     <string name="warning_apk_native_page_alignment_unsupported">Native library %1$s has %2$d byte alignment. The generated APK may not run on devices with 16 KB pages. Update the library or plugin.</string>

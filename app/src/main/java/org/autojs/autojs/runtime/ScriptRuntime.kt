@@ -29,6 +29,7 @@ import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.UncheckedIOException
 import org.autojs.autojs.rhino.AndroidClassLoader
 import org.autojs.autojs.rhino.ProxyObject
+import org.autojs.autojs.rhino.ScriptEventLoop
 import org.autojs.autojs.rhino.TopLevelScope
 import org.autojs.autojs.rhino.extension.ScriptableExtensions.prop
 import org.autojs.autojs.runtime.api.AbstractShell
@@ -54,6 +55,7 @@ import org.autojs.autojs.runtime.resource.RuntimeResourceScope.Stage
 import org.autojs.autojs.tool.Supplier
 import org.autojs.autojs.tool.UiHandler
 import org.autojs.autojs.util.ClipboardUtils
+import org.autojs.autojs.util.RhinoUtils
 import org.autojs.autojs.util.RhinoUtils.callFunction
 import org.autojs.autojs.util.RhinoUtils.isBackgroundThread
 import org.autojs.autojs.util.RhinoUtils.isMainThread
@@ -67,6 +69,7 @@ import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.RhinoException
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
+import org.mozilla.javascript.TopLevel
 import java.io.File
 import java.io.FileFilter
 import java.io.IOException
@@ -114,8 +117,6 @@ import org.autojs.autojs.runtime.api.modules.bootstrap.ScriptPolyfills
 import org.autojs.autojs.runtime.api.modules.bootstrap.require.AssetModuleSource
 import org.autojs.autojs.runtime.api.modules.bootstrap.require.ScriptModuleSources
 import org.autojs.autojs.runtime.api.modules.bootstrap.require.ScriptRequire
-import org.autojs.autojs.runtime.api.modules.promise.PromiseConstructor
-import org.autojs.autojs.runtime.api.modules.promise.TimerReactionPoster
 import org.autojs.autojs.script.JavaScriptSource
 
 /**
@@ -161,7 +162,11 @@ class ScriptRuntime private constructor(builder: Builder) {
         set(topLevelScope) {
             check(!::mTopLevelScope.isInitialized) { "Top level has already exists" }
             mTopLevelScope = topLevelScope
+            topLevelScope.eventLoop = eventLoop
         }
+
+    /** What the Contexts of this script ask about promises. zh-CN: 本脚本的 Context 就 Promise 询问的内容. */
+    internal val eventLoop: ScriptEventLoop = RuntimeEventLoop(this)
 
     var clip: String
         get() {
@@ -419,14 +424,13 @@ class ScriptRuntime private constructor(builder: Builder) {
      * AutoJs6/示例代码/协程/协程HelloWorld.js
      */
     /**
-     * Substitution of Promise: the Kotlin [PromiseConstructor] (roadmap P4.2, appendix C Q95; `assets/modules/promise.js`
-     * until P5.2), whose reactions go straight to the timer while the global `setImmediate` is the timers module's own.
-     * Created on first use, in `RhinoJavaScriptEngine.init` after the modules are mounted.
-     * zh-CN: Promise 的替代方案: Kotlin 的 [PromiseConstructor] (ROADMAP P4.2, 附录 C Q95; P5.2 之前为 `assets/modules/promise.js`), 全局 setImmediate
-     * 仍是 timers 模块自己的函数时反应直接投递到 timer. 首次使用时创建, 即 `RhinoJavaScriptEngine.init` 中模块挂载之后.
+     * The global Promise is the built-in one of Rhino, the same as that of async functions (roadmap P9.5 of Rhino-For-AutoJs6,
+     * which ended the replacement of docs/augment/ROADMAP.md P4.2); [PromiseSuspension] adds `await()` and `wait()` to it.
+     * zh-CN: 全局 Promise 就是 Rhino 内建的 Promise, 与 async 函数的相同 (Rhino-For-AutoJs6 ROADMAP P9.5, 结束了 docs/augment/ROADMAP.md P4.2 的替代方案);
+     * [PromiseSuspension] 为它添加 await() 与 wait().
      */
     internal val js_Promise: BaseFunction by lazy {
-        PromiseConstructor(topLevelScope, TimerReactionPoster(this) { scriptModules.globalValue("timers", "setImmediate") })
+        RhinoUtils.withRhinoContext(this) { cx -> TopLevel.getBuiltinCtor(cx, topLevelScope, TopLevel.Builtins.Promise) as BaseFunction }
     }
 
     /**

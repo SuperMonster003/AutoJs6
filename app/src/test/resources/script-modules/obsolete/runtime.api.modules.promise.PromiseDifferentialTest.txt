@@ -1,74 +1,74 @@
-=== bothStatesLogTheSame module: A1-then-order
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: A1-then-order
 sync ; then 1
-=== bothStatesLogTheSame module: A2-vs-timers
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: A2-vs-timers
 timeout0 ; p1 ; immediate ; p2 ; timeout-default
-=== bothStatesLogTheSame module: A3-nested-ticks
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: A3-nested-ticks
 a1 ; b1 ; inner ; a2 ; b2
-=== bothStatesLogTheSame module: A4-adopt-own
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: A4-adopt-own
 t1 ; adopted x ; t2 ; t3 ; t4
-=== bothStatesLogTheSame module: A5-thenable-sync
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: A5-thenable-sync
 then called ; after resolve ; value 5
-=== bothStatesLogTheSame module: B1-catch-finally
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: B1-catch-finally
 caught e1 ; fin ; finally threw TypeError ; kept plain ; then r
-=== bothStatesLogTheSame module: B2-executor-throw
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: B2-executor-throw
 RangeError ex ; kept 1 ; typeerror true
-=== bothStatesLogTheSame module: B3-java-exception
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: B3-java-exception
 java true JavaException: java.lang.NumberFormatExc
-=== bothStatesLogTheSame module: B4-self-resolve
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: B4-self-resolve
 TypeError: A promise cannot be resolved with itself.
-=== bothStatesLogTheSame module: B5-unhandled
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: B5-unhandled
 warn Possible Unhandled Promise Rejection: Error: lost ; warn Possible Unhandled Promise Rejection: Error: late handled ; handled at once ; handled late
-=== bothStatesLogTheSame module: B6-then-non-function
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: B6-then-non-function
 passed reject 4 ; passed 3
-=== bothStatesLogTheSame module: C1-surface-ctor
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: C1-surface-ctor
 function Promise 1 false undefined  _immediateFn,_unhandledRejectionFn,all,allSettled,resolve,reject,race undefined undefined ; catch,then,finally,await,wait await,catch,constructor,finally,then,wait ; call TypeError Promises must be constructed via new ; new 1 TypeError not a function
-=== bothStatesLogTheSame module: C2-surface-instance
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: C2-surface-instance
 _state,_handled,_value,_deferreds [object Object] [object Object] true true
-=== bothStatesLogTheSame module: C3-statics
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: C3-statics
 resolve identity true ; all empty 0 ; all string a,b ; all 5 TypeError: Promise.all accepts an array ; settled null object null is not iterable (cannot read property Symbol(Symbol.iterator)) ; race {} Promise.race accepts an array ; all 1,2,3 ; settled [{"status":"rejected","reason":"x"},{"status":"fulfilled","value":1}] ; race fast ; all rejects first
-=== bothStatesLogTheSame module: K1-await-basic
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: K1-await-basic
 (suspended) ; await 7 ; await later t ; popException Error: no ; await rejected returns true no ; done
-=== bothStatesLogTheSame module: K2-await-loop
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: K2-await-loop
 (suspended) ; loop 0,1,2 ; continuation.await ca ; after delay
-=== bothStatesLogTheSame module: K3-await-cross-thread
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: K3-await-cross-thread
 (suspended) ; cross from other on main ; then on main
-=== bothStatesLogTheSame module: K4-kotlin-await
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: K4-kotlin-await
 (suspended) ; kotlin await k
-=== bothStatesLogTheSame module: K5-sample-helloworld
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: K5-sample-helloworld
 (suspended) ; 1 s ; 2 s ; 1 + 2 = 3
-=== bothStatesLogTheSame module: K6-await-in-then
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: K6-await-in-then
 inner await error JavaException: java.lang.IllegalStateException: Ca ; popException JavaException: java.lang.IllegalStateException: resume called without suspend ; warn Possible Unhandled Promise Rejection: JavaException: java.lang.IllegalStateException: resume called without suspend
-=== bothStatesLogTheSame module: W1-wait
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: W1-wait
 wait 1 ; wait timer 2 ; wait threw w ; wait other 3
-=== bothStatesLogTheSame module: W2-wait-order
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: W2-wait-order
 immediate before ; wait x ; after
-=== bothStatesLogTheSame module: T1-settle-on-other-thread
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: T1-settle-on-other-thread
 then v on main ; then registered on other, runs on main
-=== bothStatesLogTheSame module: D1-callback-this
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D1-callback-this
 executor this is global true ; this is global true
-=== bothStatesLogTheSame module: D2-replaced-immediateFn
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D2-replaced-immediateFn
 custom function 0 true ; custom function 0 true ; timeout first ; then 1 ; warn Possible Unhandled Promise Rejection: Error: lost
-=== bothStatesLogTheSame module: D3-replaced-setImmediate
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D3-replaced-setImmediate
 wrapped ; then 2 ; timeout path 3
-=== bothStatesLogTheSame module: D4-replaced-unhandled
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D4-replaced-unhandled
 task error: EcmaError TypeError: _unhandledRejectionFn is not a function, it is number. ; task error: EcmaError TypeError: _unhandledRejectionFn is not a function, it is number.
-=== bothStatesLogTheSame module: D5-finally-not-function
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D5-finally-not-function
 TypeError: callback is not a function, it is undefined. ; TypeError: callback is not a function, it is number.
-=== bothStatesLogTheSame module: D6-not-an-instance
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D6-not-an-instance
 then via catch null function ; rejected undefined ; catch undefined ; primitive undefined ; task error: EcmaError TypeError: Cannot read property "length" from undefined ; derived undefined ; adopted rejected undefined
-=== bothStatesLogTheSame module: D7-thenables
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D7-thenables
 fake kept true ; getter threw getter ; first wins 1 ; then threw before ; function value function
-=== bothStatesLogTheSame module: D8-statics
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D8-statics
 custom ctor ; resolve 7 ; 2 1 1 0 0 1 1 1 then ; resolvers 1 1 function ; all thenable threw t ; [{"status":"fulfilled","value":1},{"status":"rejected","reason":2}] ; race a ; race replaced 7
-=== bothStatesLogTheSame module: D9-constructor-replaced
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D9-constructor-replaced
 Sub noop 0 ; sub 1 ; plain object ctor 2 ; task error: EcmaError TypeError: Cannot read property "length" from undefined ; chained
-=== bothStatesLogTheSame module: D10-adoption-chains
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D10-adoption-chains
 warn Possible Unhandled Promise Rejection: Error: adopted ; caught adopted ; chain late
-=== bothStatesLogTheSame module: D12-not-a-function-messages
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D12-not-a-function-messages
 catch on {} TypeError: Cannot find function then. ; then 1 then is not a function, it is number. ; wait on {} Cannot find function then. ; finally Cannot find function resolve. ; allSettled TypeError ; immediateFn 1 _immediateFn is not a function, it is number.
-=== bothStatesLogTheSame module: D13-functions-and-positions
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D13-functions-and-positions
 resolver prototype object object ; reapplied ; new 1 at line 0 ; call at line 6 ; kept 2 ; wait threw w at line 0
-=== bothStatesLogTheSame module: D14-constructor-property-attributes
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D14-constructor-property-attributes
 name --C, length --C, arity --C, prototype W--
-=== bothStatesLogTheSame module: D11-many-reactions-and-wait
+=== logsAreThoseOfTheModuleButForTheKnownDifferences module: D11-many-reactions-and-wait
 wait w after 300

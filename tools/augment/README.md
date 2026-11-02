@@ -134,10 +134,10 @@ py -3.12 -I tools/augment/device_bootstrap_check.py -s SERIAL --smoke coroutine 
 py -3.12 -I tools/augment/device_promise_check.py -s SERIAL --sample --scenarios --bench [--wait 90]
 ```
 
-全局 Promise 是新层的 `PromiseConstructor` (`runtime/api/modules/promise/`); P5.2 之前开关关时是 `assets/modules/promise.js`, 已随开关删除, 两态以 `--new-modules off` / `on` 各运行一次对照. 三个项目都按应用运行项目的方式启动 (经 `bench/bootstrap_smoke/launch_project.js`, 启用 continuation 特性):
+全局 Promise 是 Rhino 内建的 `NativePromise` 加宿主的 `await()` / `wait()` (`runtime/api/modules/promise/PromiseSuspension.kt`, Rhino-For-AutoJs6 P9.5); 之前是 Kotlin `PromiseConstructor`, P5.2 之前开关关时是 `assets/modules/promise.js`. 三个项目都按应用运行项目的方式启动 (经 `bench/bootstrap_smoke/launch_project.js`, 启用 continuation 特性):
 
 - `--sample`: 运行应用自带的 `示例代码/协程/协程HelloWorld`, 按顺序核对 5 行控制台输出 (最后一行读取 `hello.txt`); 其中由 `threads.start` 的线程 `cont.resume(...)` 是附录 C Q98 的回归 (原先该线程先于脚本挂起时报 "Method resume() should be called after suspend()"). 失败时列出缺少的行与错误行.
-- `--scenarios`: 运行 `bench/promise_smoke/scenarios`, 打印 19 项 (反应与 timers 的先后, thenable 采纳, 各种 await, 其他线程与 Java 线程结算后回调所在线程, `ScriptPromiseAdapter`, Flow `await()` (Q97), `wait()`, 未处理拒绝警告), 逐项打印供人工核对 (P5.2 之前两态逐项相同即通过). 其中被拒绝的 await 会弹出错误 toast (popException 的既有行为), 不需点按.
+- `--scenarios`: 运行 `bench/promise_smoke/scenarios`, 19 项 (反应与 timers 的先后, thenable 采纳, 各种 await, 其他线程与 Java 线程结算后回调所在线程, `ScriptPromiseAdapter`, Flow `await()` (Q97), `wait()`, 未处理拒绝的控制台报告) 逐项对照脚本里的 `SCENARIOS`, 只打印失败项与通过数.
 - `--bench`: 运行 `bench/promise_smoke/bench`, 打印每次操作的微秒数 (预热 3 次后 7 次的中位数). 除 `wait-resolved` 与 `await-resolved` 外, 各用例先排入 n 个操作, 再挂起等待它们跑完 (由 Looper 运行); `queued+wait` / `queued1200+wait` 改由一次 `wait()` 运行排着的 300 / 1200 个反应, 每个反应的耗时应大致相同 (Q105 之前 `wait()` 是平方级). 早于附录 C Q26 修复的构建 (如 debug 5835) 在脚本线程上 `wait()` 会一直阻塞, 跑不完 `wait-resolved` 之后的用例, 也不能作为 Q105 之前的对照.
 
 G8441 上 `logcat -c` 有时清不掉上一次运行的行, 所以只读取每个脚本启动之后记录的控制台行 (2026-10-24 改; 改前读到上一次的结束行会提前收尾并删除设备目录, 正在运行的样例随后读不到 `hello.txt`). 设备目录 `/sdcard/Download/aj6-augment-bench/p42` 用完即删.

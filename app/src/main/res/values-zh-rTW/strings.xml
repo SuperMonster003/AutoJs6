@@ -379,6 +379,7 @@
     <string name="error_connect_to_remote">連線失敗: %s</string>
     <string name="error_connection_failed_with_host">連線至 \"%1$s\" 失敗.</string>
     <string name="error_connection_timed_out">連線超時 (%d 毫秒)</string>
+    <string name="error_continuation_cannot_suspend_here">協程無法在此處掛起. async 函式內請使用 await 關鍵字, Promise 回呼內請使用 then()</string>
     <string name="error_continuation_resume_called_without_suspend">方法 resume() 呼叫前需先呼叫 suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">方法 suspend() 只能呼叫一次</string>
     <string name="error_corresponding_github_release_may_not_published">對應的 GitHub 發行版可能還未釋出</string>
@@ -527,6 +528,7 @@
     <string name="error_plugin_returned_invalid_variant">%1$s 外掛返回的 variant 無效: %2$s.</string>
     <string name="error_port_num_over_65535">埠號超過 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">專案主指令碼檔案 \"%1$s\" 不存在</string>
+    <string name="error_promise_uncaught_rejection">未捕獲的 Promise 拒絕: %s</string>
     <string name="error_promise_wait_blocks_ui_thread">Promise 未結算時 Promise.prototype.wait() 不能阻塞 UI 執行緒. 可改用 then(), 在協程中使用 await(), 或在子執行緒中呼叫 wait()</string>
     <string name="error_put_value_into_json">無法將值 %s 存入 JSON</string>
     <string name="error_refresh_failed">刷新失敗</string>
@@ -3331,6 +3333,7 @@
     <string name="text_zero_means_unlimited">0 表示不限制</string>
     <string name="ui_android_attribute_unknown">%1$s 不是 %2$s 的屬性, 已忽略</string>
     <string name="ui_android_attribute_unsupported">%2$s 的 %1$s 在此裝置上無法設定, 已忽略</string>
+    <string name="warn_async_functions_pending_at_script_end">指令碼已結束, 仍有 %1$d 個 async 函式在等待 Promise, 第一個位於 %2$s:%3$d. 未落定的 Promise 不會讓指令碼繼續執行</string>
     <string name="warn_continue_operation_without_saving_settings">設定尚未儲存, 確定要繼續操作嗎</string>
     <string name="warn_exit_without_saving_settings">設定尚未儲存, 確定要退出嗎</string>
     <string name="warning_apk_native_page_alignment_unsupported">原生程式庫 %1$s 的對齊值為 %2$d 位元組. 產生的 APK 可能無法在頁面大小為 16 KB 的裝置上執行. 請升級原生程式庫或外掛程式.</string>

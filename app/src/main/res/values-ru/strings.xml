@@ -382,6 +382,7 @@
     <string name="error_connect_to_remote">Не удается подключиться к удаленному серверу: %s</string>
     <string name="error_connection_failed_with_host">Не удалось подключиться к \"%1$s\".</string>
     <string name="error_connection_timed_out">Тайм-аут подключения (%d мс)</string>
+    <string name="error_continuation_cannot_suspend_here">Сопрограмму нельзя приостановить здесь. Используйте ключевое слово await в функции async и then() в обратном вызове Promise</string>
     <string name="error_continuation_resume_called_without_suspend">Метод resume() должен вызываться после suspend()</string>
     <string name="error_continuation_suspend_called_more_than_once">Метод suspend() должен быть вызван только один раз</string>
     <string name="error_corresponding_github_release_may_not_published">Соответствующий релиз на GitHub может быть еще не опубликован</string>
@@ -530,6 +531,7 @@
     <string name="error_plugin_returned_invalid_variant">Плагин %1$s вернул недопустимый variant: %2$s.</string>
     <string name="error_port_num_over_65535">Номер порта более 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">Основной файл скрипта проекта \"%1$s\" не существует</string>
+    <string name="error_promise_uncaught_rejection">Необработанное отклонение Promise: %s</string>
     <string name="error_promise_wait_blocks_ui_thread">Promise.prototype.wait() не может блокировать поток пользовательского интерфейса, пока Promise не завершён. Используйте then(), await() в сопрограмме или вызовите wait() в подпотоке</string>
     <string name="error_put_value_into_json">Не удается поместить значение %s в JSON</string>
     <string name="error_refresh_failed">Не удалось обновить</string>
@@ -3334,6 +3336,7 @@
     <string name="text_zero_means_unlimited">0 означает отсутствие ограничений</string>
     <string name="ui_android_attribute_unknown">%1$s не является атрибутом %2$s и был пропущен</string>
     <string name="ui_android_attribute_unsupported">%1$s у %2$s нельзя применить на этом устройстве, атрибут пропущен</string>
+    <string name="warn_async_functions_pending_at_script_end">Скрипт завершён, но функций async, ожидающих Promise, осталось: %1$d, первая в %2$s:%3$d. Незавершённый Promise не удерживает скрипт в работе</string>
     <string name="warn_continue_operation_without_saving_settings">Настройки не сохранены. Продолжить?</string>
     <string name="warn_exit_without_saving_settings">Настройки не сохранены. Выйти?</string>
     <string name="warning_apk_native_page_alignment_unsupported">Нативная библиотека %1$s имеет выравнивание %2$d байт. Созданный APK может не работать на устройствах со страницами 16 KB. Обновите библиотеку или плагин.</string>

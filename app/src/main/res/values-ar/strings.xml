@@ -384,6 +384,7 @@
     <string name="error_connect_to_remote">لا يمكن الاتصال بالخادم البعيد: %s</string>
     <string name="error_connection_failed_with_host">فشل الاتصال بـ \"%1$s\".</string>
     <string name="error_connection_timed_out">انتهت مهلة الاتصال (%d مللي ثانية)</string>
+    <string name="error_continuation_cannot_suspend_here">لا يمكن تعليق الروتين المشترك هنا. استخدم الكلمة المفتاحية await داخل دالة async, واستخدم then() داخل رد نداء Promise</string>
     <string name="error_continuation_resume_called_without_suspend">يجب استدعاء الطريقة السيرة الذاتية() بعد تعليق()</string>
     <string name="error_continuation_suspend_called_more_than_once">يجب استدعاء طريقة تعليق() مرة واحدة فقط</string>
     <string name="error_corresponding_github_release_may_not_published">قد لم يتم نشر إصدار GitHub المقابل بعد</string>
@@ -532,6 +533,7 @@
     <string name="error_plugin_returned_invalid_variant">أعاد المكوّن الإضافي %1$s variant غير صالح: %2$s.</string>
     <string name="error_port_num_over_65535">رقم المنفذ أكثر من 65535</string>
     <string name="error_project_main_script_file_with_abs_path_does_not_exist">ملف البرنامج النصي الرئيسي للمشروع \"%1$s\" غير موجود</string>
+    <string name="error_promise_uncaught_rejection">رفض Promise غير معالج: %s</string>
     <string name="error_promise_wait_blocks_ui_thread">لا يمكن لـ Promise.prototype.wait() حظر مؤشر ترابط واجهة المستخدم ما دام Promise معلقا. استخدم then(), أو await() داخل روتين مشترك, أو استدعِ wait() في خيط فرعي</string>
     <string name="error_put_value_into_json">لا يمكن وضع القيمة %s في JSON</string>
     <string name="error_refresh_failed">فشل التحديث</string>
@@ -3336,6 +3338,7 @@
     <string name="text_zero_means_unlimited">0 يعني بلا حدود</string>
     <string name="ui_android_attribute_unknown">%1$s ليست سمة في %2$s وتم تجاهلها</string>
     <string name="ui_android_attribute_unsupported">لا يمكن تعيين %1$s في %2$s على هذا الجهاز وتم تجاهلها</string>
+    <string name="warn_async_functions_pending_at_script_end">انتهى البرنامج النصي وما زالت %1$d من دوال async تنتظر Promise, أولها في %2$s:%3$d. لا تبقي Promise المعلقة البرنامج النصي قيد التشغيل</string>
     <string name="warn_continue_operation_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد المتابعة?</string>
     <string name="warn_exit_without_saving_settings">لم يتم حفظ الاعدادات. هل تريد الخروج?</string>
     <string name="warning_apk_native_page_alignment_unsupported">محاذاة المكتبة الأصلية %1$s هي %2$d بايت. قد لا يعمل ملف APK الناتج على أجهزة بصفحات 16 KB. يرجى تحديث المكتبة أو الإضافة.</string>
