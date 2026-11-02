@@ -797,6 +797,15 @@ on a device (P5.2f-2 card B). A block passes when it finishes, its session stays
 the host overlay window comes and goes, and nothing reaches `console.error` up to just
 after the close. `--list` prints the blocks without a device.
 
+`device_q218_q227_q228.py` checks three fixes of the JS runtimes in Node and Bun:
+`broadcast` keeps objects and arrays both ways between Rhino and a main script,
+`terminal` runs a waitFor followed at once by a write for eight rounds, and `storage`
+walks the shared storage prompt (`deny`, `prompt --mode files|logged|uncaught`, then
+`allowed` once the maintainer granted the access, and `restore`). It presses nothing on
+the prompt: `--close` removes the task of the prompt so the next mode can run. A grant
+made in system settings is a UID mode, which `restore` leaves: put it back with
+`appops set --uid PACKAGE MANAGE_EXTERNAL_STORAGE default`.
+
 Build and install matching current host and instrumentation APKs with `adb install
 -r -t`, plus the current Ace plugin APK. Select APKs using `output-metadata.json`
 and record their hashes; an unchanged version name does not prove the installed
