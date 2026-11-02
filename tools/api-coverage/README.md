@@ -792,6 +792,11 @@ tests.
 limit by installing the real APK (`bun-limit`). The host's runtime device suites run
 below API 33 through `runtimeModes`, which leaves the Bun mode out.
 
+`device_imgui_docs.py` runs every Rhino code block of the documentation imgui pages
+on a device (P5.2f-2 card B). A block passes when it finishes, its session stays open,
+the host overlay window comes and goes, and nothing reaches `console.error` up to just
+after the close. `--list` prints the blocks without a device.
+
 Build and install matching current host and instrumentation APKs with `adb install
 -r -t`, plus the current Ace plugin APK. Select APKs using `output-metadata.json`
 and record their hashes; an unchanged version name does not prove the installed

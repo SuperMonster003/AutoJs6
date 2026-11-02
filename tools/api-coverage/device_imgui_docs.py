@@ -7,6 +7,8 @@ escape hatch, which device_imgui_escape.py covers. Each block runs on its own, v
   runs    the block finishes without an exception
   alive   its session is still open after RUN_SECONDS, so the render callback did not throw (without an error listener a
           render error closes the session)
+  errors  nothing reached console.error, up to SETTLE_MILLISECONDS after the close; the plugin prints the errors of the
+          event listeners there, including the listeners of the closed event, and the host copies the console to logcat
   window  a host overlay window appeared and is gone after the close
 
 Only one line per block is printed. --list prints the blocks without a device. Packages are not replaced, and nothing stays
@@ -32,6 +34,8 @@ base = escape.base
 base.DEVICE_DIR = "/sdcard/Download/aj6-imgui-docs"
 
 RUN_MILLISECONDS = 2500
+# The closed listeners run on the script thread after the close.
+SETTLE_MILLISECONDS = 500
 # Node.js and Bun blocks start with their directive; see device_imgui_escape.py.
 OTHER_RUNTIME = re.compile(r"""^\s*["'](nodejs|bun)["'];""")
 BLOCK = re.compile(r"^```js\n(.*?)^```$", re.M | re.S)
@@ -39,6 +43,7 @@ BLOCK = re.compile(r"^```js\n(.*?)^```$", re.M | re.S)
 WRAPPER = r"""
 @EMIT@
 var aj6Result = {thrown: null};
+console.log('aj6-begin-@RUN@');
 try {
     (function () {
 @BODY@
@@ -55,11 +60,14 @@ setTimeout(function () {
         aj6Result.detail = String(error);
     }
     imgui.closeWindow();
-    aj6Emit('@RUN@', 0, aj6Result);
-    aj6Emit('@RUN@', -1, {done: 1});
     setTimeout(function () {
-        exit();
-    }, 200);
+        console.log('aj6-end-@RUN@');
+        aj6Emit('@RUN@', 0, aj6Result);
+        aj6Emit('@RUN@', -1, {done: 1});
+        setTimeout(function () {
+            exit();
+        }, 200);
+    }, @SETTLE@);
 }, @WAIT@);
 """
 
@@ -80,14 +88,27 @@ def blocks(docs):
     return found
 
 
+def console_errors(serial, run):
+    """The console.error lines of a run. The console object is a Java object, so the script cannot hook it."""
+    log = escape.sample.adb(serial, "logcat", "-d", "-t", "6000", "-s", "GlobalConsole:D", check=False, timeout=30) or ""
+    begin = log.rfind(f"aj6-begin-{run}")
+    end = log.rfind(f"aj6-end-{run}")
+    if begin < 0 or end < begin:
+        return [f"no console markers of {run} in logcat"]
+    return [line.split("/E: ", 1)[1].strip() for line in log[begin:end].splitlines() if "/E: " in line]
+
+
 def run_block(serial, source):
     run = uuid.uuid4().hex[:8]
     script = (WRAPPER.replace("@EMIT@", base.EMIT_JS).replace("@BODY@", source)
-              .replace("@RUN@", run).replace("@WAIT@", str(RUN_MILLISECONDS)))
+              .replace("@RUN@", run).replace("@WAIT@", str(RUN_MILLISECONDS)).replace("@SETTLE@", str(SETTLE_MILLISECONDS)))
     watch = escape.OverlayWatch(serial)
     results = base.run_script(serial, "main.js", script, run, 30)
     window = watch.finish()
-    return results.get(0), window
+    result = results.get(0)
+    if result:
+        result["errors"] = console_errors(serial, run)
+    return result, window
 
 
 def main():
@@ -114,7 +135,8 @@ def main():
     failed = 0
     for name, source in items:
         result, window = run_block(args.serial, source)
-        ok = bool(result) and result.get("thrown") is None and result.get("alive") is True and escape.window_ok(*window)
+        ok = (bool(result) and result.get("thrown") is None and result.get("alive") is True and not result.get("errors")
+              and escape.window_ok(*window))
         detail = "" if ok else json.dumps(result, ensure_ascii=False)[:300]
         print(f"{'PASS' if ok else 'FAIL'} {name} {escape.window_note(*window)} {detail}".rstrip())
         report[name] = {"ok": ok, "result": result, "window": list(window)}

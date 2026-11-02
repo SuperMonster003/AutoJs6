@@ -1644,3 +1644,60 @@ imgui 的 d.ts 与 Ace 补齐: 589 条查询路径 (587 个公开名称 + `imgui
 新待决 Q236 (`Session.once` 不传 session), 见附录 C. Q237-Q239 未用.
 
 TS a4108be; Ace 2fd349f; 插件 0080f5e / 05b799d; 宿主 18d849a63 与本节.
+
+## 26. P5.2f-2 卡 B: imgui 文档 (2026-11-02, 子会话 api-cov-imgui-docs)
+
+### 26.1 结论
+
+imgui 公开名称 587 个全部有文档: `missingDocumentation` 583 -> 0, 其中 332 个是标题, 255 个是别名表里的一行. `imgui.__pluginId` 是内部导出, 不进文档门禁. 运行时列不变, imgui 三列仍是 not-portable / rhino-only, pending 0 / 0 / 0. 文档里的 Rhino 示例 25 块全部在真机跑过. `deferredNameGate.imgui` 与 MATRIX.md 由卡 C 在 18d849a63 处理, 本卡不动.
+
+### 26.2 数字
+
+| 项 | 前 | 后 |
+|---|---:|---:|
+| `api/imgui.md` 行数 | 101 | 5346 |
+| imgui 页标题 | 0 | 332 (289 函数 + 43 常量组) |
+| 别名表行 | 0 | 255 |
+| 对象页 | 0 | 13 页 3170 行 |
+| imgui 公开名称 none / mention / heading | 583 / 4 / 0 | 0 / 255 / 332 |
+| 文档门禁全部 2017 行 missing / mention / heading | 583 / 4 / 1430 | 0 / 255 / 1762 |
+| MATRIX doc 列 none / mention / heading | 592 / 278 / 2712 | 9 / 529 / 3044 |
+
+对象页比 IMGUI-PLAN 第 1.3 节多 Dialog 与 DialogPromise, 共 13 页, 以 R7.3 移交清单为准. 卡 D 的 returned-objects 要按 13 个对象写: `imguiSessionType`, `imguiDrawListType`, `imguiFloatingButtonType`, `imguiComponentType`, `imguiDataTableType`, `imguiLogWindowType`, `imguiToastType`, `imguiStatsOverlayType`, `imguiDialogType`, `imguiDialogPromiseType`, `imguiTextureType`, `imguiSelectionStorageType`, `imguiMultiSelectIOType`. 这些页目前没有运行时块, 由卡 D 加.
+
+### 26.3 文档
+
+- 卡 A 的运行时支持表与 "在 Node.js / Bun 中使用" 一节原样保留, 正文开头写明 Node.js / Bun 走 `engines.execScript` 逃生口.
+- Q219 (b): `ready` 按普通会话事件说明, 注明 1.18.0 及更早版本中 `session.on('ready', ...)` 收不到, 这些版本用 `createWindow` 的 `onReady` / `events` 选项.
+- Q236 待决: 文档按现状写 `once` 的监听器只收到事件对象, 会话用 `event.session` 取. 选 (a) 时这两处要改成版本说明.
+- "广播的值" 一格保持 JSON 文本写法. 这是 Q218 (a) 修好之前的行为, 由小修卡 api-cov-q218-q227-q228 改短.
+- 站点的 marked 在表格单元格里不认转义的竖线, 单元格会被切断; `&#124;` 放进反引号又会原样显示. 所以表格里不写竖线, 组合标志改为列出各项.
+- changelog 只写 zh-Hans, 其他 9 种语言由维护者同步. `.python/generate_markdown.py --check` 报其他语言与 zh-Hans 的键不一致, 这是只写 zh-Hans 的预期结果.
+- `dataTypes.md` 加 13 个对象的类型段, `toc.md`, `sidebar.md`, `progress.md` 挂上入口 (Q125).
+
+### 26.4 真机
+
+Xiaomi 968e9f18 (23046RP50C, API 35) 25 / 25: 宿主 6551, ImGui v1.18.0 正式 arm64 包 (md5 143cf015b9c502c963ac7391608b2ba3, versionCode 58), 不发声. 原包 md5 f5a8d28d5484dca3e36d805b59822518, 跑完装回并核对.
+
+脚本 `tools/api-coverage/device_imgui_docs.py` 抽出 imgui 页全部 Rhino 代码块, 逐块包在函数里运行, 查四点: 代码块跑完不抛异常, 2.5 s 后会话仍打开 (帧回调没有抛错), 关闭后 0.5 s 内没有 console.error (事件监听器的错误打印在这里), 悬浮窗出现后又消失.
+
+第一版脚本只查到关闭之前, 所以 25 / 25 也漏了一个错误: Session 页示例在 `once('closed', ...)` 里读第二个参数, 而 `once` 只传事件对象 (Q236), 关闭时抛 TypeError. 卡 C 登记 Q236 后才发现. 示例改读 `event.reason`, 脚本加上 console.error 检查. `console` 是 Java 对象, 脚本里不能挂钩子, 所以从 logcat 的 GlobalConsole 标签读. 反例: 旧示例判 FAIL, 报 `Session 'closed' listener failed`; 新示例 PASS. 全量重跑 25 / 25.
+
+首轮有一块悬浮窗轮询漏检, 等待从 1.8 s 加到 2.5 s 后不再出现. 另外 23 个新示例用 tsc strict 通过, `device_imgui_escape.py --doc` 3 项 PASS. 全量重跑之后文档没有再改.
+
+### 26.5 门禁
+
+宿主 776f50a8a, TS a4108be, Ace 2fd349f, Node 2a449b9a, Bun d8eb960 的 HEAD 副本加文档 4ac9950 (KSP 取 aj6-q218-head 副本, 1355737 字节): `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` 退出 0, failures 空, `deferredNameGate` 已空, 文档门禁 heading 1762 / mention 255 / missing 0, MATRIX current, pending 0 / 0 / 0, 运行时支持页 89 页全部 current. 卡 C 删门禁之前, 宿主 9cb05d39c 副本报告 `deferredNameGate.imgui.missingDocumentation` 0, failingPaths 589 (声明缺口, 由卡 C 清零).
+
+文档: `generator/auto-generate.py --check` 报当前 (189 模块), Offline Docs 的 `imgui.html`, `imguiDataTableType.html`, `imguiSessionType.html` 与文档站生成物 blob 相同 (imgui.html fc1d3198). 14 页生成物的 7632 个站内链接与锚点无断链.
+
+### 26.6 待决与提交
+
+没有新待决, Q232-Q235 未用.
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 文档 | b594045 / 2560c32 / dda3fac / 9d81b68 | imgui 页, 13 个对象页, 目录, 类型段, changelog, 链接, 表格与 `once` 修正 |
+| 文档 | 6267b29 / 98fe030 / 4ac9950 | 生成物 |
+| Offline Docs | 83bfcef / 5c4e677 / 8b66af2 | 捆绑页 |
+| 宿主 | 9cb05d39c / (本节所在提交) | device_imgui_docs.py, 本节, ROADMAP 落点与 Q219 行, IMGUI-PLAN, tools README |
