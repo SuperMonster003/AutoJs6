@@ -1701,3 +1701,84 @@ Xiaomi 968e9f18 (23046RP50C, API 35) 25 / 25: 宿主 6551, ImGui v1.18.0 正式 
 | 文档 | 6267b29 / 98fe030 / 4ac9950 | 生成物 |
 | Offline Docs | 83bfcef / 5c4e677 / 8b66af2 | 捆绑页 |
 | 宿主 | 9cb05d39c / (本节所在提交) | device_imgui_docs.py, 本节, ROADMAP 落点与 Q219 行, IMGUI-PLAN, tools README |
+
+## 27. Q218 (a) / Q227 (a) / Q228 (b) 小修 (2026-11-02, 子会话 api-cov-q218-q227-q228)
+
+三项都在 Redmi bek749scrwv4wo8h (22120RN86C, API 33, MIUI) 上验证, Node 与 Bun 各一遍.
+
+### 27.1 Q218 (a): events.broadcast 保真
+
+主脚本发往 Rhino 的对象和数组以 JSON 文本 (`BroadcastEmitter.Json`) 过进程级广播表, 每个有监听器的 Rhino 脚本在自己的作用域里解析, 所以监听器拿到原生对象, 脚本之间不共享. Rhino 发往主脚本的值走 `NativeJSON.stringify`. 主脚本之间仍是 JSON, Rhino 之间仍是同一个对象.
+
+| 值 | 结果 |
+|---|---|
+| 字符串, 数字, 布尔值, `null`, 对象, 数组 | 两个方向都保持结构 |
+| 对象里的函数和 `undefined` | 省略 |
+| 数组里的函数和 `undefined` | `null` |
+| Rhino 直接传函数, `NaN`, 无穷大 | `null` |
+| 主脚本直接传 `undefined` | Rhino 收到 `null` |
+| Rhino 直接传 `undefined` | 字符串 `undefined` (不是本卡引入) |
+| Rhino 传循环引用, 或 `toJSON` 抛异常 | 该参数到主脚本是 `null`, 发送方不抛异常 |
+| 主脚本传循环引用 | `emit` 的 Promise 以 `TypeError` 拒绝, 广播不发出 |
+
+有两处与 JSON.stringify 的语义不同. Rhino 发送循环引用时不抛, 因为发送方不知道谁在监听, 抛错会让无关脚本出错并截断后面的监听器, 这是有意的. Rhino 直接传 `undefined` 时, Rhino 调用 Java 方法那一层已经转成字符串 `undefined`, 广播层分不清它和真的字符串, Rhino 监听器之间一直也是这个值, 不为它加包装层, 文档写明. 提交 1fbe504c7 的说明写的是 "null as arguments", 对这一种情况不准确, 以本节为准.
+
+### 27.2 Q227 (a): terminal 订阅就绪
+
+请求到宿主的顺序不保证, 只靠宿主排序不够, 所以拆成两条路由: `terminal.waitForStart` 在订阅运行后答令牌, `terminal.waitForResult` 取匹配行. 共享门面按会话 id 持有闸门, 同一会话的 write 排在此前发起的 waitFor 订阅生效之后; 失败的 start 也放行 write. 超时从 start 计, 语义同 waitFor. Rhino 的 "自调用起订阅" 不变, 旧路由 waitFor 保留. `TerminalService.waitForLine` 拆成 `startLineWait` + `awaitLine`.
+
+Node ui-family 的 runtime 变体去掉 5587b94e 的 `sleep 1`, Rhino 变体保留. 终端路由由 15 变 17, Bun 自动继承 `terminal.control`.
+
+### 27.3 Q228 (b): 共享存储提示
+
+插件进程有自己的 UID 且没有界面. 宿主给每次执行一个 `PluginStorageAccess.Prompt`, 观察脚本的错误输出 (Node 的 stderr 与 errorStack, Bun 的 ERROR 级输出), 判定被拒绝后打开一次 `PluginStorageAccessActivity`, 由用户跳转到系统设置里该插件的页面. 不加桥接路由与能力 ID, 不改契约 AAR, 错误本身不变. Node 的 `files` 模块多数方法把拒绝变成 false, 所以它在第一次拒绝时向 stderr 写一行.
+
+实测改变了两处设计. Android 13 未授权时, 在共享存储根目录新建文件报 EPERM, 建目录报 EACCES, `Download` / `Documents` 里自己创建的文件可写, 所以判定覆盖 EACCES 与 EPERM (74b6e8120, Node 28c9801e, Bun b186a23). Java 形式的 `open failed:` 来自宿主进程, 给插件授权改变不了它, 所以不算.
+
+真机还发现一个缺陷: 提示的任务不进最近任务, 离开前台后藏在后台, 下一次启动只把旧任务带回来, 显示旧插件. 启动加 `FLAG_ACTIVITY_CLEAR_TASK`, 新提示替换旧提示 (dd4d01c73).
+
+已知局限:
+
+- 脚本 catch 且不输出的裸 `node:fs` 错误不提示 (Q247).
+- 系统拦截后台 Activity 时没有提示, 只有错误本身. Redmi 上宿主在后台时能弹出, 其他 ROM 未验证.
+- 维护者第一次没有看到留在手机上的提示: 跑完时它在最上层, 回复时已不在任务栈里, 原因未查明. 按 HOME 复现不出 (提示留在任务栈), 可能是点到对话框外面. 下一次执行会再提示, 不影响使用.
+- 查他包的 appop 被系统拒绝时按未授权处理, 最坏情况是对已授权的插件提示一次.
+
+### 27.4 真机结果
+
+候选包: 宿主 6551, Node 370, Bun 346.
+
+| 用例 | Node | Bun |
+|---|---|---|
+| Q218 双向 (`device_q218_q227_q228.py broadcast`) | 8 / 8 | 8 / 8 |
+| Q227 waitFor 后紧跟 write, 8 轮 | 8 / 8 | 8 / 8 |
+| ui-family main / Worker (含去掉延迟的 terminal.session) | 22 / 22 x 2 | 22 / 22 x 2 |
+| Q228 提示: 错误不变, 只提示一次, 在最上层 | files, logged, uncaught 各 3 / 3 | logged, uncaught 各 3 / 3 |
+| Q228 授权后: 写入成功, 不再提示 | 2 / 2 | 2 / 2 |
+
+P6.1 的探针是 Node 6 / 8. 授权由维护者在手机上点. 结束时宿主 5935 (md5 b958b465), Node 291 (a8811d17), Bun 293 (bbfca1f6) 装回并核对, 两插件的 `MANAGE_EXTERNAL_STORAGE` 还原为 default (系统设置写的是 UID 级, 要 `appops set --uid`), 临时文件已删.
+
+### 27.5 门禁
+
+宿主 37b0279a3, TS a4108be, Ace 2fd349f, Node 28c9801e, Bun b186a23, 文档 5488fbe 的 HEAD 副本: `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` 退出 0, 矩阵不变, MATRIX.md 不用重生成. api-coverage 的 CI 结构脚本 (check-runtime-* 与 check-bun-*) 全部退出 0, `tools/api-coverage` Python 单测 122 项通过 (跳过 3). Node 与 Bun CI 里的 JS 测试步骤在 HEAD 上重跑, 共 382 项全过, `sync-js-tools.mjs --check`, `sync-ui-compose.js --check` 通过.
+
+宿主单测: core.broadcast, core.eventloop, engine.*, PluginStorageAccessTest, StaticReferenceGuardTest 全过 (300 项中 1 跳过). Node CI 的 JS 测试 238 项, Gradle 96 项; Bun CI 的 JS 测试 144 项, Gradle 单测全过.
+
+文档: `generator/auto-generate.py --sync-offline --increment-versions` 在 HEAD 克隆里跑, 文档 5488fbe, Offline Docs db09833.
+
+### 27.6 待决与提交
+
+Q246, Q247 已决 (附录 C), Q248, Q249 未用.
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 1fbe504c7 | Q218 |
+| 宿主 | fb0897688 | Q227 |
+| 宿主 | 776f50a8a / 74b6e8120 / dd4d01c73 | Q228 |
+| 宿主 | 37b0279a3 / (本节所在提交) | device_q218_q227_q228.py, 附录 C, 本节 |
+| Node | e014c284 / 0d5d9e5b / 2a449b9a / 28c9801e | Q227, Q228, HOST-API 与 zh-Hans changelog |
+| Bun | d8eb960 / b186a23 | Q246, Q227, Q228, host-api 与 zh-Hans changelog |
+| 文档 | 0a987af / 5488fbe | events, imgui 一格, runtimeApis, terminalSessionType, changelog, 生成物 |
+| Offline Docs | db09833 | 捆绑页 |
+
+宿主 `.changelog/lang_zh-Hans.json` 有维护者未提交的改动, 本卡没有碰, 三条建议文案在看板结果行. Bun 的 `generate_markdown.py --check` 失败是只写 zh-Hans 时的预期.
