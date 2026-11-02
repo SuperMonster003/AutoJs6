@@ -1867,3 +1867,64 @@ HEAD 副本: 宿主 64ac0e706, 文档 7455375, TS 82814a1, Ace 6cfc79d, Node bd5
 | Offline Docs | f80b11f | 捆绑页 |
 
 Ace 与 TS 没有改动. 版本没有 bump, 留给 P5.3.
+
+## 29. P5.3 阶段收尾 bump (2026-11-02, 子会话 api-cov-p5-3-bump)
+
+### 29.1 结论
+
+P5 全部完成. 按 Q260 (a) 只 bump TS 声明与 Ace, Node / Bun / ImGui / 文档站不动. 矩阵, pending 与 Ace 查询清单都没有变化, 这张卡只改版本, changelog 与一条注释.
+
+### 29.2 版本
+
+| 仓库 | 改动前 | 改动后 | 提交 |
+|---|---|---|---|
+| TS 声明 | 4.86.0 | 4.87.0 | 170b45b |
+| Ace | 2.48.0 / 391 | 2.49.0 / 392, 捆绑声明 4.87.0 | ab0dc66 |
+| Node | 2.1.0 / 376 | 不动 | - |
+| Bun | 0.22.0 / 349 | 不动 | - |
+| ImGui | 1.18.1 / versionCode 63 | 不动 (已发布, tag v1.18.1 = 836f12f) | - |
+| 文档 | versionCode 181 | 不动 | - |
+| Offline Docs | 6.8.40 / 252 | 不动 | - |
+
+文档 versionCode 与 Offline Docs 的 VERSION_BUILD 是生成时自动 +1 的结果, 发卡时是 180 / 251, 其后 1.18.1 与卡 D 的提交又各加了一次. 上次收尾 (第 21 节) 对这两个仓库同样没有改版本名, 所以 Q261 未用.
+
+### 29.3 做了什么
+
+- TS: `aj6-int-imgui.d.ts` 里 fontScale 的说明删掉不存在的 ui.getFontSize(), 与 ImGui 1.18.1 的 imgui.d.ts 同一行文字; 公开成员不变. changelog 两条: imgui 模块声明, fontScale 说明.
+- Ace: 用宿主 `tools/ace-completion/import-autojs6-dts.mjs` 从 TS 170b45b 导入, 在 HEAD 副本里运行, 再把 `aj6-int-imgui.d.ts`, `package.json`, `BUNDLED_DECLARATIONS.md` 三个文件放回共享签出. 静态索引与 lib.autojs6.d.ts 没有变化. VERSION_BUILD 按仓库 AGENTS.md 取可达提交数 + 1, 提交后 392 = 392. changelog 两条: imgui / $imgui 在 Rhino 脚本中的补全, 捆绑声明 4.87.0.
+- changelog 只写 zh-Hans, 用各仓库生成脚本的渲染函数跳过跨语言校验生成. Q136 的条目没有写.
+
+### 29.4 验收
+
+HEAD 导出副本 `E:/.cache/aj6-p5-3-bump-head` (宿主 d9acac927, TS 170b45b, Ace ab0dc66, 文档 7455375, Node bd51cb89, Bun ad4eb91, ImGui 65315bc). KSP 元数据没有重新构建: 共享签出 13:37 的 script-modules.json 与另外两份副本的 md5 相同 (0e2c5170), 其输入目录的最后一次改动是 89f6a01ae (11-01 20:50), 早于这三份构建, 复制到副本使用.
+
+| 检查 | 结果 |
+|---|---|
+| 宿主 `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` (含 Ace) | 退出 0, failures 空, pending 0 / 0 / 0, MATRIX.md 与 pending-baseline.json current, 文档 102 页 current, 未覆盖 0 / 0, 查询路径 2262 / 失败 0 |
+| Ace `generate-runtime-api-queries --check` | changed false, 查询 5482, 行 2054 (不变) |
+| Ace `verify-runtime-api-coverage --fresh`, `verify-api-coverage`, 宿主 `generate-editor-assets --check` | 退出 0 (副本先用 generate-declarations 生成 aceLspAssets) |
+| Ace `prepush_check.py --no-gradle` | 构建号 drift 0, 图标资源与 Python 测试通过; 生成文档一项失败, 见下 |
+| TS `npm test`, `npm run test:imgui`, `sync-runtime-declarations --check` | 退出 0, imgui 示例 10 个 0 诊断, 声明 95 个 changed 0 |
+| getFontSize grep | TS 0, Ace 0 |
+
+预期失败, 都等维护者同步其他 9 种语言:
+
+- TS 与 Ace 的 `generate_markdown --check`.
+- TS 的 `.python/tests` 13 个 error, 都在 setUp 的跨语言校验. 这不是本卡引入的: 42291f0 之前通过, 本卡之前的 82814a1 已是同样的 13 个 error. 这项在 TS CI 里, 推送前要先同步语言.
+
+Gradle 没有跑: 本卡只改声明注释, 版本号与文档, 机器上还有 rhino-q51 的 JMH 与 aj6-q50 的构建在跑.
+
+### 29.5 与卡片的出入
+
+- Ace 的 `aj6-int-speech.d.ts` 没有导入. 导入脚本会把它一起带上 (4 行, TS d830b2b), 而 Ace 6cfc79d 写明这份留给 3-Macaw, 所以放回共享签出时只取了上面三个文件. 问题是 Macaw P9.5.7 的原文只记录提交状态, 没有导入动作, 登记 Q262.
+- 卡片说 Q136 的 Ace 条目由 3-macaw 发版时写, 实际 6cfc79d 已把一条写进 v2.48.0 的优化项. 本卡没有改动它.
+
+### 29.6 待决与提交
+
+新待决 Q262 (已按推荐先行待确认), Q261 与 Q263-Q265 未用.
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| TS | 170b45b | 4.87.0, 注释, changelog |
+| Ace | ab0dc66 | 2.49.0 / 392, 捆绑声明 4.87.0, 注释, changelog |
+| 宿主 | (本节所在提交) | ROADMAP P5.3 与附录 C, 本节 |
