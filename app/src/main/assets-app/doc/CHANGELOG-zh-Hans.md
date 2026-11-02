@@ -106,6 +106,7 @@
 * `新增` console.setTimeVisible/setTimeFormat/setColorful/setAvoidStatusBar/setInputVisible 方法及对应的 console.build 选项参数
 * `新增` UI 模式支持 TypeScript 脚本及 TSX 布局 (需要 TypeScript Engine 插件)
 * `新增` UI 模式增加 globalconsole 控件, 用于显示全局日志; console 系列控件支持标题, 样式及输入栏设置
+* `新增` UI 模式的事件监听器 (如 ui.emitter 的 back_pressed, 控件的 click 及对话框事件) 支持挂起协程 (如 dialogs.confirm(...).await()), 需要脚本项目启用 continuation 特性 (参阅 项目文档 > [续体](https://docs.autojs6.com/#/continuation))
 * `新增` smartClick/clickIfExists/clickAny/findAny 等自动化方法, 用于控件查找与点击, 支持 Flow 链式调用
 * `新增` smartClickBounds/clickBoundsIfExists/clickBoundsAny 方法, 用于按控件区域执行坐标点击
 * `新增` scrollUntil/typeInto/dismissPopups/collectList 等自动化方法, 用于滚动查找, 文本输入, 弹窗处理及列表采集
@@ -232,13 +233,18 @@
 * `修复` 取消定时器或停止子线程后, 过期回调可能阻止脚本自动结束的问题
 * `修复` threads.pool 指定 corePoolSize 但未指定 maxPoolSize 时抛出 IllegalArgumentException 的问题
 * `修复` 协程中 Promise / Flow 的 await 方法, continuation.await 及 resumeError 恢复的 await 遇到拒绝时把错误作为返回值交回而不在调用处抛出的问题; 脚本未捕获时现在以该错误结束
+* `修复` 协程恢复后再次挂起 (如 continuation.delay 之后再调用 await) 时, UI 模式下脚本被结束 (由其他线程恢复时应用崩溃), 以及由 setInterval 回调恢复时该定时器被取消的问题
+* `修复` Promise 的 wait 方法在脚本线程上调用时一直阻塞的问题 (如 Promise.resolve(1).wait() 及等待 setTimeout 或 tts 等方法结算的 Promise); 在 UI 线程上等待尚未结算的 Promise 时改为抛出 TypeError, 不再卡住界面
 * `修复` threads.start 创建的子线程全部结束后脚本偶尔不会自动结束的问题
+* `修复` threads.disposable() 返回对象的 blockedGet/blockedGetOrThrow 方法在先调用 setAndNotify 再等待时一直阻塞, 带超时参数时即使已收到值也总要等到超时才返回, 以及偶尔未收到值就返回 null 的问题; 等待中的线程被中断时改为与 sleep 一样按脚本中断处理
+* `修复` ui.run, 阻塞式对话框, getClip/setClip 及 gesture/swipe 等手势方法在等待其他线程的结果时偶尔未得到结果就提前返回, 以及阻塞式对话框在开始等待前就被关闭时脚本一直阻塞的问题
 * `修复` 停止脚本时其子线程仍在处理图像可能导致应用崩溃的问题
 * `修复` floaty.window/rawWindow 的聚焦相关方法在脚本线程调用时可能出现线程异常的问题
 * `修复` console.setPosition/setSize/setGravity 等方法的设置结果受调用顺序或窗口显示时机影响的问题
 * `修复` 控制台浮动窗口标题栏拖动可能失效及窗口无法贴近屏幕边缘的问题
 * `修复` console.log/util.format 等方法输出对象或数组时其中的字符串值缺少单引号包裹, 与 Auto.js 4 的 util.inspect 格式不一致的问题
 * `修复` http 请求的不安全选项可能使后续请求继续跳过证书及主机名校验的问题
+* `修复` http.getAsync/postAsync/requestAsync 等方法返回的 Promise 在 then 回调中读取响应体 (如 res.body.string() 或 res.body.json()) 时抛出 NetworkOnMainThreadException 的问题
 * `修复` 正式发行版本及打包应用的 HTTP 请求可能被网络安全配置意外拦截的问题
 * `修复` UI 模式 WebView 控件的文件选择器无法正常打开的问题
 * `修复` UI 模式 list/grid 控件项目模板中的动态属性表达式无法访问当前项目对象 (如 name 属性) 而报告 ReferenceError 并导致列表项显示空白, 以及数值表达式结果显示为 18.0 而非 18 的问题
@@ -363,15 +369,15 @@
 * `修复` Shizuku 权限请求监听器在销毁后未正确注销的问题
 * `修复` AutoJs6 更新后首次使用 Shizuku 相关功能时, 因 Shizuku 仍保留旧版服务记录而报告无法使用 Shizuku 服务的问题
 * `修复` AutoJs6 被强制停止或结束后, Shizuku 用户服务启动的命令 (如音量键控制的按键监听及 shizuku.spawn 启动的进程) 仍在后台运行并逐次累积的问题 _[`issue #474`](http://issues.autojs6.com/474)_
+* `修复` 设置页面 "使用 '音量加' 键控制脚本运行" 开关在应用启动后由关闭改为开启时, 若未显示过浮动按钮, 需重启应用才能用音量加键停止脚本的问题
+* `修复` 录制脚本结束后, 录制所用的输入事件监听进程 (经 Shizuku 或 Root 运行的 getevent) 仍在后台运行直到应用退出的问题
+* `修复` 仅具备 Shizuku 权限 (无 Root) 时 RootAutomator 因无法识别触摸屏设备而创建失败, 以及 AutoJs6 启动后立即开始录制脚本时界面无响应 10 秒以上的问题
 * `修复` 后台安装 APK 时无法继续确认安装的问题
 * `修复` APK 打包取消时可能误报构建失败的问题
 * `修复` APK 打包产物的签名证书一致性校验及 Android 9-11 签名识别异常
 * `修复` 打包应用或宿主缺少运行时组件时, shell 原生库可能缺失或使用错误 ABI 导致应用崩溃的问题
 * `修复` APK 打包时同名但内容不同的原生库被静默保留其中一份的问题 (现改为终止打包并列出来源)
 * `修复` 打包的 UI 脚本启动时偶发显示空白页面后退出的问题
-* `修复` 设置页面 "使用 '音量加' 键控制脚本运行" 开关在应用启动后由关闭改为开启时, 若未显示过浮动按钮, 需重启应用才能用音量加键停止脚本的问题
-* `修复` 录制脚本结束后, 录制所用的输入事件监听进程 (经 Shizuku 或 Root 运行的 getevent) 仍在后台运行直到应用退出的问题
-* `修复` 仅具备 Shizuku 权限 (无 Root) 时 RootAutomator 因无法识别触摸屏设备而创建失败, 以及 AutoJs6 启动后立即开始录制脚本时界面无响应 10 秒以上的问题
 * `修复` VSCode 插件保存项目时已删除文件仍残留在设备或缓存目录中的问题 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
 * `修复` VSCode 插件接收项目归档时可能因日志处理导致内存不足的问题 _[`issue #523`](http://issues.autojs6.com/523)_
 * `修复` VSCode 插件的失效连接阻塞日志发送, 导致新连接无法接收日志的问题 _[`issue #385`](http://issues.autojs6.com/385)_
@@ -415,11 +421,11 @@
 * `优化` 精简安装包内的依赖, 语言资源及图像资源以缩减文件体积
 * `优化` 检查更新通过 GitHub REST API 获取版本与安装包信息, 更新说明支持本地渲染
 * `优化` 应用内置简体中文及英文发行历史, 其他语言支持在线获取与缓存 (离线时优先使用缓存, 无缓存时显示英文)
+* `优化` 应用设置统一由同一套键声明与存储层读写, 设置页面, 脚本 settings 模块及设置导入/导出使用相同的默认值与分类; 已有设置的键名及存储文件保持不变, 升级后无需迁移
 * `优化` 插件化离线项目文档 (Offline Docs 插件), 支持独立安装及更新, 文档来源切换即时生效
 * `优化` 插件化打包模板 (APK Builder Template 插件), 打包时校验插件签名, 宿主版本及模板兼容性
 * `优化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization 相关功能
 * `优化` 插件化 OpenCC/Pinyin/Pinyin4j/MediaInfo 相关功能
-* `优化` 应用设置统一由同一套键声明与存储层读写, 设置页面, 脚本 settings 模块及设置导入/导出使用相同的默认值与分类; 已有设置的键名及存储文件保持不变, 升级后无需迁移
 * `优化` 官方插件的主题色, 夜间模式及语言支持跟随宿主设置
 * `优化` 插件中心完善在线安装与更新, 变体选择, 插件设置, 使用说明及发行历史显示
 * `优化` 插件中心列表图标按安装状态响应短按/长按: 已安装时打开系统应用详情/独立启动页面 (无启动页面时提示), 未安装时打开插件详情/启动安装

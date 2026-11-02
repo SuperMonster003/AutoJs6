@@ -6,7 +6,7 @@
 
 # v6.8.0
 
-###### 2026/10/22 - 일부 기능 플러그인화, 신중하게 업데이트
+###### 2026/10/24 - 일부 기능 플러그인화, 신중하게 업데이트
 
 * `힌트` 일부 내장 기능 (OCR, 바코드 인식, OpenCV, OpenCC, Pinyin, MediaInfo, 터미널 및 오프라인 프로젝트 문서 등)을 독립 플러그인으로 제공하며, 사용 전에 플러그인 센터에서 해당 플러그인을 설치하고 활성화해야 함
 * `힌트` 패키징 앱의 대상 SDK가 29에서 37로 변경되며, 공유 저장소 및 로컬 네트워크 접근에는 시스템 요구에 따른 권한이 필요함
@@ -14,11 +14,14 @@
 * `힌트` console 요소와 부동 콘솔은 현재 스크립트의 로그를 표시하며, 전역 로그는 globalconsole 요소 또는 로그 페이지에서 확인
 * `힌트` 파일 로그를 내장 구현으로 변경하며, 문서화된 설정과 일반적인 PatternLayout 형식을 유지하고 다른 Log4j API는 제공하지 않음
 * `힌트` Node.js pinyin/pinyin4j와 콘솔 창 제어는 비동기 호스트 호출로 변경되었으며, 스크립트는 await로 결과를 기다려야 함
+* `추가` Rhino 엔진이 필드, 정적 블록, 비공개 이름 및 Error/Array/Map 등 내장 타입 상속을 포함한 ES2015+ class 문법 지원 (참조: 프로젝트 문서 > [클래스 문법](https://docs.autojs6.com/#/classSyntax))
+* `추가` Rhino 스크립트의 class가 Java 클래스와 인터페이스 상속 지원 (예: class Worker extends java.lang.Thread); super로 Java 부모 메서드 호출, 보호된 멤버, 다중 인터페이스 (extends JavaAdapter(Base, I1, I2)) 지원; View 하위 클래스 인스턴스에서 attr/on 등 위젯 메서드 사용 가능; final 클래스 상속 및 final 메서드 재정의는 불가 (참조: 프로젝트 문서 > [클래스 문법](https://docs.autojs6.com/#/classSyntax))
 * `추가` Node.js/Bun/Worker의 ai.agent 작업 제어와 이벤트, 등록된 스크립트의 컨텍스트와 결과, 패키징된 앱의 명시적 승인
 * `추가` Node.js, Bun 및 Worker의 Flow within/scope 검색 범위 상속, 나침반 탐색 및 결과 투영과 press/swipe/gesture/gestures 오버로드
 * `추가` Node.js, Bun, Worker의 flow 비동기 체인 및 조건/안정성 대기, 분기 취소, 단계 재시도, 호스트 화면 스냅샷 지원; Node.js, Bun 및 Worker의 Flow 고급 클릭, 스크롤, 입력, 목록 수집 및 실제 이벤트 대기, 구독 준비, 스냅샷 검증 및 취소 지원
 * `추가` Node.js/Bun/Worker: 메일 계정 연결, 메시지 작업, 첨부 파일 및 메일함 감시, 취소와 Worker 종료 시 정리
 * `추가` 새 바로가기와 업데이트 전부터 고정된 바로가기의 자동 저장, 백업 내보내기/가져오기 및 일괄 복원 지원; 읽을 수 없는 아이콘은 개별 선택하거나 기본 아이콘으로 일괄 보완하며 저장된 아이콘은 덮어쓰지 않음; 동결 해제 후 누락된 항목은 백업 페이지에 표시하고 홈 페이지에서는 알리지 않으며 확인된 수동 삭제는 기본 선택에서 제외; 같은 스크립트의 여러 바로가기를 원래 ID로 개별 저장 (기존 항목 검색은 Android 7.1+, 자동 감지는 Android 8+ 필요) (경로: 설정 > 구성 > 바로가기 백업)
+* `추가` "AutoJs6 설정 관리" 페이지에서 분류별 설정 내보내기/가져오기 (zip 파일), 기본값 복원 및 마지막 가져오기/복원 취소 지원; 가져올 때 없는 작업 디렉터리를 만들거나 아직 받지 않은 편집기 글꼴을 다운로드할 수 있으며, 처리하지 않은 항목은 현재 값 유지; "자격 증명 및 권한"은 암호화해 저장하며 자격 증명 비밀번호를 설정하면 다른 기기에서도 비밀번호로 가져오기 가능, 미설정 시 원래 기기에서만 가능; 바로가기와 색상 라이브러리를 데이터 분류로 내보내고 "세부 선택..."에서 항목 선택 가능; 가져온 바로가기는 이후 홈 화면에 복원할 수 있고 가져오기 취소 시 추가된 바로가기와 색상 라이브러리도 제거; 자동 백업은 주기별 (매일/매주/매월, 기본 꺼짐), 변경 후 (설정 변경이 멈춘 뒤 5분, 기본 꺼짐), 작업 후 (가져오기, 기본값 복원, 취소 완료 후, 기본 켜짐)를 지원하며 작업 디렉터리의 backups/settings에 종류별 최신 7개를 자격 증명 없이 저장; 주기별/변경 후 백업 실패 시 알림; 설정 마법사에 첫 실행 시 기존 내보내기 파일을 가져오는 마법사 추가 (위치: 설정 > 구성 > AutoJs6 설정 관리/설정 마법사)
 * `추가` 설정 마법사, 권한 요청 및 플러그인 설치 마법사를 순서대로 실행하며 첫 실행 후 홈 환영 안내에서 진입 가능 (위치: 설정 > 구성 > 설정 마법사)
 * `추가` 권한 요청 마법사, 홈 서랍의 권한을 선택하여 순차 요청하며 "표준"/"최소"/"전체" 및 사용자 지정 구성을 지원, 허용된 권한은 메뉴에서 숨기기 가능 (위치: 설정 마법사/홈 서랍 "권한" 그룹 제목 버튼)
 * `추가` 플러그인 설치 마법사, 공식 플러그인을 분류별로 선택하여 일괄 설치하며 "표준"/"최소"/"전체" 및 사용자 지정 구성의 저장, 이름 변경, 삭제 지원 (위치: 설정 마법사/홈 플러그인 탭 부동 버튼 메뉴/플러그인 센터 "+" 메뉴)
@@ -27,9 +30,16 @@
 * `추가` 접근성 서비스 관리자, 서비스 시작/중지, 캐시 삭제, 자체 검사, 이벤트 감시 및 진단 정보 복사 지원 (위치: 홈 서랍의 접근성 서비스 항목)
 * `추가` 개발자 옵션에서 프로세스 종료 기록 확인과 진단 정보 복사 지원 (Android 11+) (위치: 앱 및 개발자 정보 페이지에서 앱 아이콘 길게 누르기)
 * `추가` 개발자 옵션에 "Node.js 스크립트의 Inspector 사용 허용" 스위치 (기본 비활성화), Node.js Runtime 플러그인과 함께 중단점 디버깅 및 CPU/힙 분석에 사용
+* `추가` 개발자 옵션에 "메모리 진단" 페이지를 추가하여 Java 힙, 네이티브 힙, 프로세스 PSS, 살아 있는 스크립트 엔진, 종료 후 회수되지 않은 런타임, 해제되지 않은 이미지 및 스크립트 스레드 표시 (2초마다 갱신); 강제 GC 후 재확인, hprof 힙 덤프 내보내기 및 진단 텍스트 복사 지원 (위치: 개발자 옵션 > 메모리 진단 > 메모리 진단 열기)
+* `추가` 스크립트 종료 10초 후에도 런타임이 회수되지 않으면 전역 콘솔에 경고와 "메모리 진단" 페이지 안내 표시; debug 빌드에는 LeakCanary 감시 상태 포함 (기본 켜짐) (위치: 개발자 옵션 > 메모리 진단 > 스크립트 종료 후 회수되지 않으면 콘솔 경고)
+* `추가` debug 빌드에 LeakCanary를 기본 포함하여 종료된 스크립트의 엔진, 런타임, 스레드 및 플로팅 창을 감시하고 회수되지 않은 객체 탐지; 개발자 옵션의 "메모리 진단"에 "LeakCanary" 스위치 추가 (debug 빌드에서만 표시) (Gradle 속성 autojs.leakcanary.enabled로 제외 가능)
+* `추가` memory 모듈에서 AutoJs6 프로세스의 메모리 진단 데이터를 스크립트로 조회 ("메모리 진단" 페이지와 같은 출처): snapshot은 메모리 스냅샷, collect는 강제 회수 후 재확인, retained는 종료 후 미회수 런타임 목록, dumpHeap은 hprof 힙 덤프 내보내기, watch는 LeakCanary 객체 감시 (debug 빌드만); 정식 버전의 dumpHeap은 개발자 옵션 "스크립트의 hprof 내보내기 허용"을 켜야 함 (기본 꺼짐) (참조: 예제 코드 > 도구 > 메모리 진단) (참조: 프로젝트 문서 > [메모리](https://docs.autojs6.com/#/memory)) _[`issue #452`](http://issues.autojs6.com/452)_
 * `추가` 코드 생성 모델 관리 페이지, 로컬 가져오기, 필요 시 다운로드, 여러 버전 관리/비교 및 공식 모델 업데이트 지원 (위치: 설정 > 접근성 서비스 > 코드 생성 모델)
 * `추가` MCP Server 플러그인, MCP 클라이언트로 AutoJs6의 스크립트, 파일 및 장치 조작 기능에 접근 (위치: 홈 서랍/플러그인 센터)
 * `추가` 3-Shell Terminal 플러그인, 터미널 기능 제공 (위치: 홈 서랍, 프로젝트 도구 모음, 파일 관리자의 디렉터리 메뉴)
+* `추가` 3-Macaw Speech 플러그인으로 오프라인 음성 인식, 호출어 탐지 및 음성 합성 제공; 시스템 TTS 엔진으로 등록 가능하며 음성 모델은 필요할 때 다운로드 (위치: 플러그인 센터/플러그인 설치 마법사)
+* `추가` Paddle OCR PP-OCRv3 Paddle Lite 플러그인으로 Paddle Lite 기반 PP-OCRv3 문자 인식 계속 제공 (Paddle OCR PP-OCRv3 플러그인은 2.0.0부터 ONNX Runtime 사용); 두 플러그인을 함께 설치할 수 있고 스크립트에서 `variant: "v3-paddle-lite"`로 지정 가능 (위치: 플러그인 센터/플러그인 설치 마법사)
+* `추가` ocr 모듈 Paddle 엔진의 useCls 옵션으로 탐지와 인식 사이에 문자 방향 분류를 실행하여 180도 회전한 텍스트 줄 인식 (기본 꺼짐; Paddle OCR PP-OCRv3 플러그인 2.0.0 이상 필요, 패키지 앱에도 적용)
 * `추가` Node.js Runtime 플러그인, Node.js 파일과 프로젝트 실행 ("nodejs" 모드 인수 및 .node.js/.cjs/.mjs 파일 지원)
 * `추가` Python Runtime 플러그인, Python 파일과 프로젝트 실행, 모듈 진입점, 실행 시간 제한 및 사전 표준 입력 지원
 * `추가` Lua Runtime 플러그인, Lua 스크립트 실행
@@ -41,9 +51,14 @@
 * `추가` ai.agent 스크립트 API, 3-Stove Agent 작업의 시작, 조회, 응답, 확인 및 취소, detached 백그라운드 작업 지원 (3-Stove Agent 플러그인 필요) (참조: 예제 코드 > agent)
 * `추가` ai.agent.run/create 메서드의 plan 옵션, 3-Stove Agent가 계획 모드에서 단계 계획을 제안한 뒤 실행하도록 설정
 * `추가` project.json 또는 @agent 헤더 주석으로 3-Stove Agent가 호출할 스크립트 등록, 인수 검증, 시간 초과 중지 및 구조화된 결과 반환 지원
+* `추가` plugins.tools 모듈로 플러그인이 직접 선언한 도구를 나열하고 동기/비동기 호출; 인수는 도구가 선언한 형식으로 검증하며 이미지 인수는 현재 화면, 파일 경로 또는 ImageWrapper 지원; 디렉터리 인수는 안의 파일 (모델 등)을 플러그인에 전달하고, 도구가 생성한 파일/디렉터리 (압축 해제 결과 등)는 지정 경로에 저장 (도구 제공 플러그인 필요) (참조: 프로젝트 문서 > [플러그인](https://docs.autojs6.com/#/plugins))
+* `추가` 플러그인 도구 계약으로 도구의 이름, 설명, 인수 형식 및 위험 수준을 선언하면 AutoJs6가 취합, 인수 검증 및 호출 전달을 수행하여 스크립트와 MCP Server 등에서 사용; 이 계약만 구현한 타사 플러그인도 플러그인 센터에 표시 (센터에서 활성화하고 허용한 플러그인만 포함)
 * `추가` compose 모듈, Jetpack Compose로 UI 구축, 노드 팩터리, 장기 노드 핸들, 반응형 state/render/ref 및 테마 제어 제공 (3-Block Compose 플러그인 필요) (참조: 예제 코드 > 3-Block Compose)
 * `추가` 편집기 메뉴의 "3-Block Compose 디자이너에서 열기": 현재 파일을 저장한 뒤 3-Block Compose 플러그인 (1.2.0 이상)의 시각적 디자이너에서 편집, 편집기로 돌아오면 디자이너가 저장한 내용을 자동 재로드 (저장하지 않은 변경이 있으면 먼저 확인) (참조: 예제 코드 > 3-Block Compose)
 * `추가` ui 모드 레이아웃 미리보기 서비스, 3-Block Compose 디자이너가 캔버스 안에서 호스트의 실제 레이아웃 인플레이터로 XML 레이아웃을 미리 볼 수 있으며, Android 11 이상에서는 임베드 표시, 그 이하 버전에서는 스냅샷 제공 (3-Block Compose 플러그인 1.6.0 이상 필요)
+* `추가` 3-Block Compose 디자이너의 대화형 미리보기 (Android 13 이상)가 캔버스 안에서 ui 모드 스크립트를 실제 실행: 대화상자를 캔버스에 표시하고 ui.statusBarColor / navigationBarColor / backgroundColor를 가상 상태 표시줄/탐색 표시줄과 배경으로 표현; 메인 스레드를 오래 점유하는 스크립트는 설정 시간 (기본 5초) 후 중지하고 해당 줄 보고; 디자이너의 백그라운드 전환, 복귀 또는 캔버스 위 뒤로 버튼에서 ui.emitter에 pause / resume / back_pressed 전달, 뒤로 이벤트를 처리하지 않으면 실행 종료; TSX는 TypeScript Engine 플러그인으로 먼저 컴파일하고 컴파일/런타임 오류 모두 TSX 원본 줄 번호로 보고 (3-Block Compose 1.7.0 이상 필요, 수명 주기 이벤트, 시간 설정 및 TSX는 1.9.0 이상 필요)
+* `추가` 3-Block Compose 디자이너의 폴더 프로젝트 (XML 레이아웃 포함)를 AutoJs6에서 직접 실행하거나 가져오기 가능: 실행 시 캐시 디렉터리에 풀어 프로젝트로 실행하고 종료 후 자동 정리; 가져오기 시 스크립트 디렉터리의 같은 이름 폴더에 풀고, 이미 있으면 덮어쓰기 또는 새 폴더 저장 선택 (3-Block Compose 1.8.0 이상 필요)
+* `추가` 코드 편집기에서 ui 모드 스크립트를 열면 도구 모음의 "미리보기"로 편집기 내부 레이아웃 표시 (세로 화면은 아래쪽, 가로 화면은 오른쪽): 전체 화면 크기로 배치한 뒤 비례 축소하고 입력을 멈추면 자동 갱신; 미리보기 위젯을 누르면 해당 소스로 이동; 레이아웃 오류는 패널에 원인을 표시하고 이전 화면 유지; 레이아웃만 보여주고 스크립트는 실행하지 않으며 스위치 상태는 파일별 저장; 3-Block Compose 1.2.0 이상 설치 시 오른쪽 위에 "3-Block Compose 디자이너에서 열기" 버튼 제공
 * `추가` compose.mount/floaty 메서드, UI 페이지 마운트와 부동 창 생성 (부동 창은 UI/비 UI 스크립트 모두 지원), 스크립트 중지 시 소속 세션 자동 정리
 * `추가` compose.dialog 메서드, 갱신 및 종료 가능한 대화상자와 모달 하단 시트 세션 생성, UI/일반 스크립트에서 사용 가능
 * `추가` XML <compose> 컨테이너와 compose.attach 메서드, UI 페이지나 부동 창에 Compose 세션 삽입, compose.AndroidView로 기존 Android View 호스팅 가능
@@ -51,21 +66,35 @@
 * `추가` ui.inflate 메서드가 컴파일된 XML TSX 레이아웃과 onClick 콜백 바인딩 지원
 * `추가` flow 모듈 및 waitAsync 전역 메서드, 비동기 대기와 연쇄 작업, 분기, 반복, 시간 제한, 재시도 및 취소 지원 (참조: 프로젝트 문서 > [흐름](https://docs.autojs6.com/#/flow))
 * `추가` terminal 전역 객체, 터미널 세션 관리, 표시되는 실행과 출력 감시, 출력 대기 및 종료 코드 지원 (3-Shell Terminal 플러그인 필요) (참조: 예제 코드 > 터미널)
+* `추가` imgui 전역 객체로 Dear ImGui 기반 플로팅 창과 전체 화면 즉시 모드 UI 구성; 플러그인을 활성화하면 직접 사용 가능하며 첫 멤버 호출 때 로드; 기존 plugins.load("io.github.supermonster003.autojs6.plugin.imgui")도 같은 객체 반환 (ImGui 플러그인 필요)
+* `추가` shell.spawn/shizuku.spawn으로 명령을 프로세스로 실행하고 출력 실시간 읽기; 줄 단위 읽기, output/errorOutput/exit 이벤트, stdin 쓰기, 제한 시간 대기 및 자식 프로세스를 포함한 종료 지원; 스크립트 종료 시 프로세스 자동 종료 (adb 옵션 및 shizuku.spawn은 Shizuku, root 옵션은 Root 권한 필요)
+* `추가` Shell 생성자가 { cmd, root, adb, pty, env, cwd } 옵션 객체 지원 (Auto.js Pro 호환); 이 방식의 Shell은 파이프로 실행되며 getInputStream/getErrorStream/getOutputStream/waitFor/exitCode/exitAndReadOutput/raw/execForResult 제공; Shizuku (adb 옵션)로 실행 가능하며 execAndWaitFor는 종료 코드 표식으로 명령별 출력 분리
+* `추가` shell.spawn 및 옵션으로 생성한 Shell이 pty를 지원하여 의사 터미널에서 명령 실행; 파이프에서 출력을 버퍼링하는 getevent/awk 등을 줄 단위로 출력 (stderr는 stdout에 병합)
+* `추가` $shell.setDefaultOptions/checkAccess/isRootAvailable (Auto.js Pro 호환)로 현재 스크립트의 shell 함수 등의 기본 root/adb 옵션 설정 및 Root/Shizuku 권한 확인
 * `추가` installer 모듈, 앱 설치, 업데이트 및 제거, Shizuku/Root/Dhizuku 자동 작업과 알림 설치 등 지원 (3-Setup Installer 플러그인 필요) (참조: 프로젝트 문서 > [설치 도구](https://docs.autojs6.com/#/installer))
 * `추가` mail 모듈, 메일 송수신, 조회, 첨부 다운로드 및 폴더 관리, 동기/비동기 호출 지원 (3-Stamp Mail 플러그인 필요) (참조: 프로젝트 문서 > [메일](https://docs.autojs6.com/#/mail))
 * `추가` mail.watch 메서드, 새 메일 감시 및 연결 끊김 후 재연결 지원
 * `추가` epub 모듈, 전자책 메타데이터, 목차, 장 본문 및 표지 읽기, 리소스 내보내기와 전체 텍스트 검색 지원 (3-Folio EPUB 플러그인 필요) (참조: 프로젝트 문서 > [전자책](https://docs.autojs6.com/#/epub))
 * `추가` epub.read 메서드, 전자책 리더 열기 및 읽기 위치, 책갈피와 읽기 설정 제어
 * `추가` epub.annotations/annotationsAsync 메서드, 강조 표시와 메모 읽기, 리더 세션에서 주석 변경 감시 지원
+* `추가` files.batchRename으로 찾기/바꾸기, 정규식, 카운터, 날짜 변수, 사진 메타데이터 (EXIF / XMP), 한자 병음 변환을 사용한 파일/폴더 일괄 이름 변경; 계획 미리보기, 파일에 접근하지 않는 이름 시험 계산, 이름 프리셋, 충돌 처리 정책, 진행 콜백, 실행 취소 및 기록 조회/정리 지원 (Batch Rename 필요, 사진 메타데이터, 병음 변환 및 프리셋은 1.1.0 이상 필요) (참조: 프로젝트 문서 > [파일](https://docs.autojs6.com/#/files))
+* `추가` gallery 모듈에서 3-Maple Image로 이미지 선택, 보기, 편집 및 변환; 파일 읽기/쓰기는 스크립트 자체가 접근할 수 있는 경로로 제한 (3-Maple Image 3.4.0 이상 필요) (참조: 프로젝트 문서 > [갤러리](https://docs.autojs6.com/#/gallery))
+* `추가` speech 모듈로 오프라인 음성 인식, 음성 활동 감지, 호출어 탐지 및 음성 합성 제공; 마이크 받아쓰기 세션, 호출어 세션 (호출 후 자동 받아쓰기 가능), WAV 파일/PCM 데이터 인식, WAV 합성, 플러그인 엔진의 텍스트 읽기 및 음성 모델 관리 지원; 파일 읽기/쓰기는 스크립트 자체가 접근 가능한 경로로 제한; AutoJs6가 전면일 때 시작한 마이크 세션은 백그라운드나 화면이 꺼진 뒤에도 녹음 계속 (3-Macaw Speech 필요) (참조: 예제 코드 > 3-Macaw Speech)
+* `추가` speech.speaker 모듈로 화자 인식 제공; 목소리 등록, 녹음이 특정 인물의 것인지 검증, 등록된 사람 중 가장 비슷한 화자 식별 가능; 성문은 플러그인 내부에만 저장하고 스크립트에는 이름과 유사도 점수만 반환 (3-Macaw Speech 1.3.0 이상 필요) (참조: 예제 코드 > 3-Macaw Speech)
+* `추가` speech.diarize/detectLanguage/tag로 오디오 파일 오프라인 분석: 누가 언제 말했는지 화자 분리 (등록 성문으로 이름 지정 가능), 발화 언어 식별 및 소리 종류 분류 (말, 음악, 개 짖는 소리, 비 등); 모두 진행 콜백과 Async 형식 지원 (3-Macaw Speech 1.3.0 이상 필요) (참조: 예제 코드 > 3-Macaw Speech)
 * `추가` yolo 모듈, YOLO 플러그인으로 모델을 불러와 객체 탐지 (참조: 프로젝트 문서 > [YOLO](https://docs.autojs6.com/#/yolo))
 * `추가` tts 모듈, 텍스트 음성 변환에 사용 (참조: 프로젝트 문서 > [텍스트 음성 변환](https://docs.autojs6.com/#/tts))
 * `추가` settings 모듈, 앱 설정 읽기와 변경에 사용 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (참조: 프로젝트 문서 > [설정](https://docs.autojs6.com/#/settings))
+* `추가` settings.export/categories로 스크립트에서 앱 설정을 분류별 zip 파일로 내보내기 ("AutoJs6 설정 관리"와 같은 형식, 자격 증명 제외) 및 분류/항목 수 나열 (참조: 프로젝트 문서 > [설정](https://docs.autojs6.com/#/settings))
 * `추가` work_manager 모듈, 예약 작업과 브로드캐스트 작업 관리 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (참조: 프로젝트 문서 > [Work Manager](https://docs.autojs6.com/#/workManager))
 * `추가` power_manager 모듈, 배터리 최적화 제외 확인과 요청 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (참조: 프로젝트 문서 > [Power Manager](https://docs.autojs6.com/#/powerManager))
+* `추가` sqlite의 데이터베이스 콜백 DatabaseCallback이 onDowngrade를 지원하여 요청 버전이 기존 데이터베이스보다 낮을 때 다운그레이드 처리; 구현하지 않으면 아무 작업도 하지 않고 기존 테이블과 데이터를 유지하며 예외를 던지지 않음 (참조: 프로젝트 문서 > [SQLite](https://docs.autojs6.com/#/sqlite))
 * `추가` pangu 전역 객체, 중국어와 서양 문자가 섞인 텍스트의 간격 처리와 검사 (참조: 프로젝트 문서 > [텍스트 간격](https://docs.autojs6.com/#/pangu))
 * `추가` device.pageSize 속성 (getter), 시스템 메모리 페이지 크기 조회
 * `추가` device.getMarketName 메서드, 장치의 판매명 조회 _[`issue #513`](http://issues.autojs6.com/513)_
 * `추가` ui.useAndroidLayout 메서드, Android 네이티브 레이아웃 요소 지원 활성화
+* `추가` UI 레이아웃이 프로젝트 res 디렉터리를 지원하여 문자열, 색상, 크기, 배열, 스타일, 테마, 이미지, Drawable (vector 포함), 색상 상태 목록 및 <include> 레이아웃 참조 가능; 야간 모드, 언어, 화면 방향/너비, 밀도 및 Android 버전에 맞는 한정자 디렉터리 (values-night, layout-land 등) 선택 (참조: 프로젝트 문서 > [사용자 인터페이스](https://docs.autojs6.com/#/ui))
+* `추가` 네이티브 Android XML 레이아웃의 위젯 속성 지원 확대: 속성 처리기 밖의 속성도 Android SDK 및 AndroidX / Material 정의에 따라 공개 메서드나 부모 레이아웃 매개변수로 설정; ConstraintLayout 제약과 Barrier/Group/Flow/Guideline, CoordinatorLayout의 layout_behavior 및 AppBarLayout 스크롤 플래그 등 포함; MaterialButton 등 Material 구성 요소 직접 사용 가능 (참조: 프로젝트 문서 > [Android XML 속성](https://docs.autojs6.com/#/uiAndroidAttributes))
 * `추가` runtime.loadAar 메서드, AAR 파일 동적 로드
 * `추가` runtime.loadJarWithR8/retraceR8Stack 메서드, R8 Compiler 플러그인으로 JAR 로드 및 난독화 스택 복원 (실험적)
 * `추가` images.quantize/quantizeToFile 메서드, PNG 이미지 양자화와 파일 저장, 이미지 크기 및 품질 정보 반환 (Image Quantization 플러그인 필요)
@@ -77,6 +106,7 @@
 * `추가` console.setTimeVisible/setTimeFormat/setColorful/setAvoidStatusBar/setInputVisible 메서드와 대응하는 console.build 옵션
 * `추가` UI 모드에서 TypeScript 스크립트 및 TSX 레이아웃 지원 (TypeScript Engine 플러그인 필요)
 * `추가` UI 모드의 globalconsole 요소로 전역 로그 표시, console 계열 요소에서 제목, 스타일 및 입력란 설정 지원
+* `추가` UI 모드 이벤트 리스너 (ui.emitter의 back_pressed, 위젯 click, 대화상자 이벤트 등)에서 코루틴 일시 중단 지원 (dialogs.confirm(...).await() 등); 스크립트 프로젝트에서 continuation 기능을 켜야 함 (참조: 프로젝트 문서 > [컨티뉴에이션](https://docs.autojs6.com/#/continuation))
 * `추가` smartClick/clickIfExists/clickAny/findAny 등 자동화 메서드, 요소 검색과 클릭에 사용하며 Flow 연쇄 호출 지원
 * `추가` smartClickBounds/clickBoundsIfExists/clickBoundsAny 메서드, 요소 영역에 따른 좌표 클릭
 * `추가` scrollUntil/typeInto/dismissPopups/collectList 등 자동화 메서드, 스크롤 검색, 텍스트 입력, 팝업 처리 및 목록 수집
@@ -107,6 +137,8 @@
 * `추가` 이미지 뷰어가 같은 디렉터리 이미지 전환, 두 손가락 확대/축소, EXIF 표시 및 전체 화면을 지원하며 3-Maple Image로 편집과 형식 변환 가능
 * `추가` 파일 관리자에서 플러그인으로 연 파일을 플러그인 안에서 휴지통으로 옮기고 취소로 되돌릴 수 있음 (플러그인 지원 필요)
 * `추가` 파일 관리자에서 파일을 여러 개 선택했을 때 사용할 수 있는 플러그인 작업이 여럿이면 선택 막대의 "더"에서 나머지 작업을 고를 수 있음 (3-Maple Image로 이미지 일괄 변환 등)
+* `추가` 파일 관리자에서 Batch Rename으로 파일/폴더 일괄 이름 변경 지원; 찾기/바꾸기, 정규식, 카운터, 날짜 변수, 사진 메타데이터 및 한자 병음 변환을 사용하고 새 이름 미리보기, 개별 제외, 이름 프리셋 및 실행 취소 가능 (위치: 다중 선택 도구 모음/폴더 메뉴 "내부 항목 일괄 이름 변경"/이름 변경 대화상자 "더보기")
+* `추가` "이름 변경 기록" 페이지에서 파일 관리자와 스크립트의 일괄 이름 변경 기록 보기, 검색 및 출처/상태 필터링; 개별 배치 취소/삭제, 기록 비우기 및 출처별 보관 배치 수 설정 가능 (위치: 파일 관리자 이름 변경 대화상자 > "더보기" > 이름 변경 기록)
 * `추가` 파일 관리자가 APK/APKS/XAPK/APKM/APKZ/AAB 정보와 매니페스트 조회 및 APK/분할 APK 컨테이너 설치 지원
 * `추가` Ace Editor 플러그인으로 Ace 편집기를 불러오며 설정에서 편집기 엔진 선택 가능, 플러그인을 사용할 수 없으면 플러그인 센터 진입점 제공
 * `추가` Ace 편집기가 코드 완성, 인수 안내, 호버 문서와 진단을 지원하며 TypeScript 프로젝트에서 정의 이동, 심볼 이름 변경 및 자동 가져오기 지원 (TypeScript Engine 플러그인 필요)
@@ -140,6 +172,7 @@
 * `추가` 패키징 앱이 Node.js 프로젝트와 스크립트 지원, 실행 시 Node.js Runtime 플러그인 필요 (미설치 시 설치 안내 표시)
 * `추가` 패키징 앱 빌드 시 Rhino TypeScript 프로젝트 컴파일, 결과물 암호화 및 Source Map 첨부 지원
 * `추가` 패키징 설정에서 로그 표시/숨김 및 런처 바로가기 설정 지원 _[`issue #550`](http://issues.autojs6.com/550)_
+* `추가` 패키지 앱에서 ONNX Runtime 버전 Paddle OCR PP-OCRv3 (2.0.0 이상) 지원; Paddle Lite와 함께 설치되어 있으면 ONNX Runtime 버전을 우선 포함하며 의존하는 OpenCV 플러그인 런타임도 자동 포함 (OpenCV 플러그인 설치 필요)
 * `추가` VSCode 플러그인 연결에서 QR 스캔, 페어링 확인 및 LAN 검색 지원 (VSCode 플러그인 1.1.0+ 필요)
 * `추가` VSCode 플러그인에서 원격 파일 관리와 장치 스크립트 실행 지원, 큰 파일 전송 진행률 표시 (VSCode 플러그인 1.1.0+ 필요)
 * `추가` 클라이언트/서버 모드의 연결 관리자, 연결 상태 확인, 클라이언트 관리 및 접속 주소 기록 지원
@@ -161,6 +194,7 @@
 * `추가` Node.js/Bun: WebView 페이지 로딩과 JavaScript 반환값, Drawer 패널, Toolbar 탐색과 메뉴, ViewPager 페이지 및 비동기 네이티브 이벤트
 * `추가` Node.js/Bun: WebView HTTP(S) 다운로드, 시스템 파일 선택, 비동기 WebViewClient/WebChromeClient 콜백 및 네이티브 탐색과 리소스 규칙
 * `추가` Node.js/Bun: WebView 원본 크기 사진 촬영, 저장 및 디렉터리 선택, 문서 바이트 읽기, blob/data 분할 다운로드와 선택한 위치로 출력
+* `추가` Node.js 프로젝트의 project.json에 node.timeoutMs 실행 제한 설정 추가; 미설정 또는 0이면 Node.js 스크립트/프로젝트도 Rhino처럼 실행 시간 제한 없음
 * `추가` 사진 촬영이나 파일 작업을 기다리는 Bun 프로젝트 및 패키지 앱의 timeoutMs 실행 시간 설정
 * `추가` Node.js/Bun: WebView 동영상 촬영과 전면 AAC/M4A 오디오 녹음, 미디어 옵션, 선택 대기 시간 설정 및 임시 파일 정리
 * `추가` WebView getUserMedia/MediaRecorder 오디오 및 비디오 스트리밍, 페이지 Promise 대기, 명시적 Android 미디어 권한 요청 및 Worker 수명 주기 관리
@@ -185,21 +219,39 @@
 * `수정` Android 7.x에서 runtime.loadDex 호출 시 DEX 캐시 손상 및 클래스 로드 실패가 발생할 수 있는 문제
 * `수정` Rhino 엔진과 내장 모듈의 스코프, 인수 변환 및 반환값 처리 비호환으로 일부 스크립트 동작이 비정상적인 문제
 * `수정` Object.fromEntries에서 숫자 또는 숫자 문자열을 키로 사용할 때 생성된 속성에 접근할 수 없고 콘솔 출력이 불완전한 문제 _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_
+* `수정` Object.defineProperty로 구성 불가 (configurable이 false)인 열거 가능 속성을 변경할 때 설명자에 enumerable을 지정하지 않아도 (`{ value: 1 }`만 전달하는 경우 등) TypeError가 발생하던 문제
+* `수정` 루프 본문의 const 선언이 반복마다 다시 할당되지 않던 문제 (for/while 안의 `const item = list[i]`가 항상 첫 반복 값인 경우 등)
+* `수정` Android 7.x에서 정규식 Unicode 속성 이스케이프 (`\p{L}` 등)를 사용하면 UnsupportedOperationException이 발생하던 문제
+* `수정` 일부 번역된 스크립트 오류 메시지에서 인수가 누락되거나 MessageFormat 예외가 발생하던 문제
 * `수정` Proxy로 감싼 함수 및 일부 JavaScript 콜백을 내장 모듈에 전달하지 못하거나 인수 중첩 및 오버로드 모호성이 발생하는 문제
 * `수정` EventEmitter#once 리스너가 재귀 이벤트 전달 또는 콜백 예외 시 반복 호출될 수 있는 문제
 * `수정` app.isInstalled/kill 등에서 패키지명 인수를 정상 사용하지 못하는 문제 _[`issue #495`](http://issues.autojs6.com/495)_
 * `수정` Root 권한이 없는 장치에서 shell 관련 메서드 호출 시 응답이 멈출 수 있는 문제
 * `수정` dialogs.multiChoice의 다중 선택 결과가 잘못 문자열로 변환되는 문제 _[`issue #518`](http://issues.autojs6.com/518)_
 * `수정` 스레드 종료 시 스크립트 대화상자를 닫으면 앱이 충돌할 수 있는 문제
+* `수정` setInterval 타이머가 있는 스크립트를 중지하면 간헐적으로 "Unable to schedule a timer callback because its looper is exiting" 오류가 표시되던 문제
 * `수정` 타이머 취소 또는 하위 스레드 중지 후 만료된 콜백이 스크립트 자동 종료를 방해할 수 있는 문제
+* `수정` threads.pool에서 corePoolSize를 지정하고 maxPoolSize를 생략하면 IllegalArgumentException이 발생하던 문제
+* `수정` 코루틴의 Promise / Flow await, continuation.await 및 resumeError로 재개된 await가 거부될 때 호출 위치에서 예외를 던지지 않고 오류를 반환값으로 전달하던 문제; 처리하지 않은 오류는 이제 해당 오류로 스크립트 종료
+* `수정` 코루틴 재개 후 다시 일시 중단하면 (continuation.delay 이후 await 등) UI 모드 스크립트가 종료되고 다른 스레드에서 재개 시 앱이 충돌하던 문제, setInterval 콜백에서 재개하면 해당 타이머가 취소되던 문제
+* `수정` 스크립트 스레드에서 Promise.wait 호출 시 계속 차단되던 문제 (Promise.resolve(1).wait() 및 setTimeout/tts 등으로 결정되는 Promise 대기); UI 스레드에서 미결정 Promise를 기다리면 TypeError를 던져 화면이 멈추지 않도록 변경
+* `수정` threads.start로 생성한 자식 스레드가 모두 종료되어도 스크립트가 자동 종료되지 않을 수 있던 문제
+* `수정` threads.disposable()의 blockedGet/blockedGetOrThrow가 setAndNotify 호출 후 대기하면 계속 차단되고, 시간 제한이 있으면 값을 받아도 만료까지 기다리며, 때때로 값을 받지 않고 null을 반환하던 문제; 대기 스레드가 인터럽트되면 sleep처럼 스크립트 중단으로 처리
+* `수정` ui.run, 차단형 대화상자, getClip/setClip 및 gesture/swipe 등이 다른 스레드의 결과를 기다릴 때 결과 전에 반환할 수 있던 문제, 대기 시작 전에 차단형 대화상자가 닫히면 스크립트가 계속 차단되던 문제
+* `수정` 스크립트 중지 시 자식 스레드가 이미지 처리 중이면 앱이 충돌할 수 있던 문제
 * `수정` floaty.window/rawWindow의 포커스 관련 메서드를 스크립트 스레드에서 호출할 때 스레드 예외가 발생할 수 있는 문제
 * `수정` console.setPosition/setSize/setGravity 등의 설정 결과가 호출 순서나 창 표시 시점의 영향을 받는 문제
 * `수정` 부동 콘솔 제목 표시줄 끌기가 작동하지 않거나 창을 화면 가장자리에 붙이지 못하는 문제
 * `수정` console.log/util.format 등의 객체/배열 출력에서 문자열 값에 작은따옴표가 없어 Auto.js 4의 util.inspect 형식과 일치하지 않는 문제
 * `수정` http 요청의 비보안 옵션이 후속 요청에서도 인증서 및 호스트명 검증을 건너뛰게 할 수 있는 문제
+* `수정` http.getAsync/postAsync/requestAsync 등의 Promise에서 then 콜백으로 응답 본문 (res.body.string() 또는 res.body.json() 등)을 읽으면 NetworkOnMainThreadException이 발생하던 문제
 * `수정` 정식 출시 및 패키징 앱의 HTTP 요청이 네트워크 보안 설정에 의해 의도치 않게 차단될 수 있는 문제
 * `수정` UI 모드 WebView 요소의 파일 선택기를 정상적으로 열지 못하는 문제
 * `수정` UI 모드 list/grid 항목 템플릿의 동적 속성 표현식이 현재 항목 객체 (예: name 속성)에 접근하지 못해 ReferenceError와 빈 항목이 발생하고, 숫자 표현식 결과가 18 대신 18.0으로 표시되는 문제
+* `수정` UI 레이아웃의 RelativeLayout 자식 위젯에서 layout_toStartOf, layout_toEndOf 및 layout_alignBaseline이 적용되지 않던 문제
+* `수정` UI 레이아웃의 paddingHorizontal/paddingVertical 속성 때문에 레이아웃 로딩이 실패하던 문제
+* `수정` UI 레이아웃의 scrollbars 및 requiresFadingEdge로 스크롤바나 가장자리 페이드를 끌 수 없던 문제 (none 등)
+* `수정` UI 레이아웃의 ImageView에 adjustViewBounds와 scaleType을 함께 설정하면 배율 타입이 적용되지 않을 수 있던 문제
 * `수정` UI 스크립트가 분할 화면 진입 또는 창 크기 변경 시 예상치 않게 종료될 수 있는 문제
 * `수정` 선택자 오버로드, filter 전역 메서드 및 집합 선택자의 정규식 인수를 정상 사용하지 못하는 문제
 * `수정` contains 계열 선택자가 일반 문자열 인수를 정규식으로 잘못 해석하는 문제
@@ -231,18 +283,35 @@
 * `수정` 여러 스레드/파일에서 OCR 반복 호출 시 화면 캡처 권한을 반복 요청할 수 있는 문제 _[`issue #551`](http://issues.autojs6.com/551)_
 * `수정` OCR 플러그인 선택 실패 시 오류 안내가 실제 엔진 및 설치 상태와 일치하지 않는 문제
 * `수정` Paddle OCR 플러그인 서비스 연결이 끊긴 후 복구하지 못하거나 미실행 상태에서 자동 시작하지 못하는 문제 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_ _[`issue #517`](http://issues.autojs6.com/517)_
+* `수정` 일부 시스템 (ColorOS 등)에서 실행되지 않은 플러그인에 연결하지 못해 센터에서 수동 활성화해야 하던 문제 (AutoJs6가 전면이거나 "다른 앱 위에 표시" 권한이 있으면 플러그인 자동 시작)
 * `수정` 패키징 앱에서 Paddle OCR과 Rapid OCR을 순차 사용하면 앱이 충돌할 수 있는 문제
 * `수정` Paddle OCR v3와 v4/v5/v6를 동시에 선택하면 패키징 앱에서 Paddle OCR을 사용할 수 없는 문제 (패키징 앱은 PP-OCRv3만 지원)
 * `수정` images.resize에 잘못된 인수를 전달하면 앱이 충돌할 수 있는 문제
 * `수정` images 일부 메서드가 이미지를 조기 회수하거나 네이티브 메모리를 누수시키거나 다른 스크립트의 이미지를 회수할 수 있는 문제
 * `수정` colors.isSimilar/images.detectColor의 hs 알고리즘 결과 오류 및 colors.rgb/rgba의 소수/백분율 성분 처리 오류
+* `수정` Color의 toHex/toInt/alpha/toHsv/isSimilar/blend/build 등 메서드, images.getSimilarity 및 http 요청의 client 옵션 오류 시 try/catch로 잡을 수 없는 ClassCastException으로 스크립트가 종료되던 문제
 * `수정` images.isEqual/mse/ncc/isGrayscale 등의 비교 결과 및 회색조/RGBA 이미지 처리 이상
 * `수정` images.invert의 투명도 누락, ImageWrapper#saveTo의 빨강/파랑 채널 반전 및 images.clip의 범위 초과 영역 처리 오류
 * `수정` images.load 등에서 연결을 닫지 않거나 임시 이미지 리소스를 해제하지 않을 수 있는 문제
 * `수정` images.findImage/matchTemplate의 가장자리 일치, 좌표 정밀도, 결과 정렬 및 개수 제한 이상
 * `수정` images.matchTemplate가 채널 수가 다른 이미지, 단색 템플릿 또는 투명 마스크를 올바르게 처리하지 못하고 MatchingResult#sortBy가 소수 비교 결과를 받지 않는 문제
 * `수정` images.matchFeatures의 반환 경계가 실제 위치와 다르며 작은 이미지 특징 탐지, 결과 그리기 및 리소스 해제가 비정상적인 문제
-* `수정` 스크립트 반복 실행 후 메모리 사용량이 계속 증가할 수 있는 문제 (시험 수정) _[`issue #548`](http://issues.autojs6.com/548)_
+* `수정` 스크립트 종료 후 메모리가 해제되지 않던 문제: threads.start, 자식 스레드 타이머 또는 plugins.load를 사용하거나 강제 중지 시 threads.pool 스레드/WebSocket 연결이 남은 스크립트는 실행할 때마다 메모리가 잔류해 반복 실행 시 계속 증가; 다른 스크립트도 하나 분량의 메모리가 계속 남던 문제 _[`issue #548`](http://issues.autojs6.com/548)_
+* `수정` 설정 페이지를 닫거나 메인 페이지를 다시 만들면 (야간 모드 전환 등) 이전 페이지의 메모리가 해제되지 않던 문제
+* `수정` 다운로드 진행 대화상자에서 "다운로드 취소"를 누른 뒤나 "클라이언트 모드" / "서버 모드"가 켜진 동안, 작업을 시작한 페이지를 닫아도 메모리가 해제되지 않던 문제
+* `수정` 시스템이 플러그인 바인딩을 거부하면 (ColorOS의 백그라운드 제한 등) 거부된 연결이 매번 남아 플러그인 센터를 닫아도 메모리가 해제되지 않던 문제
+* `수정` 시스템이 Node.js Runtime 바인딩을 거부하면 (ColorOS의 백그라운드 제한 등) Node.js 스크립트 실행마다 거부된 연결이 남던 문제
+* `수정` Node.js 스크립트 종료 후 메모리가 해제되지 않던 문제: 런타임, UI 세션, 플로팅 창, 대화상자, 이미지 핸들, 화면 녹화 및 플러그인 도구 호출 등의 브리지 객체가 매번 남아 반복 실행 시 메모리 증가
+* `수정` Bun 및 QuickJS 스크립트 종료 후 메모리가 해제되지 않던 문제: 엔진, 출력 콜백 및 호스트 기능 호출 (자동화, 이미지) 등의 브리지 객체가 매번 남아 반복 실행 시 메모리 증가
+* `수정` 홈의 "작업" 목록에 표시된 스크립트가 종료되어도 목록 갱신 전에는 메모리를 해제하지 못하던 문제
+* `수정` web.newWebSocket 연결이 스크립트 종료 후에도 열려 있고, exitOnClose를 설정한 연결은 아무 스크립트나 종료되어도 닫히던 문제 (이제 소유 스크립트 종료 때만 처리하며 exitOnClose 연결은 제한 시간 내 정상 종료, 나머지는 연결 해제)
+* `수정` runtime.loadDex/loadJar/loadAar로 로드한 DEX 및 클래스가 스크립트 종료 후 해제되지 않던 문제 (로더는 로드한 스크립트와 함께 해제; 같은 파일을 로드한 스크립트가 모두 끝나면 다른 스크립트는 직접 로드해야 클래스 사용 가능)
+* `수정` 여러 UI 스크립트를 동시에 실행하면 나중에 시작한 스크립트가 끝나도 나머지 UI 스크립트가 모두 끝날 때까지 메모리가 남고, 그동안 나머지가 종료된 런타임으로 위젯을 감싸던 문제
+* `수정` webview가 있는 UI 스크립트 종료 후 일부 구형 WebView (WebView 111 등)가 닫힌 페이지를 계속 보유해 메모리가 해제되지 않던 문제
+* `수정` speech.listen/wake가 세션을 열지 못하면 (음성 모델 미설치 등) 스크립트 종료 후에도 메모리가 해제되지 않던 문제
+* `수정` speech.listen/wake 등이 음성 플러그인을 기다리다 시간 초과되거나 스크립트가 종료된 뒤, 늦게 열린 세션/작업이 취소되지 않고 플러그인 연결을 계속 점유하던 문제
+* `수정` gallery.pick/view/edit, yolo.load, mail.connect, epub.open/read 등이 플러그인 세션을 기다리다 시간 초과되거나 스크립트가 종료된 뒤, 또는 AutoJs4 런타임의 접수 제한 시간을 넘긴 뒤, 늦게 열린 세션이나 접수된 스크립트가 닫히지 않고 플러그인 연결을 계속 점유하던 문제
+* `수정` JavaAdapter 생성 시 전체 클래스 캐시 디렉터리를 비워 runtime.loadJar 변환 캐시를 무효화하고, 동시에 실행 중인 loadJar/loadDex가 사용하는 파일까지 삭제할 수 있던 문제
 * `수정` 외부 URI 또는 백그라운드에서 스크립트 실행 시 원본 경로나 확장자가 누락될 수 있는 문제 _[`issue #545`](http://issues.autojs6.com/545)_
 * `수정` Tasker에서 스크립트를 정상 호출하여 실행하지 못하는 문제 _[`issue #501`](http://issues.autojs6.com/501)_
 * `수정` 위젯 일괄 업데이트 시 스크립트 경로 및 클릭 매핑이 잘못 삭제될 수 있는 문제
@@ -254,6 +323,7 @@
 * `수정` 파일 관리자 화면으로 돌아가거나 휴지통 항목을 삭제한 후 화면이 깜박이거나 스크롤 위치가 초기화될 수 있는 문제
 * `수정` TypeScript 파일과 같은 확장자의 동영상을 구분하지 못하거나 일부 소스 파일에 실행 진입점이 없는 문제
 * `수정` 파일 관리자 작업 안내가 중복 표시될 수 있는 문제
+* `수정` 파일 관리자가 권한 부족이나 저장소 제거로 인한 디렉터리 읽기 실패를 빈 디렉터리로 표시하고, 이동 실패 후 경로와 목록이 일치하지 않던 문제
 * `수정` 일부 터치스크린에서 파일 관리자 등 목록 항목이 다른 화면을 열었다가 돌아온 후에도 회색 배경이 유지되는 문제
 * `수정` 작업 목록의 "실행 작업" 개수가 표시 항목과 일치하지 않고, 종료된 UI 스크립트가 실행 중으로 남는 문제
 * `수정` 미디어/이미지 파일 경로 분석 이상 및 MediaInfo 상세에 캐시 경로가 표시되는 문제
@@ -266,6 +336,7 @@
 * `수정` 버전 기록 정리 시 기록이 끝나지 않은 새 스냅샷이 잘못 삭제될 수 있는 문제
 * `수정` 휴지통 복원 실패 시에도 작업 완료를 안내하는 문제
 * `수정` 휴지통에서 디렉터리 복원 시 비정상 압축 항목을 대상 디렉터리 밖에 쓸 수 있는 문제
+* `수정` 더 새로운 AutoJs6에서 작성한 버전 기록/휴지통/색상 라이브러리/키 저장소 데이터베이스를 현재 버전에서 열지 못하던 문제 (두 버전이 공유하는 데이터 유지; 유지 불가 시 백업 후 빈 데이터베이스로 계속하고, 데이터 버전 이상의 AutoJs6를 다시 설치하면 자동 복원)
 * `수정` 코드 편집기 화면 재생성 후 커서, 선택 영역 또는 저장하지 않은 내용이 손실될 수 있는 문제
 * `수정` 코드 편집기/로그 페이지에서 소프트 키보드나 입력란을 표시하면 내용이 가려지거나 축소될 수 있는 문제
 * `수정` 편집기 테마와 앱의 밝은/어두운 모드가 다를 때 편집기 대화상자의 "더보기" 메뉴에서 배경과 글자 색상이 비슷해 읽기 어려운 문제
@@ -278,6 +349,8 @@
 * `수정` 시작 화면 배경이 노치 화면의 짧은 변 영역을 덮지 않는 문제
 * `수정` 부동 버튼 메뉴의 최근 앱 패키지명 및 Activity 정보 이상 _[`issue #529`](http://issues.autojs6.com/529)_
 * `수정` 부동 버튼의 "스크립트 실행" 대화상자를 최소화한 후 복원하지 못할 수 있는 문제 (시험 수정) _[`issue #500`](http://issues.autojs6.com/500)_
+* `수정` 플로팅 버튼의 "더보기" 대화상자 표시 후 정보 로딩에 따라 일부 항목이 아래로 이동하던 문제
+* `수정` AutoJs6 시작 후 플로팅 버튼의 "더보기"를 처음 열면 Shizuku로 얻는 최근 앱 패키지 이름 및 Activity 정보 표시에 1초 이상 걸리던 문제
 * `수정` 레이아웃 분석에서 집합 요소 코드를 생성할 때 잘못된 구문이 포함될 수 있는 문제
 * `수정` 일부 테마 색상이나 야간 모드에서 레이아웃 분석 부동 창/대화상자의 텍스트와 요소 대비가 부족한 문제
 * `수정` 기존 레이아웃에서 선택한 Material Design 색상을 레이아웃 전환 후 "현재 테마 색상 찾기"로 찾지 못하고 Material Design 색상 페이지에 현재 색상 요약도 표시되지 않는 문제
@@ -287,11 +360,18 @@
 * `수정` 플러그인 센터에서 일부 월 약어가 포함된 날짜를 올바르게 분석하지 못하는 문제
 * `수정` 플러그인 센터의 아이콘 캐시, 야간 모드 전환 및 당겨서 새로고침 상태 이상
 * `수정` 플러그인 센터 새로고침 시 설치된 플러그인이 누락되거나 목록이 비거나 스크롤 위치가 초기화될 수 있는 문제
+* `수정` 시스템 앱 정보 등에서 플러그인 센터로 돌아오면 아이콘이 없는 항목이 잠깐 표시된 뒤 즉시 재정렬되던 문제
 * `수정` 플러그인 센터가 잘못된 변형을 설치하거나 패키징 템플릿 및 업데이트 안내를 중복 표시할 수 있는 문제
 * `수정` 플러그인 센터 인덱스 갱신 성공 후에도 삭제/이름 변경된 이전 플러그인을 캐시에서 복원하는 문제
 * `수정` 플러그인 센터 콜드 스타트 직후 상세를 열면 목록 갱신에 따라 대화상자 전체가 다시 생성되어 깜박이는 문제
 * `수정` 업데이트 설치 중 등 일시적으로 연결할 수 없었던 플러그인이 계속 비활성 상태로 유지되는 문제
+* `수정` 플러그인 센터에서 Offline Docs를 끈 뒤 다시 켜면 "Failed to enable the plugin"이 표시되며 실패하던 문제
 * `수정` Shizuku 권한 요청 리스너가 소멸 후 올바르게 해제되지 않는 문제
+* `수정` AutoJs6 업데이트 후 첫 Shizuku 기능 사용 시 Shizuku에 이전 서비스 기록이 남아 서비스를 사용할 수 없다고 보고하던 문제
+* `수정` AutoJs6 강제 중지/종료 후에도 Shizuku 사용자 서비스가 시작한 명령 (음량 키 제어 감시 및 shizuku.spawn 프로세스 등)이 백그라운드에 남아 누적되던 문제 _[`issue #474`](http://issues.autojs6.com/474)_
+* `수정` 앱 시작 후 "음량 올리기 키로 스크립트 실행 제어"를 꺼짐에서 켜짐으로 바꿀 때, 플로팅 버튼을 표시한 적이 없으면 앱을 재시작해야 음량 올리기 키로 스크립트를 중지할 수 있던 문제
+* `수정` 스크립트 기록 종료 후에도 입력 이벤트 감시 프로세스 (Shizuku 또는 Root로 실행한 getevent)가 앱 종료까지 백그라운드에 남던 문제
+* `수정` Root 없이 Shizuku 권한만 있으면 RootAutomator가 터치스크린을 식별하지 못해 생성에 실패하던 문제, AutoJs6 시작 직후 스크립트 기록을 시작하면 화면이 10초 넘게 응답하지 않던 문제
 * `수정` 백그라운드 APK 설치 시 설치 확인을 계속할 수 없는 문제
 * `수정` APK 패키징 취소 시 빌드 실패로 잘못 보고될 수 있는 문제
 * `수정` APK 결과물의 서명 인증서 일관성 검사 및 Android 9-11 서명 인식 이상
@@ -310,6 +390,7 @@
 * `수정` cXy/cYx에서 false 지정 시 절대 좌표 모드가 적용되지 않고 가로 화면의 종횡비가 반전되며 한쪽 기준값만 설정하면 일부 호출이 실패하는 문제
 * `수정` setScaleBases의 두 번째 인수가 잘못되었거나 기준값이 이미 설정된 경우 다른 축의 값이 먼저 변경되고 일회성 설정 기회가 소모되는 문제
 * `수정` 화면 재생성과 스크립트의 화면 크기 읽기가 동시에 발생하면 device.width/height 및 좌표 변환에서 크기가 0으로 읽히는 문제
+* `수정` device.keepAwake/keepScreenOn/keepScreenDim에서 시간 제한 없이 획득한 웨이크 락이 스크립트 종료 후에도 해제되지 않던 문제
 * `수정` Node.js pinyin/pinyin4j가 작은 내장 사전만 변환하던 문제, 이제 설치된 병음 플러그인을 사용
 * `수정` Node.js 콘솔 창과 스타일 제어 메서드가 실제 효과를 내지 않던 문제
 * `수정` Bun 스크립트 종료 시 동기 결과가 출력 콜백보다 먼저 도착하여 마지막 로그가 손실되던 문제
@@ -325,6 +406,8 @@
 * `수정` 진행 대화상자 갱신 후 이전 값이 반환되고 취소 후 창이 남는 문제
 * `수정` 일간 및 주간 작업의 실행 시간이 일광 절약 시간 전환 후 달라지는 문제
 * `수정` IntentTask 로컬 및 외부 수신 충돌과 갱신이나 삭제 후 등록이 남는 문제
+* `수정` AutoJs6 및 패키지 앱을 더 새로운 버전이 남긴 데이터 위에 설치하면 (다운그레이드 등) 시작 즉시 충돌하고 반복 재시작되던 문제 (예약 작업 및 인텐트 작업 데이터베이스 다운그레이드 시 기존 데이터 유지; 그래도 열 수 없으면 백업 후 빈 데이터베이스로 시작하고 AutoJs6는 알림도 전송; 데이터 버전 이상을 다시 설치하면 자동 복원)
+* `수정` AutoJs6 및 패키지 앱의 처리되지 않은 예외를 시스템에 넘기지 않아 충돌 기록이 없고, 시작 즉시 충돌하는 프로세스를 백그라운드 구성 요소가 시스템 제한 없이 반복 시작하던 문제
 * `수정` 빌드된 앱의 FileProvider URI가 실제 매니페스트 대신 템플릿 authority를 사용하는 문제
 * `수정` Node.js 호스트 모듈에 java.new 같은 예약어 멤버가 있을 때 ESM 가져오기가 실패하는 문제
 * `수정` 시작 및 로그 화면을 숨긴 Bun 패키지 앱에서 Activity가 너무 일찍 종료되어 초기화 중 프로세스가 회수되는 문제
@@ -338,6 +421,7 @@
 * `개선` 의존성, 언어 및 이미지 리소스를 정리하여 설치 패키지 크기 축소
 * `개선` GitHub REST API로 버전과 설치 패키지 정보를 가져오며 업데이트 설명의 로컬 렌더링 지원
 * `개선` 중국어 간체/영어 출시 기록 내장, 다른 언어는 온라인 조회와 캐시 지원 (오프라인에서는 캐시 우선, 없으면 영어 표시)
+* `개선` 앱 설정의 읽기/쓰기를 공통 키 선언 및 저장 계층으로 통일하여 설정 페이지, settings 모듈, 가져오기/내보내기가 같은 기본값과 분류 사용; 기존 키 이름과 저장 파일은 유지하여 업그레이드 후 마이그레이션 불필요
 * `개선` 오프라인 문서를 Offline Docs 플러그인으로 분리, 독립 설치/업데이트 및 문서 소스 전환 즉시 반영
 * `개선` 패키징 템플릿을 APK Builder Template 플러그인으로 분리, 패키징 시 서명, 호스트 버전 및 템플릿 호환성 검사
 * `개선` ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization 관련 기능 플러그인화
@@ -348,13 +432,18 @@
 * `개선` 홈 플러그인 탭 FAB 메뉴는 설치 마법사, 공식/서드파티 저장소 및 플러그인 센터를 우선 표시하고, URL/로컬 파일 설치와 관리 작업은 "더보기"에 통합
 * `개선` 플러그인 센터의 2단계 정렬 및 단계별 오름차순/내림차순 지원, 기본 순서는 설치됨 > 비활성화됨 > 미설치, 같은 상태에서는 최근 업데이트 순
 * `개선` 플러그인 센터의 직접 작업/설정 변경 후 항목 위치를 유지하며 상태 갱신, 백그라운드 자동 새로고침은 계속되고 당겨서 새로고침 또는 정렬/필터 변경 후 일반 배치 복귀
+* `개선` 플러그인 센터가 새로 설치한 플러그인 (센터를 닫은 동안 설치한 경우 포함)을 일시적으로 맨 위에 표시하고 "새로 설치됨" 또는 "활성화 실패" 표시; 탭 전환이나 센터 종료 후 원래 순서 복원; 항목에서 직접 설치/활성화한 플러그인은 상태만 표시하고 위치 유지
 * `개선` 플러그인 센터가 SDK 플러그인 자동 마운트 및 사용 가능한 ABI 탐지 지원
-* `개선` 공식 플러그인 신규 설치 후 자동 활성화 지원, 외부/덮어쓰기 설치는 기존 활성화 정책 유지
+* `개선` 공식 서명 플러그인 (MCP Server 및 YOLO 포함)은 설치 후 기본 활성화; 센터가 새 설치 (닫힌 동안 설치 포함)를 발견하면 자동 활성화하고, ColorOS 등 실행되지 않은 플러그인에 연결할 수 없는 시스템에서는 먼저 시작; 다른 서명의 MCP Server/YOLO는 수동 활성화가 필요하며 덮어쓰기 설치는 기존 상태 유지
 * `개선` 플러그인 센터의 캐시/비동기 로드로 목록 표시와 새로고침을 개선하고 활성화 실패 시 복구 안내 제공
 * `개선` 홈 플러그인 탭의 부동 버튼을 길게 눌러 플러그인 센터 진입 지원
 * `개선` 플러그인 정보에서 지원 ABI와 현재 설치 패키지 ABI를 별도로 표시
 * `개선` Rhino 초기화 데이터 캐시로 스크립트 시작 효율 향상, 큰 배열 출력 효율 및 구형 Android의 Java 리플렉션 호환성 개선
-* `개선` Rhino를 업스트림과 동기화하여 new.target 지원, 스코프, TypedArray 및 디버거 호환성 개선
+* `개선` Rhino 엔진을 업스트림과 동기화하여 new.target, for...of/for...in 루프 헤더의 const 선언 및 Uint8Array Base64/Hex 변환 (Uint8Array.fromBase64, toHex 등) 지원; 스코프, TypedArray 및 디버거 호환성 개선
+* `개선` Rhino의 배열 구조 분해, 펼치기, for...of 및 Proxy/Reflect/with/TypedArray 동작을 ECMAScript에 맞춤; f(...args) 및 논리 할당 단락 평가 지원; 엄격 모드에서 Proxy의 set trap이 false이면 할당 시 TypeError, Symbol.iterator가 없는 유사 배열 객체 구조 분해 시 TypeError
+* `개선` BigInt.asIntN/asUintN 및 DataView의 setBigInt64/setBigUint64에 Number를 전달하면 TypeError 발생 (기존에는 자동 변환); BigInt(x)로 작성해야 함
+* `개선` const 변수 재할당은 비엄격 모드에서도 TypeError를 던져 (ECMAScript 및 Node.js와 일치) 더 이상 조용히 무시하지 않음
+* `개선` ArrayBuffer, DataView, TypedArray, 정규식 및 구조 분해 등 엔진 오류 메시지 28개의 9개 언어 번역 보완
 * `개선` runtime.loadJar가 DEX Compiler 플러그인으로 JAR 로드를 지원하며 컴파일 진단과 실패 시 대체 처리 제공 (실험적, 기본 비활성화)
 * `개선` 예약/브로드캐스트 작업, 바로가기 및 Tasker에서 TypeScript 실행 지원 (TypeScript Engine 플러그인 필요)
 * `개선` pinyin 모듈의 호출별 사용자 발음 사전 지원 및 compare/compact 보완
@@ -362,11 +451,15 @@
 * `개선` opencc 모듈의 변환 유형 조회, 일괄 변환 및 연쇄 변환 지원
 * `개선` ocr 모듈이 기본적으로 ML Kit/Paddle/Rapid 순으로 사용 가능한 엔진을 선택하며 명시 지정 및 자동 선택 복원 지원
 * `개선` 호스트 브리지를 통해 호출되는 ocr 모듈 (Node.js 플러그인 등 플러그인 세션) 이 engine 미지정 시 ML Kit/Paddle/Rapid 순으로 활성화된 엔진을 자동 선택하며 더 이상 ML Kit OCR 플러그인을 필수로 요구하지 않음
+* `개선` ocr Paddle 엔진의 profile 옵션을 플러그인 선택에 반영하여 같은 profile을 선언한 플러그인만 선택 (PP-OCRv3 언어 팩의 zh/en/zh-hant/ja/ko 및 PP-OCRv4의 mobile/server/mobile-en 등, 대소문자 무시); 일치하는 플러그인이 없으면 설치된 플러그인의 profile을 오류 메시지에 나열
+* `개선` ocr Paddle 엔진에서 여러 플러그인이 조건에 맞고 변형 우선순위를 조정하지 않았다면, 같은 세대 (PP-OCRv3 ONNX Runtime 언어 팩 및 Paddle Lite 등)에서 선언된 권장 기본 플러그인 (PP-OCRv3 중국어판)을 우선하고 다음으로 패키지 이름순 선택; 검색 순서에 의존하지 않음
 * `개선` 호스트 브리지 accessibility 모듈에 captureScreenImage 를 추가하여 접근성 스크린샷 (사용할 수 없으면 화면 캡처로 대체) 을 세션 내 이미지 핸들로 반환하고, MCP Server 등 플러그인 세션이 바코드 인식과 이미지 / 색상 찾기에 바로 사용할 수 있도록 함; 플러그인 세션이 동시에 보유할 수 있는 이미지 핸들 수를 4 에서 동시 호출 수의 2 배로 상향
 * `개선` MCP Server, 3-Stove Agent 등 모델 대상 플러그인 세션이 브리지로 이미지를 읽을 때 (image.readImage) 가장 긴 변이 4096 px 를 넘는 이미지는 2 의 거듭제곱으로 다운샘플링하여 디코딩하고 결과에 scale 과 원본 크기를 포함하여 갤러리의 큰 사진이 호스트 메모리를 소진하지 않도록 함; Node.js 플러그인 스크립트는 영향 없음
 * `개선` MCP Server, 3-Stove Agent 등 모델 대상 플러그인 세션이 브리지로 경로를 지정해 이미지나 미디어 정보를 읽을 때 (image.readImage, mediainfo) 작업 디렉터리 안으로 제한하고, 쓰기 (image.saveImage) 도 작업 디렉터리 안으로 제한; 요청이 files.shared_read 를 선언하고 AutoJs6 가 모든 파일 접근 권한을 가진 경우 공유 저장소를 읽기 전용으로 접근할 수 있으며 (Android/data 와 Android/obb 제외), files.list 와 files.stat 도 같은 토큰으로 공유 저장소를 나열할 수 있음; Node.js 플러그인 스크립트는 영향 없음
 * `개선` 호스트 브리지 app 모듈에 pluginCapabilities 를 추가하여 OCR, 바코드, Pinyin, Pinyin4j, MediaInfo, OpenCV, 오프라인 문서 각 플러그인 패밀리의 상태 (available / not_installed / disabled / incompatible), 설치된 플러그인의 버전과 활성화 / 승인 상태, 대응하는 브리지 메서드, 플러그인 센터 진입점을 실시간으로 반환하고, MCP Server 등 플러그인 세션이 설치 상태에 따라 도구를 표시하고 설치를 안내할 수 있도록 함; 플러그인 세션 시작 시의 선택적 메서드 목록도 같은 논리로 사용 가능한 패밀리의 메서드를 보충
+* `개선` 호스트 브리지에 plugin_tools를 추가하여 MCP Server 등 플러그인 세션에서 도구 목록, 호출 및 취소 제공; 화면 캡처와 작업 디렉터리 파일을 파일 디스크립터로 전달하고 생성 파일은 작업 디렉터리에 저장; 시간 초과/취소 시 플러그인에 중지 통지; 비공식 플러그인 도구는 plugin_tools.user_granted 토큰 선언 요청 필요; MCP Server 기본 권한에 포함되며 3-Stove Agent 권한에는 미포함
 * `개선` MCP Server 플러그인 세션의 기본 권한 부여 확대: ocr, barcode, pinyin, pinyin4j, mediainfo 각 모듈의 메서드, image.readImage 와 이미지 / 색상 찾기 메서드, accessibility.readScreenText / captureScreenImage 및 app.pluginCapabilities 와 해당 권한 토큰 (읽기 전용 공유 저장소용 files.shared_read 포함) 추가; 이 메서드들은 해당 플러그인이 설치되어 활성화된 동안만 사용 가능하며, image.saveImage 와 image.toBytes 는 여전히 권한 밖, 3-Stove Agent 의 권한 부여는 변경 없음; 또한 agent.listScripts / readManifest / execRegistered 와 agent, agent.exec 토큰을 추가해 MCP Server 가 등록된 스크립트를 나열하고 실행할 수 있음
+* `개선` AutoJs6 작업 디렉터리가 없거나 같은 이름의 파일이 있거나 저장소 권한 부족으로 접근할 수 없으면, 호스트 브리지의 files 및 engines.execScript / execScriptFile 등의 오류 메시지에 원인과 해결 방법 표시 (ERR_AUTOJS6_WORKING_DIRECTORY_UNAVAILABLE)
 * `개선` images.save/saveImage/compress/compressToBytes가 PNG 양자화 (투명도 유지), 픽셀 및 메모리 제한 지원 (Image Quantization 플러그인 필요)
 * `개선` images.readPixels 메서드의 ImageWrapper 인수 지원
 * `개선` images.matchTemplate/findPointByImage의 scales 옵션 지원, 결과에 크기, 비율 및 영역 정보 추가
@@ -375,6 +468,7 @@
 * `개선` 화면 캡처에서 일시적으로 프레임이 없을 때 재시도 지원, 캡처 리소스 해제가 동시 이미지 작업에 주는 영향 감소
 * `개선` mediainfo 모듈의 snapshot/capabilities 및 미디어 스트림 개수 조회 지원, 파일 상세 조회 시간 단축
 * `개선` KeyCode의 인수 호환성 개선 및 Shizuku 권한으로 키 코드 전송 지원 _[`issue #492`](http://issues.autojs6.com/492)_
+* `개선` shell 함수가 adb 옵션으로 Shizuku 명령 실행 지원 (Auto.js Pro 호환); arguments의 adb 키는 더 이상 --adb 인수로 변환되지 않으며 해당 인수가 필요하면 "--adb"로 작성
 * `개선` 접근성 서비스의 Shizuku 자동 활성화 및 공식 연동 플러그인과 시작/중지 상태 동기화 지원
 * `개선` auto.registerEvent의 source 노드를 필요 시 분석 (Android 13 미만에서는 콜백 안에서 읽어야 함)
 * `개선` 접근성 창 조회에서 사용할 수 없는 루트 노드를 건너뛰고 Android 버전별 노드 회수 정책 보완
@@ -384,8 +478,9 @@
 * `개선` console.rawInput/input 복원, 콘솔 입력란에서 텍스트 읽기 및 식 평가 지원
 * `개선` 각 콘솔이 시간 표시/형식을 별도 기억하고 같은 이름의 스크립트 재실행 시 기존 부동 창 교체
 * `개선` media.playMusic의 포그라운드 재생, 오디오 포커스 및 알림 제어 지원, 스크립트 종료 시 재생 리소스 정리
+* `개선` web.newInjectableWebView로 만든 WebView가 스크립트 종료 시 화면에 표시되지 않았다면 함께 제거
 * `개선` 내장 com.stardust 호환 클래스 사본을 제거하고 com.stardust 접두사의 클래스명을 AutoJs6 동명 구현에 매핑 (218개 완전 매핑, 90개 부분 매핑, 대응 구현이 없는 나머지 46개는 제공 중단), new/instanceof 등 클래스명 사용이 runtime 객체와 일치하도록 조정 (참조: 프로젝트 문서 > [AutoJs4 런타임](https://docs.autojs6.com/#/autojs4Runtime))
-* `개선` 3-Block Compose, 자동화 흐름, 콘솔 상호작용 및 전자책 작업 예제 추가, 화면 OCR 예제 보완
+* `개선` 예제 코드에 3-Block Compose, 3-Macaw Speech 음성, 자동화 흐름, 콘솔 상호작용 및 전자책 작업을 추가하고 화면 OCR 예제 보완
 * `개선` 부동 콘솔의 통합 작업 메뉴, 크기와 시간, 색상, 글자 크기 및 투명도 설정 지원
 * `개선` 코드 편집기의 테마 색상과 메뉴 배치 통일, 글꼴, 읽기 전용 모드 및 텍스트 선택 개선
 * `개선` 코드 편집기에서 스크립트 실행 후 실행 버튼을 중지 버튼으로 전환
@@ -414,6 +509,8 @@
 * `개선` Gradle 플랫폼 호환 데이터와 갱신 작업을 AutoJs6-Gradle-Platform-Versions로 이전, Scrapers의 저장소 간 동기화 지원
 * `개선` device.getAndroidId의 useSystemId 불리언 인수, Android 8.0+에서 Shizuku/Root로 실행 앱의 Android 사용자 시스템 값을 조회하며 권한/읽기 실패 시 예외, 구형 시스템에서는 인수 무시
 * `개선` cX/cY/cXy/cYx의 명시적 auto 모드 지원, 좌표와 기준값의 일관된 검증 및 Long 범위를 초과하는 유한한 계산 결과 보존
+* `개선` 네이티브 Android XML 레이아웃에서 설정할 수 없거나 알 수 없는 속성을 건너뛰고 콘솔에 한 번 경고하여 전체 레이아웃 로딩이 실패하지 않도록 변경
+* `개선` UI 레이아웃 속성을 작성 순서로 적용하여 나중 속성이 이전 속성을 덮어씀 (padding 다음의 paddingHorizontal 등)
 * `개선` Bun 호스트 호출이 제한 시간 내에서 대기하고 대기 취소와 짧게 겹치는 작업의 순차 실행 지원
 * `개선` Java 객체 스냅샷에 식별 정보를 사용하여 암시적 toString 호출과 콜백 방지
 * `의존성` Android AXML 모듈화
@@ -435,6 +532,7 @@
 * `의존성` AndroidX SavedState 버전 1.2.1 -> 1.3.2 업그레이드
 * `의존성` AndroidX Emoji2 버전 1.3.0 -> 1.4.0 업그레이드
 * `의존성` AndroidX Window 버전 1.0.0 -> 1.5.0 업그레이드
+* `의존성` Rhino 버전 2.0.0-SNAPSHOT으로 업그레이드 (업스트림 스냅샷 2025/12/22 -> 2026/10/23)
 * `의존성` Android Annotations 버전 4.8.0 제거
 * `의존성` Android dx 버전 1.14 제거
 * `의존성` AndroidX AppCompat (Legacy) 버전 1.0.2 제거
