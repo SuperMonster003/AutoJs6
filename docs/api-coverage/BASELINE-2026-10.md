@@ -1782,3 +1782,88 @@ Q246, Q247 已决 (附录 C), Q248, Q249 未用.
 | Offline Docs | db09833 | 捆绑页 |
 
 宿主 `.changelog/lang_zh-Hans.json` 有维护者未提交的改动, 本卡没有碰, 三条建议文案在看板结果行. Bun 的 `generate_markdown.py --check` 失败是只写 zh-Hans 时的预期.
+
+## 28. P5.2f-2 卡 D: imgui 成员登记与收口 (2026-11-02, 子会话 api-cov-imgui-members)
+
+### 28.1 结论
+
+imgui 返回对象的成员进了矩阵分母 (Q217 (a)): 13 个对象 309 个成员, 三列 not-portable / rhino-only (规则 imgui-rhino-only-members), pending 保持 0 / 0 / 0, pending-baseline.json 未动. 成员表由 `plugin_exports.py` 的新 kind `dts-interfaces` 从插件 `imgui.d.ts` 读取, 插件增减成员时门禁能发现. P5.2 勾选, P5 只剩 P5.3 收尾.
+
+### 28.2 数字
+
+| 指标 | 前 | 后 |
+|---|---:|---:|
+| 矩阵行数 | 3582 | 3891 (+309) |
+| 返回对象 / 成员 | 51 / 1351 | 64 / 1660 |
+| Node main / Worker / Bun not-portable | 1528 / 1531 / 1531 | 1837 / 1840 / 1840 |
+| pending | 0 / 0 / 0 | 0 / 0 / 0 |
+| doc none / mention / heading | 9 / 529 / 3044 | 9 / 564 / 3318 |
+| dts none / name | 10 / 2325 | 10 / 2634 |
+| ace none / semantic | 415 / 946 | 415 / 1255 |
+| 文档运行时块页 | 89 | 102 |
+| 工具单测 | 122 | 125 |
+
+矩阵增加的 309 行等于成员总数, 其中 Getters 150, Functions 142, GettersAndSetters 17. 309 行的 doc 是 heading 274 / mention 35, d.ts 全部 name, Ace 全部 semantic. 35 个 mention 都是 ImguiDrawList 的 PascalCase 别名, 写在该页的别名表里.
+
+| 对象 | 接口自身 | 继承 | 合计 |
+|---|---:|---:|---:|
+| ImguiSession | 66 | 4 (DialogMethods) | 70 |
+| ImguiDrawList | 71 | - | 71 |
+| ImguiFloatingButton | 24 | - | 24 |
+| ImguiDataTable | 20 | 11 (Component) | 31 |
+| ImguiLogWindow | 15 | 11 (Component) | 26 |
+| ImguiDialog | 8 | 11 (Component) | 19 |
+| ImguiToast | 7 | 11 (Component) | 18 |
+| ImguiStatsOverlay | 6 | 11 (Component) | 17 |
+| ImguiComponent | 11 | - | 11 |
+| ImguiTexture | 8 | - | 8 |
+| ImguiSelectionStorage | 6 | - | 6 |
+| ImguiMultiSelectIO | 5 | - | 5 |
+| ImguiDialogPromise | 3 | - (Promise 不列) | 3 |
+| 合计 | | | 309 |
+
+### 28.3 读取器
+
+`dts-interfaces` 读文件里每个接口一份成员表, 不产生导出行. 接口自身声明的名称遮蔽继承来的同名成员, 重载算一个成员, 嵌套对象类型里的字段不算成员. 文件之外的基类 (DialogPromise 的 `Promise`) 记入 `externalBases`, 其成员不列.
+
+独立核对: 用 Ace 捆绑的 TypeScript 6.0.3 检查器列出 69 个接口的属性, 与读取器比较. 67 个完全一致, 13 个目标接口都在内; 差异只有 `Vec2` 与 `IndexedRef` 的数字索引成员 (`0`, `1`), 这两个接口不是返回对象, 读取器不收数字名称.
+
+### 28.4 门禁反例
+
+都在 HEAD 副本里跑, 用 `AUTOJS6_IMGUI_TYPES_ROOT` 指向临时目录, 没有改动任何仓库.
+
+| 情况 | 退出码 | 行数 | 结果 |
+|---|---:|---:|---|
+| d.ts 副本的 Session 加成员 gateProbe | 1 | 3892 | 3 条失败: `ImguiSession#gateProbe (doc missing, d.ts missing, Ace none)`, MATRIX.md stale, imguiSessionType 运行时块与矩阵不符 |
+| 没有 ImGui 检出 | 0 | 3582 | imgui skipped, 对象 51, 矩阵与基线不比较 |
+
+第二行说明缺仓库时门禁等于没有, 所以 CI 必须检出. 工作流已加该仓库的检出与 `imgui_plugin_ref` 输入.
+
+### 28.5 与方案的出入
+
+- 对象是 13 个, 不是方案写的 11 个. 卡 B 按 R7.3 移交清单多写了 Dialog 与 DialogPromise, 卡 C 的声明里也有.
+- 卡片没有列文档站, 但 `--docs-support` 要求每个返回对象的页面有运行时块 (26.2 已写明由卡 D 加), 所以动了文档站与 Offline Docs. 改动只是 13 页各插一块生成内容, 文档 changelog 不用写: 这些页随 6.8.0 新增.
+- 插件 `API-COVERAGE-HANDOVER.md` 写 StatsOverlay 7 个成员, 实际 6 个. `tools/check_types.py --members` 把 `snapshot()` 返回类型里的 `history` 也算了进去; IMGUI-PLAN 1.3 的 6 是对的. Toast 7, LogWindow 15 等其余数字与读取器相同. 插件仓库本卡不碰, 留作记录.
+- 工具代码约 110 行, 比方案估的 50-80 行多: 接口头要去掉类型参数, 成员要跳过嵌套类型, 还要跟随 extends. `relative()` 顺带改为兄弟检出也输出相对路径, 否则矩阵 JSON 的 source 字段带本机绝对路径.
+
+### 28.6 验收
+
+HEAD 副本: 宿主 64ac0e706, 文档 7455375, TS 82814a1, Ace 6cfc79d, Node bd51cb89, Bun ad4eb91, ImGui 836f12f (已在 origin/master, CI 默认检出的就是它; 相对 v1.18.0 的 imgui.d.ts 只改注释, 成员不变). KSP 没有重跑: 复用共享签出的 script-modules.json (sha1 07e72243, 1355737 字节), 模块源码自 89f6a01ae (11-01 20:50) 之后没变.
+
+- `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` 退出 0, failures 空, returned-objects 报告 failures 空, MATRIX current, pending baseline current, 运行时块 102 页 current.
+- 工具单测 125 项过 (3 项跳过, 都是 augment 迁移期用例, 与本卡无关), 新增读取用例, 缺仓库 skipped 用例与矩阵规则用例.
+- 工作流其余步骤全部退出 0: 16 个 `check-runtime-*`, 7 个 `check-bun-*`, `test-dts-types.mjs`, `language_runtimes.py`, Ace `generate-runtime-api-queries.mjs --check` 与 `verify-runtime-api-coverage.mjs --fresh` (查询清单不变), TS `sync-runtime-declarations.mjs --check`, `verify-runtime-declarations.mjs`, `verify-api-coverage.mjs`.
+- 文档 `auto-generate.py --check` 当前 (189 模块), Offline Docs 的 imguiSessionType.html 与 imguiToastType.html 和文档站生成物 blob 相同.
+
+### 28.7 待决与提交
+
+没有新待决, Q251-Q255 未用.
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 64ac0e706 | plugin_exports.py, 单测, policy, returned-objects, 规则, 工作流, tools README, MATRIX.md, 同一提交 |
+| 宿主 | (本节所在提交) | ROADMAP P5.2 与 D-23, IMGUI-PLAN, 本节 |
+| 文档 | 65035cc / 7455375 | 13 个对象页运行时块, 生成物 |
+| Offline Docs | f80b11f | 捆绑页 |
+
+Ace 与 TS 没有改动. 版本没有 bump, 留给 P5.3.
