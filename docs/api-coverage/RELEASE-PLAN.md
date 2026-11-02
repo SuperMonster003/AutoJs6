@@ -6,6 +6,8 @@
 
 维护者按此清单逐仓库指示推送 (D6). 子会话只准备, 不推送; 每个仓库等维护者说 "推送 <仓库>" 后再执行, 执行结果写进 E 段. 本清单是静态快照: 没有用设备, 没有跑 Gradle, 没有推送, 没有打 tag, 只有宿主的本清单与 ROADMAP 有改动.
 
+2026-11-02 15:3x 维护者拍板: 宿主暂无 push 计划 (Q274), P7.2 现在推送除宿主外的全部仓库 (步骤 3 ~ 9), Node / Bun 只推不发版; 步骤 1 / 2 / 10 等宿主有 push 计划后再做.
+
 数字取样于 2026-11-02 15:0x ~ 15:3x. 各仓库先 `git fetch --quiet <remote>` 再算, 所以比 FINAL 第 7 节新. 宿主 HEAD 取 caca8faa7, 本清单提交后领先数 +1. 执行前用 B 段末尾的命令重算一次, 其他主题可能又有新提交.
 
 先看这 6 条, 它们是 FINAL 与 ROADMAP 没写到的:
@@ -50,15 +52,15 @@ Rhino-For-AutoJs6 不在本表: 宿主用入库的 `libs/org-mozilla-rhino-2_0_0
 
 | 编号 | 条件 | 当前状态 | 说明 |
 |---|---|---|---|
-| B1 | 宿主 6.8.0 公开 | 未满足, 维护者决定 | 宿主只本地提交. D6: 公开后再推 Node / Bun / Ace / TS. 公开方式见 Q274 |
-| B2 | Node / Bun 对最低宿主的声明 | 已满足, 无需改 (Bun 待确认 Q272) | 比较的是宿主 versionCode 6551, 不是 VERSION_BUILD 4899. Node 声明 3923 (AndroidManifest 第 105, 121 行, NodeJsPluginInfoService, 2 个测试), Q206 (a) 已决保持. Bun 声明 5278 (宿主 `plugin-api/bun-runtime-api` 的 BunRuntimeContract, 经 AAR 进插件, README 同写). 两值都低于 6551, 所以 6.8.0 宿主能安装. 公开宿主止于 6.7.0 (VERSION_BUILD 3804), 低于两个声明值; 6.8.0 公开后在 6551 以上, 高于两个声明值. 公开用户不会落在声明值与 6551 之间, 不需要为此提高 |
-| B3 | Node / Bun 版本与 3-macaw 1.4.0 协调 | 未满足, 待 Q271 | 2.1.0 / 0.22.0 没有 tag, 远端还是 2.0.0 / 0.2.6. bump 之后的提交已把条目写进 v2.1.0 / v0.22.0 节, 只差发布当天改 `released_date` (现为 2026/11/01). 3-macaw 1.4.0: 版本已是 1.4.0 且已推送, 未打 tag, Q138 评估卡 (local_fff2f977) 进行中, P9.5 未开始. 属于它的未发版提交: Node bd51cb89, Bun ad4eb91, TS 82814a1 / d830b2b / 59d3d98 / ca77091, Ace 6cfc79d / efb96ea / 3aebb44, 文档 df98878 / 23aab4b / 3c9235a. 这些随本清单推送, 两边没有先后依赖: 类型字段是可选的, 插件没到 1.4.0 时值为空, 不影响运行 |
+| B1 | 宿主 6.8.0 公开 | 维护者 2026-11-02 决定: 暂无 push 计划, 代码留本地 (Q274); C 段步骤 1 / 2 / 10 暂停 | 宿主只本地提交. D6: 公开后再推 Node / Bun / Ace / TS. 公开方式见 Q274 |
+| B2 | Node / Bun 对最低宿主的声明 | 已满足, 无需改 (Q272 (a) 已决保持 5278) | 比较的是宿主 versionCode 6551, 不是 VERSION_BUILD 4899. Node 声明 3923 (AndroidManifest 第 105, 121 行, NodeJsPluginInfoService, 2 个测试), Q206 (a) 已决保持. Bun 声明 5278 (宿主 `plugin-api/bun-runtime-api` 的 BunRuntimeContract, 经 AAR 进插件, README 同写). 两值都低于 6551, 所以 6.8.0 宿主能安装. 公开宿主止于 6.7.0 (VERSION_BUILD 3804), 低于两个声明值; 6.8.0 公开后在 6551 以上, 高于两个声明值. 公开用户不会落在声明值与 6551 之间, 不需要为此提高 |
+| B3 | Node / Bun 版本与 3-macaw 1.4.0 协调 | 已决 Q271 (a): 不改版本名, 发布当天改 released_date | 2.1.0 / 0.22.0 没有 tag, 远端还是 2.0.0 / 0.2.6. bump 之后的提交已把条目写进 v2.1.0 / v0.22.0 节, 只差发布当天改 `released_date` (现为 2026/11/01). 3-macaw 1.4.0: 版本已是 1.4.0 且已推送, 未打 tag, Q138 评估卡 (local_fff2f977) 进行中, P9.5 未开始. 属于它的未发版提交: Node bd51cb89, Bun ad4eb91, TS 82814a1 / d830b2b / 59d3d98 / ca77091, Ace 6cfc79d / efb96ea / 3aebb44, 文档 df98878 / 23aab4b / 3c9235a. 这些随本清单推送, 两边没有先后依赖: 类型字段是可选的, 插件没到 1.4.0 时值为空, 不影响运行 |
 | B4 | Ace 捆绑声明版本 | 已满足 | `BUNDLED_DECLARATIONS.md` 写 4.87.0, 与 TS package.json 一致. Q262 (b) 的 4 行在 efb96ea. 3-macaw 看板第 74 行仍写 "Ace 的 Rhino 声明同步归 P9.5.7", 已被 efb96ea 取代, 看板未改, 由 3-macaw 调度核对 |
-| B5 | TS 声明是否发 npm | 未决 Q273 | npm 现为 4.24.1 (2026-09-30, 共 11 版), 本地 4.87.0, GitHub 4.42.0. `npm pack --dry-run`: 214 个文件, 打包 2.49 MB, 解包 20.2 MB. 发布要维护者的 npm 账号, 子会话不发 |
+| B5 | TS 声明是否发 npm | 已决 Q273 (a): 发 4.87.0, 维护者 npm publish | npm 现为 4.24.1 (2026-09-30, 共 11 版), 本地 4.87.0, GitHub 4.42.0. `npm pack --dry-run`: 214 个文件, 打包 2.49 MB, 解包 20.2 MB. 发布要维护者的 npm 账号, 子会话不发 |
 | B6 | 文档站生成物与 Offline Docs 同步 | 未满足, 维护者待办 | `auto-generate.py --check` 退出 1, 6 个落后: `docs/changelog.html`, `docs/image.html`, `docs/progress.html`, `docs/runtimeApis.html`, `json/runtimeApis.json`, `docs/assets/offline-search-index.js` (eaf4d58 未生成). 跑 `generator/auto-generate-for-autojs6.bat` 后, 另要在 Offline Docs 跑 `py .python/generate_markdown.py` 并提交: 生成器不碰 README, README 现写 fileCount 232 / contentSha256 985e6d30, 实际 245 / 40e223c4, 还有 sourceBaseCommit d163293c 要核对 |
 | B7 | changelog 其他 9 种语言同步 | 未满足, 维护者待办 | TS v4.87.0, Ace v2.49.0, Node v2.1.0, Bun v0.22.0 都只有 zh-Hans (1 / 10). 文档站同样落后. `generate_markdown --check` 失败是预期: TS, Ace, Bun, 文档站. TS `.python/tests` 13 例 error, 文档站 `.python/tests` 17 例 error, Bun `.python` 38 例中 2 例 error, 三者都在各自 CI 里. 例外: Node 的 `--check` 通过, 它不查跨语言版本一致, 通过不代表已同步 |
 | B8 | 宿主 changelog 与生成物 | 未满足, 维护者待办 | `.changelog/lang_zh-Hans.json` 补本主题条目, 重新生成 CHANGELOG / README; 工作区 5 个未提交文件就是它, 本卡没碰. 另外宿主 `generate_markdown.py --check` 在 HEAD 与工作区都退出 1, 36 行 "expected N entries" (例如 ar v6.8.0 fix 194 比 150), 也就是宿主 9 种语言同样要同步, 否则 `Markdown integrity` 红 |
-| B9 | Node `Android build` 的 `unit` 作业 | 未满足, 待 Q275 | 远端 776a40668 (10-11) 到 22fd1d347 (10-30) 连续 4 次失败, `package` 与 `emulator` 随之跳过. 原因: 该作业 `lfs: false`, 而 `:app:testDebugUnitTest` 触发 CMake 链接 `libnode.so`, 读到 LFS 指针. HEAD 的作业步骤没变 (未跑 Gradle 验证). `restore-native` 只在 `package` 作业里用 |
+| B9 | Node `Android build` 的 `unit` 作业 | Q275 (a) 已决, 修复见 <本卡 Node 提交 hash, 第 2 步完成后回填> (本地, 随 P7.2 推送) | 远端 776a40668 (10-11) 到 22fd1d347 (10-30) 连续 4 次失败, `package` 与 `emulator` 随之跳过. 原因: 该作业 `lfs: false`, 而 `:app:testDebugUnitTest` 触发 CMake 链接 `libnode.so`, 读到 LFS 指针. HEAD 的作业步骤没变 (未跑 Gradle 验证). `restore-native` 只在 `package` 作业里用 |
 | B10 | 待决 Q266 | 不阻塞 | 已按推荐先行, 见 ROADMAP 附录 C |
 
 重算命令 (只更新远端引用, 不动工作区):
@@ -167,12 +169,12 @@ P7.2 每完成一个仓库填一行, 不改已填的行.
 
 ## F. 本卡新待决
 
-详情在 ROADMAP 附录 C 与看板待决区. Q271 / Q272 不阻塞, 本清单已按推荐写; Q273 / Q274 / Q275 要在 P7.2 对应步骤之前拍板.
+详情在 ROADMAP 附录 C 与看板待决区. 五项已于 2026-11-02 15:3x 全部拍板.
 
 | 编号 | 问题 | 状态 |
 |---|---|---|
-| Q271 | Node / Bun 发布版本号: 不改名, 还是 2.1.1 / 0.22.1 | 已按推荐先行待确认 |
-| Q272 | Bun 最低宿主 5278 是否保持 (与 Node 的 Q206 对称) | 已按推荐先行待确认 |
-| Q273 | TS 声明是否发 npm | 需拍板 |
-| Q274 | 宿主 6.8.0 公开方式 | 需拍板 |
-| Q275 | Node `unit` 作业长期失败, 推送前修不修 | 需拍板 |
+| Q271 | Node / Bun 发布版本号: 不改名, 还是 2.1.1 / 0.22.1 | 已决 (a) 不改名 |
+| Q272 | Bun 最低宿主 5278 是否保持 (与 Node 的 Q206 对称) | 已决 (a) 保持 5278 |
+| Q273 | TS 声明是否发 npm | 已决 (a) 发 4.87.0 |
+| Q274 | 宿主 6.8.0 公开方式 | 已决: 暂无 push 计划, 公开方式届时再定 |
+| Q275 | Node `unit` 作业长期失败, 推送前修不修 | 已决 (a) 推 Node 前修 |
