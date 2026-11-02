@@ -24,8 +24,8 @@ T10). `check.py` compares those names with the associated
 documentation pages, resolves their real TypeScript symbols, and queries the
 plugin's actual semantic and static completion providers.
 
-A module root listed in `policy.json` `deferredNameGate` (a decided deferral:
-`imgui` until P5.2f-2, roadmap Q115 (a)) keeps its documentation, d.ts and Ace
+A module root listed in `policy.json` `deferredNameGate` (a decided deferral;
+none at present, `imgui` left it in P5.2f-2, roadmap Q115 (a)) keeps its documentation, d.ts and Ace
 gaps out of the failures. `summary.json` `deferredNameGate` counts them,
 `surfaces.json` lists the paths as `deferred` (with the module aliases, `$imgui`),
 `MATRIX.md` names the root, and the matrix columns still record the gaps. The

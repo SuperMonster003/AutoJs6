@@ -940,7 +940,8 @@ class RepositoryTest(unittest.TestCase):
         for column in ['node_main', 'node_worker', 'bun']:
             self.assertEqual({(row[column]['status'], row[column].get('reason'), row[column].get('rule')) for row in public},
                              {('not-portable', 'rhino-only', 'imgui-rhino-only')}, column)
-        self.assertEqual(self.matrix['summary']['deferredNameGate']['imgui']['rows'], len(rows))
+        # P5.2f-2: documentation, d.ts and Ace cover the module, so no name gate is deferred any more.
+        self.assertEqual(self.matrix['summary']['deferredNameGate'], {})
 
     def test_p2_3(self):
         # Q18 (a): every @ScriptPrototype module is listed, its members are rows like exports, Java internals are excluded.

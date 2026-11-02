@@ -12190,6 +12190,3925 @@
         }
       ]
     },
+    "imgui": {
+      "doc": "AutoJs6 imgui API",
+      "members": [
+        {
+          "name": "bool",
+          "kind": "function",
+          "doc": "bool(value?: boolean): IndexedRef<boolean>;",
+          "signature": "bool(value?: boolean): IndexedRef<boolean>;"
+        },
+        {
+          "name": "float",
+          "kind": "function",
+          "doc": "float(value?: number): IndexedRef<number>;",
+          "signature": "float(value?: number): IndexedRef<number>;"
+        },
+        {
+          "name": "int",
+          "kind": "function",
+          "doc": "int(value?: number): IndexedRef<number>;",
+          "signature": "int(value?: number): IndexedRef<number>;"
+        },
+        {
+          "name": "string",
+          "kind": "function",
+          "doc": "string(value?: Stringifiable): IndexedRef<string>;",
+          "signature": "string(value?: Stringifiable): IndexedRef<string>;"
+        },
+        {
+          "name": "ref",
+          "kind": "function",
+          "doc": "ref<T>(value: T): ValueRef<T>;",
+          "signature": "ref<T>(value: T): ValueRef<T>;"
+        },
+        {
+          "name": "floats",
+          "kind": "function",
+          "doc": "floats(values?: readonly number[]): NativeArray<number>;",
+          "signature": "floats(values?: readonly number[]): NativeArray<number>;"
+        },
+        {
+          "name": "ints",
+          "kind": "function",
+          "doc": "ints(values?: readonly number[]): NativeArray<number>;",
+          "signature": "ints(values?: readonly number[]): NativeArray<number>;"
+        },
+        {
+          "name": "bytes",
+          "kind": "function",
+          "doc": "bytes(values?: readonly number[]): NativeArray<number>;",
+          "signature": "bytes(values?: readonly number[]): NativeArray<number>;"
+        },
+        {
+          "name": "strings",
+          "kind": "function",
+          "doc": "strings(values?: readonly Stringifiable[]): NativeArray<string>;",
+          "signature": "strings(values?: readonly Stringifiable[]): NativeArray<string>;"
+        },
+        {
+          "name": "version",
+          "kind": "function",
+          "doc": "version(): string;",
+          "signature": "version(): string;"
+        },
+        {
+          "name": "density",
+          "kind": "variable",
+          "doc": "density: number;",
+          "signature": "density: number;"
+        },
+        {
+          "name": "dp",
+          "kind": "function",
+          "doc": "dp(value: number): number;",
+          "signature": "dp(value: number): number;"
+        },
+        {
+          "name": "px",
+          "kind": "function",
+          "doc": "px(value: number): number;",
+          "signature": "px(value: number): number;"
+        },
+        {
+          "name": "Limits",
+          "kind": "variable",
+          "doc": "Limits: Readonly<{ InputTextMaxBytes: 65536; SelectionMaxItems: 512; InputQueueCapacity: 2048; DragDropPayloadMaxBytes: 65536; }>;",
+          "signature": "Limits: Readonly<{ InputTextMaxBytes: 65536; SelectionMaxItems: 512; InputQueueCapacity: 2048; DragDropPayloadMaxBytes: 65536; }>;"
+        },
+        {
+          "name": "BackendStatus",
+          "kind": "variable",
+          "doc": "BackendStatus: Readonly<{ Available: \"available\"; Experimental: \"experimental\"; Unavailable: \"unavailable\"; Deferred: \"deferred\"; }>;",
+          "signature": "BackendStatus: Readonly<{ Available: \"available\"; Experimental: \"experimental\"; Unavailable: \"unavailable\"; Deferred: \"deferred\"; }>;"
+        },
+        {
+          "name": "Cond",
+          "kind": "variable",
+          "doc": "Cond: Readonly<Record<\"None\" | \"Always\" | \"Once\" | \"FirstUseEver\" | \"Appearing\", number>>;",
+          "signature": "Cond: Readonly<Record<\"None\" | \"Always\" | \"Once\" | \"FirstUseEver\" | \"Appearing\", number>>;"
+        },
+        {
+          "name": "WindowFlags",
+          "kind": "variable",
+          "doc": "WindowFlags: Readonly<Record<\"None\" | \"NoTitleBar\" | \"NoResize\" | \"NoMove\" | \"NoScrollbar\" | \"NoScrollWithMouse\" | \"NoCollapse\" | \"AlwaysAutoResize\" | \"NoBackground\" | \"NoSavedSettings\" | \"NoMouseInputs\" | \"MenuBar\" | \"HorizontalScrollbar\" | \"NoFocusOnAppearing\" | \"NoBringToFrontOnFocus\" | \"AlwaysVerticalScrollbar\" | \"AlwaysHorizontalScrollbar\" | \"NoNavInputs\" | \"NoNavFocus\" | \"UnsavedDocument\" | \"NoNav\" | \"NoDecoration\" | \"NoInputs\", number>>;",
+          "signature": "WindowFlags: Readonly<Record<\"None\" | \"NoTitleBar\" | \"NoResize\" | \"NoMove\" | \"NoScrollbar\" | \"NoScrollWithMouse\" | \"NoCollapse\" | \"AlwaysAutoResize\" | \"NoBackground\" | \"NoSavedSettings\" | \"NoMouseInputs\" | \"MenuBar\" | \"HorizontalScrollbar\" | \"NoFocusOnAppearing\" | \"NoBringToFrontOnFocus\" | \"AlwaysVerticalScrollbar\" | \"AlwaysHorizontalScrollbar\" | \"NoNavInputs\" | \"NoNavFocus\" | \"UnsavedDocument\" | \"NoNav\" | \"NoDecoration\" | \"NoInputs\", number>>;"
+        },
+        {
+          "name": "InputTextFlags",
+          "kind": "variable",
+          "doc": "InputTextFlags: Readonly<Record<\"None\" | \"CharsDecimal\" | \"CharsHexadecimal\" | \"CharsScientific\" | \"CharsUppercase\" | \"CharsNoBlank\" | \"AllowTabInput\" | \"EnterReturnsTrue\" | \"EscapeClearsAll\" | \"CtrlEnterForNewLine\" | \"ReadOnly\" | \"Password\" | \"AlwaysOverwrite\" | \"AutoSelectAll\" | \"NoHorizontalScroll\" | \"NoUndoRedo\" | \"ElideLeft\" | \"WordWrap\", number>>;",
+          "signature": "InputTextFlags: Readonly<Record<\"None\" | \"CharsDecimal\" | \"CharsHexadecimal\" | \"CharsScientific\" | \"CharsUppercase\" | \"CharsNoBlank\" | \"AllowTabInput\" | \"EnterReturnsTrue\" | \"EscapeClearsAll\" | \"CtrlEnterForNewLine\" | \"ReadOnly\" | \"Password\" | \"AlwaysOverwrite\" | \"AutoSelectAll\" | \"NoHorizontalScroll\" | \"NoUndoRedo\" | \"ElideLeft\" | \"WordWrap\", number>>;"
+        },
+        {
+          "name": "SliderFlags",
+          "kind": "variable",
+          "doc": "SliderFlags: Readonly<Record<\"None\" | \"Logarithmic\" | \"NoRoundToFormat\" | \"NoInput\" | \"WrapAround\" | \"ClampOnInput\" | \"ClampZeroRange\" | \"NoSpeedTweaks\" | \"ColorMarkers\" | \"AlwaysClamp\", number>>;",
+          "signature": "SliderFlags: Readonly<Record<\"None\" | \"Logarithmic\" | \"NoRoundToFormat\" | \"NoInput\" | \"WrapAround\" | \"ClampOnInput\" | \"ClampZeroRange\" | \"NoSpeedTweaks\" | \"ColorMarkers\" | \"AlwaysClamp\", number>>;"
+        },
+        {
+          "name": "TreeNodeFlags",
+          "kind": "variable",
+          "doc": "TreeNodeFlags: Readonly<Record<\"None\" | \"Selected\" | \"Framed\" | \"AllowOverlap\" | \"NoTreePushOnOpen\" | \"NoAutoOpenOnLog\" | \"DefaultOpen\" | \"OpenOnDoubleClick\" | \"OpenOnArrow\" | \"Leaf\" | \"Bullet\" | \"FramePadding\" | \"SpanAvailWidth\" | \"SpanFullWidth\" | \"SpanLabelWidth\" | \"SpanAllColumns\" | \"LabelSpanAllColumns\" | \"NavLeftJumpsToParent\" | \"CollapsingHeader\", number>>;",
+          "signature": "TreeNodeFlags: Readonly<Record<\"None\" | \"Selected\" | \"Framed\" | \"AllowOverlap\" | \"NoTreePushOnOpen\" | \"NoAutoOpenOnLog\" | \"DefaultOpen\" | \"OpenOnDoubleClick\" | \"OpenOnArrow\" | \"Leaf\" | \"Bullet\" | \"FramePadding\" | \"SpanAvailWidth\" | \"SpanFullWidth\" | \"SpanLabelWidth\" | \"SpanAllColumns\" | \"LabelSpanAllColumns\" | \"NavLeftJumpsToParent\" | \"CollapsingHeader\", number>>;"
+        },
+        {
+          "name": "SelectableFlags",
+          "kind": "variable",
+          "doc": "SelectableFlags: Readonly<Record<\"None\" | \"AllowOverlap\" | \"SpanAllColumns\" | \"NoAutoClosePopups\" | \"AllowDoubleClick\" | \"Disabled\" | \"Highlight\" | \"SelectOnNav\", number>>;",
+          "signature": "SelectableFlags: Readonly<Record<\"None\" | \"AllowOverlap\" | \"SpanAllColumns\" | \"NoAutoClosePopups\" | \"AllowDoubleClick\" | \"Disabled\" | \"Highlight\" | \"SelectOnNav\", number>>;"
+        },
+        {
+          "name": "TabBarFlags",
+          "kind": "variable",
+          "doc": "TabBarFlags: Readonly<Record<\"None\" | \"Reorderable\" | \"AutoSelectNewTabs\" | \"TabListPopupButton\" | \"NoCloseWithMiddleMouseButton\" | \"NoTabListScrollingButtons\" | \"NoTooltip\" | \"DrawSelectedOverline\" | \"FittingPolicyMixed\" | \"FittingPolicyShrink\" | \"FittingPolicyScroll\", number>>;",
+          "signature": "TabBarFlags: Readonly<Record<\"None\" | \"Reorderable\" | \"AutoSelectNewTabs\" | \"TabListPopupButton\" | \"NoCloseWithMiddleMouseButton\" | \"NoTabListScrollingButtons\" | \"NoTooltip\" | \"DrawSelectedOverline\" | \"FittingPolicyMixed\" | \"FittingPolicyShrink\" | \"FittingPolicyScroll\", number>>;"
+        },
+        {
+          "name": "TabItemFlags",
+          "kind": "variable",
+          "doc": "TabItemFlags: Readonly<Record<\"None\" | \"UnsavedDocument\" | \"NoCloseWithMiddleMouseButton\" | \"NoTooltip\" | \"SetSelected\" | \"NoPushId\" | \"NoReorder\" | \"Leading\" | \"Trailing\" | \"NoAssumedClosure\", number>>;",
+          "signature": "TabItemFlags: Readonly<Record<\"None\" | \"UnsavedDocument\" | \"NoCloseWithMiddleMouseButton\" | \"NoTooltip\" | \"SetSelected\" | \"NoPushId\" | \"NoReorder\" | \"Leading\" | \"Trailing\" | \"NoAssumedClosure\", number>>;"
+        },
+        {
+          "name": "MouseButton",
+          "kind": "variable",
+          "doc": "MouseButton: Readonly<Record<\"Left\" | \"Right\" | \"Middle\", number>>;",
+          "signature": "MouseButton: Readonly<Record<\"Left\" | \"Right\" | \"Middle\", number>>;"
+        },
+        {
+          "name": "ChildFlags",
+          "kind": "variable",
+          "doc": "ChildFlags: Readonly<Record<\"None\" | \"AlwaysAutoResize\" | \"Borders\" | \"AlwaysUseWindowPadding\" | \"ResizeX\" | \"ResizeY\" | \"AutoResizeX\" | \"AutoResizeY\" | \"FrameStyle\" | \"NavFlattened\", number>>;",
+          "signature": "ChildFlags: Readonly<Record<\"None\" | \"AlwaysAutoResize\" | \"Borders\" | \"AlwaysUseWindowPadding\" | \"ResizeX\" | \"ResizeY\" | \"AutoResizeX\" | \"AutoResizeY\" | \"FrameStyle\" | \"NavFlattened\", number>>;"
+        },
+        {
+          "name": "ComboFlags",
+          "kind": "variable",
+          "doc": "ComboFlags: Readonly<Record<\"None\" | \"PopupAlignLeft\" | \"HeightSmall\" | \"HeightRegular\" | \"HeightLarge\" | \"HeightLargest\" | \"NoArrowButton\" | \"NoPreview\" | \"WidthFitPreview\", number>>;",
+          "signature": "ComboFlags: Readonly<Record<\"None\" | \"PopupAlignLeft\" | \"HeightSmall\" | \"HeightRegular\" | \"HeightLarge\" | \"HeightLargest\" | \"NoArrowButton\" | \"NoPreview\" | \"WidthFitPreview\", number>>;"
+        },
+        {
+          "name": "PopupFlags",
+          "kind": "variable",
+          "doc": "PopupFlags: Readonly<Record<\"None\" | \"MouseButtonLeft\" | \"MouseButtonRight\" | \"MouseButtonMiddle\" | \"NoReopen\" | \"NoOpenOverExistingPopup\" | \"NoOpenOverItems\" | \"AnyPopupId\" | \"AnyPopupLevel\" | \"AnyPopup\", number>>;",
+          "signature": "PopupFlags: Readonly<Record<\"None\" | \"MouseButtonLeft\" | \"MouseButtonRight\" | \"MouseButtonMiddle\" | \"NoReopen\" | \"NoOpenOverExistingPopup\" | \"NoOpenOverItems\" | \"AnyPopupId\" | \"AnyPopupLevel\" | \"AnyPopup\", number>>;"
+        },
+        {
+          "name": "HoveredFlags",
+          "kind": "variable",
+          "doc": "HoveredFlags: Readonly<Record<\"None\" | \"ChildWindows\" | \"RootWindow\" | \"AnyWindow\" | \"NoPopupHierarchy\" | \"AllowWhenBlockedByPopup\" | \"AllowWhenBlockedByActiveItem\" | \"AllowWhenOverlappedByItem\" | \"AllowWhenOverlappedByWindow\" | \"AllowWhenDisabled\" | \"NoNavOverride\" | \"AllowWhenOverlapped\" | \"RectOnly\" | \"RootAndChildWindows\" | \"ForTooltip\" | \"Stationary\" | \"DelayNone\" | \"DelayShort\" | \"DelayNormal\" | \"NoSharedDelay\", number>>;",
+          "signature": "HoveredFlags: Readonly<Record<\"None\" | \"ChildWindows\" | \"RootWindow\" | \"AnyWindow\" | \"NoPopupHierarchy\" | \"AllowWhenBlockedByPopup\" | \"AllowWhenBlockedByActiveItem\" | \"AllowWhenOverlappedByItem\" | \"AllowWhenOverlappedByWindow\" | \"AllowWhenDisabled\" | \"NoNavOverride\" | \"AllowWhenOverlapped\" | \"RectOnly\" | \"RootAndChildWindows\" | \"ForTooltip\" | \"Stationary\" | \"DelayNone\" | \"DelayShort\" | \"DelayNormal\" | \"NoSharedDelay\", number>>;"
+        },
+        {
+          "name": "FocusedFlags",
+          "kind": "variable",
+          "doc": "FocusedFlags: Readonly<Record<\"None\" | \"ChildWindows\" | \"RootWindow\" | \"AnyWindow\" | \"NoPopupHierarchy\" | \"RootAndChildWindows\", number>>;",
+          "signature": "FocusedFlags: Readonly<Record<\"None\" | \"ChildWindows\" | \"RootWindow\" | \"AnyWindow\" | \"NoPopupHierarchy\" | \"RootAndChildWindows\", number>>;"
+        },
+        {
+          "name": "ColorEditFlags",
+          "kind": "variable",
+          "doc": "ColorEditFlags: Readonly<Record<\"None\" | \"NoInputs\" | \"NoTooltip\" | \"NoAlpha\" | \"NoPicker\" | \"NoOptions\" | \"NoSmallPreview\" | \"NoLabel\" | \"NoSidePreview\" | \"NoDragDrop\" | \"NoBorder\" | \"NoColorMarkers\" | \"AlphaOpaque\" | \"AlphaNoBg\" | \"AlphaPreviewHalf\" | \"AlphaBar\" | \"HDR\" | \"DisplayRGB\" | \"DisplayHSV\" | \"DisplayHex\" | \"Uint8\" | \"Float\" | \"PickerHueBar\" | \"PickerHueWheel\" | \"PickerNoRotate\" | \"InputRGB\" | \"InputHSV\", number>>;",
+          "signature": "ColorEditFlags: Readonly<Record<\"None\" | \"NoInputs\" | \"NoTooltip\" | \"NoAlpha\" | \"NoPicker\" | \"NoOptions\" | \"NoSmallPreview\" | \"NoLabel\" | \"NoSidePreview\" | \"NoDragDrop\" | \"NoBorder\" | \"NoColorMarkers\" | \"AlphaOpaque\" | \"AlphaNoBg\" | \"AlphaPreviewHalf\" | \"AlphaBar\" | \"HDR\" | \"DisplayRGB\" | \"DisplayHSV\" | \"DisplayHex\" | \"Uint8\" | \"Float\" | \"PickerHueBar\" | \"PickerHueWheel\" | \"PickerNoRotate\" | \"InputRGB\" | \"InputHSV\", number>>;"
+        },
+        {
+          "name": "TableFlags",
+          "kind": "variable",
+          "doc": "TableFlags: Readonly<Record<\"None\" | \"NoSavedSettings\" | \"Reorderable\" | \"Borders\" | \"Resizable\" | \"Hideable\" | \"Sortable\" | \"ContextMenuInBody\" | \"RowBg\" | \"BordersInnerH\" | \"BordersOuterH\" | \"BordersInnerV\" | \"BordersOuterV\" | \"BordersH\" | \"BordersV\" | \"BordersInner\" | \"BordersOuter\" | \"NoBordersInBody\" | \"NoBordersInBodyUntilResize\" | \"SizingFixedFit\" | \"SizingFixedSame\" | \"SizingStretchProp\" | \"SizingStretchSame\" | \"NoHostExtendX\" | \"NoHostExtendY\" | \"NoKeepColumnsVisible\" | \"PreciseWidths\" | \"NoClip\" | \"PadOuterX\" | \"NoPadOuterX\" | \"NoPadInnerX\" | \"ScrollX\" | \"ScrollY\" | \"SortMulti\" | \"SortTristate\" | \"HighlightHoveredColumn\", number>>;",
+          "signature": "TableFlags: Readonly<Record<\"None\" | \"NoSavedSettings\" | \"Reorderable\" | \"Borders\" | \"Resizable\" | \"Hideable\" | \"Sortable\" | \"ContextMenuInBody\" | \"RowBg\" | \"BordersInnerH\" | \"BordersOuterH\" | \"BordersInnerV\" | \"BordersOuterV\" | \"BordersH\" | \"BordersV\" | \"BordersInner\" | \"BordersOuter\" | \"NoBordersInBody\" | \"NoBordersInBodyUntilResize\" | \"SizingFixedFit\" | \"SizingFixedSame\" | \"SizingStretchProp\" | \"SizingStretchSame\" | \"NoHostExtendX\" | \"NoHostExtendY\" | \"NoKeepColumnsVisible\" | \"PreciseWidths\" | \"NoClip\" | \"PadOuterX\" | \"NoPadOuterX\" | \"NoPadInnerX\" | \"ScrollX\" | \"ScrollY\" | \"SortMulti\" | \"SortTristate\" | \"HighlightHoveredColumn\", number>>;"
+        },
+        {
+          "name": "TableColumnFlags",
+          "kind": "variable",
+          "doc": "TableColumnFlags: Readonly<Record<\"None\" | \"NoResize\" | \"Disabled\" | \"NoReorder\" | \"NoClip\" | \"DefaultHide\" | \"DefaultSort\" | \"WidthStretch\" | \"WidthFixed\" | \"NoHide\" | \"NoSort\" | \"NoSortAscending\" | \"NoSortDescending\" | \"NoHeaderLabel\" | \"NoHeaderWidth\" | \"PreferSortAscending\" | \"PreferSortDescending\" | \"IndentEnable\" | \"IndentDisable\" | \"AngledHeader\" | \"IsEnabled\" | \"IsVisible\" | \"IsSorted\" | \"IsHovered\", number>>;",
+          "signature": "TableColumnFlags: Readonly<Record<\"None\" | \"NoResize\" | \"Disabled\" | \"NoReorder\" | \"NoClip\" | \"DefaultHide\" | \"DefaultSort\" | \"WidthStretch\" | \"WidthFixed\" | \"NoHide\" | \"NoSort\" | \"NoSortAscending\" | \"NoSortDescending\" | \"NoHeaderLabel\" | \"NoHeaderWidth\" | \"PreferSortAscending\" | \"PreferSortDescending\" | \"IndentEnable\" | \"IndentDisable\" | \"AngledHeader\" | \"IsEnabled\" | \"IsVisible\" | \"IsSorted\" | \"IsHovered\", number>>;"
+        },
+        {
+          "name": "TableRowFlags",
+          "kind": "variable",
+          "doc": "TableRowFlags: Readonly<Record<\"None\" | \"Headers\", number>>;",
+          "signature": "TableRowFlags: Readonly<Record<\"None\" | \"Headers\", number>>;"
+        },
+        {
+          "name": "TableBgTarget",
+          "kind": "variable",
+          "doc": "TableBgTarget: Readonly<Record<\"None\" | \"RowBg0\" | \"RowBg1\" | \"CellBg\", number>>;",
+          "signature": "TableBgTarget: Readonly<Record<\"None\" | \"RowBg0\" | \"RowBg1\" | \"CellBg\", number>>;"
+        },
+        {
+          "name": "SortDirection",
+          "kind": "variable",
+          "doc": "SortDirection: Readonly<Record<\"None\" | \"Ascending\" | \"Descending\", number>>;",
+          "signature": "SortDirection: Readonly<Record<\"None\" | \"Ascending\" | \"Descending\", number>>;"
+        },
+        {
+          "name": "Col",
+          "kind": "variable",
+          "doc": "Col: Readonly<Record<ColName, number>>;",
+          "signature": "Col: Readonly<Record<ColName, number>>;"
+        },
+        {
+          "name": "StyleVar",
+          "kind": "variable",
+          "doc": "StyleVar: Readonly<Record<StyleVarName, number>>;",
+          "signature": "StyleVar: Readonly<Record<StyleVarName, number>>;"
+        },
+        {
+          "name": "Themes",
+          "kind": "variable",
+          "doc": "Themes: Readonly<{ Dark: \"dark\"; Light: \"light\"; Classic: \"classic\"; Pink: \"pink\"; Blue: \"blue\"; ModernDark: \"modern-dark\"; CyanDusk: \"cyan-dusk\"; OrangeDark: \"orange-dark\"; CrystalClear: \"crystal-clear\"; VibrantNight: \"vibrant-night\"; PurpleDream: \"purple-dream\"; }>;",
+          "signature": "Themes: Readonly<{ Dark: \"dark\"; Light: \"light\"; Classic: \"classic\"; Pink: \"pink\"; Blue: \"blue\"; ModernDark: \"modern-dark\"; CyanDusk: \"cyan-dusk\"; OrangeDark: \"orange-dark\"; CrystalClear: \"crystal-clear\"; VibrantNight: \"vibrant-night\"; PurpleDream: \"purple-dream\"; }>;"
+        },
+        {
+          "name": "Appearance",
+          "kind": "variable",
+          "doc": "Appearance: Readonly<{ Flat: \"flat\"; Rounded: \"rounded\"; Card: \"card\"; }>;",
+          "signature": "Appearance: Readonly<{ Flat: \"flat\"; Rounded: \"rounded\"; Card: \"card\"; }>;"
+        },
+        {
+          "name": "Fonts",
+          "kind": "variable",
+          "doc": "Fonts: Readonly<Record<\"Default\" | \"CjkFallback\" | \"Icons\", number>>;",
+          "signature": "Fonts: Readonly<Record<\"Default\" | \"CjkFallback\" | \"Icons\", number>>;"
+        },
+        {
+          "name": "TextureFlags",
+          "kind": "variable",
+          "doc": "TextureFlags: Readonly<Record<\"None\" | \"Nearest\" | \"Repeat\" | \"Mipmaps\", number>>;",
+          "signature": "TextureFlags: Readonly<Record<\"None\" | \"Nearest\" | \"Repeat\" | \"Mipmaps\", number>>;"
+        },
+        {
+          "name": "DrawListLayer",
+          "kind": "variable",
+          "doc": "DrawListLayer: Readonly<Record<\"Window\" | \"Foreground\" | \"Background\", number>>;",
+          "signature": "DrawListLayer: Readonly<Record<\"Window\" | \"Foreground\" | \"Background\", number>>;"
+        },
+        {
+          "name": "DrawFlags",
+          "kind": "variable",
+          "doc": "DrawFlags: Readonly<Record<\"None\" | \"RoundCornersTopLeft\" | \"RoundCornersTopRight\" | \"RoundCornersBottomLeft\" | \"RoundCornersBottomRight\" | \"RoundCornersNone\" | \"RoundCornersAll\" | \"RoundCornersTop\" | \"RoundCornersBottom\" | \"RoundCornersLeft\" | \"RoundCornersRight\" | \"Closed\", number>>;",
+          "signature": "DrawFlags: Readonly<Record<\"None\" | \"RoundCornersTopLeft\" | \"RoundCornersTopRight\" | \"RoundCornersBottomLeft\" | \"RoundCornersBottomRight\" | \"RoundCornersNone\" | \"RoundCornersAll\" | \"RoundCornersTop\" | \"RoundCornersBottom\" | \"RoundCornersLeft\" | \"RoundCornersRight\" | \"Closed\", number>>;"
+        },
+        {
+          "name": "TouchMode",
+          "kind": "variable",
+          "doc": "TouchMode: Readonly<{ Touchable: \"touchable\"; Passthrough: \"passthrough\"; Auto: \"auto\"; }>;",
+          "signature": "TouchMode: Readonly<{ Touchable: \"touchable\"; Passthrough: \"passthrough\"; Auto: \"auto\"; }>;"
+        },
+        {
+          "name": "WindowMode",
+          "kind": "variable",
+          "doc": "WindowMode: Readonly<{ Overlay: \"overlay\"; Activity: \"activity\"; Privileged: \"privileged\"; }>;",
+          "signature": "WindowMode: Readonly<{ Overlay: \"overlay\"; Activity: \"activity\"; Privileged: \"privileged\"; }>;"
+        },
+        {
+          "name": "LogLevel",
+          "kind": "variable",
+          "doc": "LogLevel: Readonly<{ Log: \"log\"; Debug: \"debug\"; Info: \"info\"; Warn: \"warn\"; Error: \"error\"; }>;",
+          "signature": "LogLevel: Readonly<{ Log: \"log\"; Debug: \"debug\"; Info: \"info\"; Warn: \"warn\"; Error: \"error\"; }>;"
+        },
+        {
+          "name": "ToastPosition",
+          "kind": "variable",
+          "doc": "ToastPosition: Readonly<{ TopLeft: \"top-left\"; TopCenter: \"top-center\"; TopRight: \"top-right\"; Center: \"center\"; BottomLeft: \"bottom-left\"; BottomCenter: \"bottom-center\"; BottomRight: \"bottom-right\"; }>;",
+          "signature": "ToastPosition: Readonly<{ TopLeft: \"top-left\"; TopCenter: \"top-center\"; TopRight: \"top-right\"; Center: \"center\"; BottomLeft: \"bottom-left\"; BottomCenter: \"bottom-center\"; BottomRight: \"bottom-right\"; }>;"
+        },
+        {
+          "name": "Icons",
+          "kind": "variable",
+          "doc": "Icons: Readonly<Record<\"Refresh\" | \"Search\" | \"Info\" | \"Error\" | \"Warning\" | \"Pause\" | \"Play\" | \"Stop\" | \"Add\" | \"Copy\" | \"Save\" | \"Download\" | \"Upload\" | \"Edit\" | \"ArrowBack\" | \"ArrowForward\" | \"Check\" | \"ChevronLeft\" | \"ChevronRight\" | \"Close\" | \"ExpandLess\" | \"ExpandMore\" | \"Menu\" | \"MoreHoriz\" | \"MoreVert\" | \"Person\" | \"Star\" | \"BugReport\" | \"Code\" | \"Delete\" | \"DoneAll\" | \"Favorite\" | \"Home\" | \"Lock\" | \"LockOpen\" | \"Settings\" | \"Visibility\" | \"VisibilityOff\", string>>;",
+          "signature": "Icons: Readonly<Record<\"Refresh\" | \"Search\" | \"Info\" | \"Error\" | \"Warning\" | \"Pause\" | \"Play\" | \"Stop\" | \"Add\" | \"Copy\" | \"Save\" | \"Download\" | \"Upload\" | \"Edit\" | \"ArrowBack\" | \"ArrowForward\" | \"Check\" | \"ChevronLeft\" | \"ChevronRight\" | \"Close\" | \"ExpandLess\" | \"ExpandMore\" | \"Menu\" | \"MoreHoriz\" | \"MoreVert\" | \"Person\" | \"Star\" | \"BugReport\" | \"Code\" | \"Delete\" | \"DoneAll\" | \"Favorite\" | \"Home\" | \"Lock\" | \"LockOpen\" | \"Settings\" | \"Visibility\" | \"VisibilityOff\", string>>;"
+        },
+        {
+          "name": "Dir",
+          "kind": "variable",
+          "doc": "Dir: Readonly<Record<\"None\" | \"Left\" | \"Right\" | \"Up\" | \"Down\", number>>;",
+          "signature": "Dir: Readonly<Record<\"None\" | \"Left\" | \"Right\" | \"Up\" | \"Down\", number>>;"
+        },
+        {
+          "name": "ButtonFlags",
+          "kind": "variable",
+          "doc": "ButtonFlags: Readonly<Record<\"None\" | \"MouseButtonLeft\" | \"MouseButtonRight\" | \"MouseButtonMiddle\" | \"EnableNav\", number>>;",
+          "signature": "ButtonFlags: Readonly<Record<\"None\" | \"MouseButtonLeft\" | \"MouseButtonRight\" | \"MouseButtonMiddle\" | \"EnableNav\", number>>;"
+        },
+        {
+          "name": "Key",
+          "kind": "variable",
+          "doc": "Key: Readonly<Record<\"Tab\" | \"None\" | \"Pause\" | \"Menu\" | \"Delete\" | \"Home\" | \"LeftArrow\" | \"RightArrow\" | \"UpArrow\" | \"DownArrow\" | \"PageUp\" | \"PageDown\" | \"End\" | \"Insert\" | \"Backspace\" | \"Space\" | \"Enter\" | \"Escape\" | \"LeftCtrl\" | \"LeftShift\" | \"LeftAlt\" | \"LeftSuper\" | \"RightCtrl\" | \"RightShift\" | \"RightAlt\" | \"RightSuper\" | \"Digit0\" | \"Digit1\" | \"Digit2\" | \"Digit3\" | \"Digit4\" | \"Digit5\" | \"Digit6\" | \"Digit7\" | \"Digit8\" | \"Digit9\" | \"A\" | \"B\" | \"C\" | \"D\" | \"E\" | \"F\" | \"G\" | \"H\" | \"I\" | \"J\" | \"K\" | \"L\" | \"M\" | \"N\" | \"O\" | \"P\" | \"Q\" | \"R\" | \"S\" | \"T\" | \"U\" | \"V\" | \"W\" | \"X\" | \"Y\" | \"Z\" | \"F1\" | \"F2\" | \"F3\" | \"F4\" | \"F5\" | \"F6\" | \"F7\" | \"F8\" | \"F9\" | \"F10\" | \"F11\" | \"F12\" | \"F13\" | \"F14\" | \"F15\" | \"F16\" | \"F17\" | \"F18\" | \"F19\" | \"F20\" | \"F21\" | \"F22\" | \"F23\" | \"F24\" | \"Apostrophe\" | \"Comma\" | \"Minus\" | \"Period\" | \"Slash\" | \"Semicolon\" | \"Equal\" | \"LeftBracket\" | \"Backslash\" | \"RightBracket\" | \"GraveAccent\" | \"CapsLock\" | \"ScrollLock\" | \"NumLock\" | \"PrintScreen\" | \"Keypad0\" | \"Keypad1\" | \"Keypad2\" | \"Keypad3\" | \"Keypad4\" | \"Keypad5\" | \"Keypad6\" | \"Keypad7\" | \"Keypad8\" | \"Keypad9\" | \"KeypadDecimal\" | \"KeypadDivide\" | \"KeypadMultiply\" | \"KeypadSubtract\" | \"KeypadAdd\" | \"KeypadEnter\" | \"KeypadEqual\" | \"AppBack\" | \"AppForward\" | \"Oem102\" | \"ModCtrl\" | \"ModShift\" | \"ModAlt\" | \"ModSuper\", number>>;",
+          "signature": "Key: Readonly<Record<\"Tab\" | \"None\" | \"Pause\" | \"Menu\" | \"Delete\" | \"Home\" | \"LeftArrow\" | \"RightArrow\" | \"UpArrow\" | \"DownArrow\" | \"PageUp\" | \"PageDown\" | \"End\" | \"Insert\" | \"Backspace\" | \"Space\" | \"Enter\" | \"Escape\" | \"LeftCtrl\" | \"LeftShift\" | \"LeftAlt\" | \"LeftSuper\" | \"RightCtrl\" | \"RightShift\" | \"RightAlt\" | \"RightSuper\" | \"Digit0\" | \"Digit1\" | \"Digit2\" | \"Digit3\" | \"Digit4\" | \"Digit5\" | \"Digit6\" | \"Digit7\" | \"Digit8\" | \"Digit9\" | \"A\" | \"B\" | \"C\" | \"D\" | \"E\" | \"F\" | \"G\" | \"H\" | \"I\" | \"J\" | \"K\" | \"L\" | \"M\" | \"N\" | \"O\" | \"P\" | \"Q\" | \"R\" | \"S\" | \"T\" | \"U\" | \"V\" | \"W\" | \"X\" | \"Y\" | \"Z\" | \"F1\" | \"F2\" | \"F3\" | \"F4\" | \"F5\" | \"F6\" | \"F7\" | \"F8\" | \"F9\" | \"F10\" | \"F11\" | \"F12\" | \"F13\" | \"F14\" | \"F15\" | \"F16\" | \"F17\" | \"F18\" | \"F19\" | \"F20\" | \"F21\" | \"F22\" | \"F23\" | \"F24\" | \"Apostrophe\" | \"Comma\" | \"Minus\" | \"Period\" | \"Slash\" | \"Semicolon\" | \"Equal\" | \"LeftBracket\" | \"Backslash\" | \"RightBracket\" | \"GraveAccent\" | \"CapsLock\" | \"ScrollLock\" | \"NumLock\" | \"PrintScreen\" | \"Keypad0\" | \"Keypad1\" | \"Keypad2\" | \"Keypad3\" | \"Keypad4\" | \"Keypad5\" | \"Keypad6\" | \"Keypad7\" | \"Keypad8\" | \"Keypad9\" | \"KeypadDecimal\" | \"KeypadDivide\" | \"KeypadMultiply\" | \"KeypadSubtract\" | \"KeypadAdd\" | \"KeypadEnter\" | \"KeypadEqual\" | \"AppBack\" | \"AppForward\" | \"Oem102\" | \"ModCtrl\" | \"ModShift\" | \"ModAlt\" | \"ModSuper\", number>>;"
+        },
+        {
+          "name": "Mod",
+          "kind": "variable",
+          "doc": "Mod: Readonly<Record<\"None\" | \"Ctrl\" | \"Shift\" | \"Alt\" | \"Super\", number>>;",
+          "signature": "Mod: Readonly<Record<\"None\" | \"Ctrl\" | \"Shift\" | \"Alt\" | \"Super\", number>>;"
+        },
+        {
+          "name": "InputFlags",
+          "kind": "variable",
+          "doc": "InputFlags: Readonly<Record<\"Tooltip\" | \"None\" | \"Repeat\" | \"RouteActive\" | \"RouteFocused\" | \"RouteGlobal\" | \"RouteAlways\" | \"RouteOverFocused\" | \"RouteOverActive\" | \"RouteUnlessBgFocused\" | \"RouteFromRootWindow\", number>>;",
+          "signature": "InputFlags: Readonly<Record<\"Tooltip\" | \"None\" | \"Repeat\" | \"RouteActive\" | \"RouteFocused\" | \"RouteGlobal\" | \"RouteAlways\" | \"RouteOverFocused\" | \"RouteOverActive\" | \"RouteUnlessBgFocused\" | \"RouteFromRootWindow\", number>>;"
+        },
+        {
+          "name": "DragDropFlags",
+          "kind": "variable",
+          "doc": "DragDropFlags: Readonly<Record<\"None\" | \"SourceNoPreviewTooltip\" | \"SourceNoDisableHover\" | \"SourceNoHoldToOpenOthers\" | \"SourceAllowNullID\" | \"SourceExtern\" | \"PayloadAutoExpire\" | \"PayloadNoCrossContext\" | \"PayloadNoCrossProcess\" | \"AcceptBeforeDelivery\" | \"AcceptNoDrawDefaultRect\" | \"AcceptNoPreviewTooltip\" | \"AcceptDrawAsHovered\" | \"AcceptPeekOnly\", number>>;",
+          "signature": "DragDropFlags: Readonly<Record<\"None\" | \"SourceNoPreviewTooltip\" | \"SourceNoDisableHover\" | \"SourceNoHoldToOpenOthers\" | \"SourceAllowNullID\" | \"SourceExtern\" | \"PayloadAutoExpire\" | \"PayloadNoCrossContext\" | \"PayloadNoCrossProcess\" | \"AcceptBeforeDelivery\" | \"AcceptNoDrawDefaultRect\" | \"AcceptNoPreviewTooltip\" | \"AcceptDrawAsHovered\" | \"AcceptPeekOnly\", number>>;"
+        },
+        {
+          "name": "MultiSelectFlags",
+          "kind": "variable",
+          "doc": "MultiSelectFlags: Readonly<Record<\"None\" | \"SingleSelect\" | \"NoSelectAll\" | \"NoRangeSelect\" | \"NoAutoSelect\" | \"NoAutoClear\" | \"NoAutoClearOnReselect\" | \"BoxSelect1d\" | \"BoxSelect2d\" | \"BoxSelectNoScroll\" | \"ClearOnEscape\" | \"ClearOnClickVoid\" | \"ScopeWindow\" | \"ScopeRect\" | \"SelectOnAuto\" | \"SelectOnClickAlways\" | \"SelectOnClickRelease\" | \"NavWrapX\" | \"NoSelectOnRightClick\", number>>;",
+          "signature": "MultiSelectFlags: Readonly<Record<\"None\" | \"SingleSelect\" | \"NoSelectAll\" | \"NoRangeSelect\" | \"NoAutoSelect\" | \"NoAutoClear\" | \"NoAutoClearOnReselect\" | \"BoxSelect1d\" | \"BoxSelect2d\" | \"BoxSelectNoScroll\" | \"ClearOnEscape\" | \"ClearOnClickVoid\" | \"ScopeWindow\" | \"ScopeRect\" | \"SelectOnAuto\" | \"SelectOnClickAlways\" | \"SelectOnClickRelease\" | \"NavWrapX\" | \"NoSelectOnRightClick\", number>>;"
+        },
+        {
+          "name": "getBackendCapabilities",
+          "kind": "function",
+          "doc": "getBackendCapabilities(): BackendCapabilities;",
+          "signature": "getBackendCapabilities(): BackendCapabilities;"
+        },
+        {
+          "name": "listExamples",
+          "kind": "function",
+          "doc": "listExamples(): string[];",
+          "signature": "listExamples(): string[];"
+        },
+        {
+          "name": "getExampleSource",
+          "kind": "function",
+          "doc": "getExampleSource(name: string): string;",
+          "signature": "getExampleSource(name: string): string;"
+        },
+        {
+          "name": "runExample",
+          "kind": "function",
+          "doc": "runExample(name: string, options?: ExampleOptions): Session;",
+          "signature": "runExample(name: string, options?: ExampleOptions): Session;"
+        },
+        {
+          "name": "colorU32",
+          "kind": "function",
+          "doc": "colorU32(red: number | Color, green?: number, blue?: number, alpha?: number): number;",
+          "signature": "colorU32(red: number | Color, green?: number, blue?: number, alpha?: number): number;"
+        },
+        {
+          "name": "icon",
+          "kind": "function",
+          "doc": "icon(name: string, label?: Stringifiable): string;",
+          "signature": "icon(name: string, label?: Stringifiable): string;"
+        },
+        {
+          "name": "setNextWindowPos",
+          "kind": "function",
+          "doc": "setNextWindowPos(x: number, y: number, condition?: number, pivotX?: number, pivotY?: number): void;",
+          "signature": "setNextWindowPos(x: number, y: number, condition?: number, pivotX?: number, pivotY?: number): void;"
+        },
+        {
+          "name": "setNextWindowSize",
+          "kind": "function",
+          "doc": "setNextWindowSize(width: number, height: number, condition?: number): void;",
+          "signature": "setNextWindowSize(width: number, height: number, condition?: number): void;"
+        },
+        {
+          "name": "setNextWindowSizeConstraints",
+          "kind": "function",
+          "doc": "setNextWindowSizeConstraints(minWidth: number, minHeight: number, maxWidth: number, maxHeight: number): void;",
+          "signature": "setNextWindowSizeConstraints(minWidth: number, minHeight: number, maxWidth: number, maxHeight: number): void;"
+        },
+        {
+          "name": "setNextWindowBgAlpha",
+          "kind": "function",
+          "doc": "setNextWindowBgAlpha(alpha: number): void;",
+          "signature": "setNextWindowBgAlpha(alpha: number): void;"
+        },
+        {
+          "name": "setNextWindowFocus",
+          "kind": "function",
+          "doc": "setNextWindowFocus(): void;",
+          "signature": "setNextWindowFocus(): void;"
+        },
+        {
+          "name": "setNextWindowCollapsed",
+          "kind": "function",
+          "doc": "setNextWindowCollapsed(collapsed: boolean, condition?: number): void;",
+          "signature": "setNextWindowCollapsed(collapsed: boolean, condition?: number): void;"
+        },
+        {
+          "name": "setKeyboardFocusHere",
+          "kind": "function",
+          "doc": "setKeyboardFocusHere(offset?: number): void;",
+          "signature": "setKeyboardFocusHere(offset?: number): void;"
+        },
+        {
+          "name": "begin",
+          "kind": "function",
+          "doc": "begin(name: string, open?: MutableValue<boolean> | null, flags?: number): boolean;",
+          "signature": "begin(name: string, open?: MutableValue<boolean> | null, flags?: number): boolean;"
+        },
+        {
+          "name": "end",
+          "kind": "function",
+          "doc": "end(): void;",
+          "signature": "end(): void;"
+        },
+        {
+          "name": "beginChild",
+          "kind": "function",
+          "doc": "beginChild(id: string, width?: number, height?: number, borders?: boolean | number, flags?: number): boolean;",
+          "signature": "beginChild(id: string, width?: number, height?: number, borders?: boolean | number, flags?: number): boolean;"
+        },
+        {
+          "name": "endChild",
+          "kind": "function",
+          "doc": "endChild(): void;",
+          "signature": "endChild(): void;"
+        },
+        {
+          "name": "getWindowPos",
+          "kind": "function",
+          "doc": "getWindowPos(): Vec2;",
+          "signature": "getWindowPos(): Vec2;"
+        },
+        {
+          "name": "getWindowSize",
+          "kind": "function",
+          "doc": "getWindowSize(): Vec2;",
+          "signature": "getWindowSize(): Vec2;"
+        },
+        {
+          "name": "getContentRegionAvail",
+          "kind": "function",
+          "doc": "getContentRegionAvail(): Vec2;",
+          "signature": "getContentRegionAvail(): Vec2;"
+        },
+        {
+          "name": "getCursorPos",
+          "kind": "function",
+          "doc": "getCursorPos(): Vec2;",
+          "signature": "getCursorPos(): Vec2;"
+        },
+        {
+          "name": "setCursorPos",
+          "kind": "function",
+          "doc": "setCursorPos(x: number, y: number): void;",
+          "signature": "setCursorPos(x: number, y: number): void;"
+        },
+        {
+          "name": "text",
+          "kind": "function",
+          "doc": "text(value: Stringifiable): void;",
+          "signature": "text(value: Stringifiable): void;"
+        },
+        {
+          "name": "textWrapped",
+          "kind": "function",
+          "doc": "textWrapped(value: Stringifiable): void;",
+          "signature": "textWrapped(value: Stringifiable): void;"
+        },
+        {
+          "name": "textColored",
+          "kind": "function",
+          "doc": "textColored(color: Color, value: Stringifiable): void;",
+          "signature": "textColored(color: Color, value: Stringifiable): void;",
+          "signatures": [
+            "textColored(color: Color, value: Stringifiable): void;",
+            "textColored(red: number, green: number, blue: number, alpha: number, value: Stringifiable): void;"
+          ]
+        },
+        {
+          "name": "button",
+          "kind": "function",
+          "doc": "button(label: string, width?: number, height?: number): boolean;",
+          "signature": "button(label: string, width?: number, height?: number): boolean;"
+        },
+        {
+          "name": "smallButton",
+          "kind": "function",
+          "doc": "smallButton(label: string): boolean;",
+          "signature": "smallButton(label: string): boolean;"
+        },
+        {
+          "name": "checkbox",
+          "kind": "function",
+          "doc": "checkbox(label: string, value: MutableValue<boolean>): boolean;",
+          "signature": "checkbox(label: string, value: MutableValue<boolean>): boolean;"
+        },
+        {
+          "name": "radioButton",
+          "kind": "function",
+          "doc": "radioButton(label: string, value: MutableValue<number>, buttonValue: number): boolean;",
+          "signature": "radioButton(label: string, value: MutableValue<number>, buttonValue: number): boolean;"
+        },
+        {
+          "name": "sliderFloat",
+          "kind": "function",
+          "doc": "sliderFloat(label: string, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;",
+          "signature": "sliderFloat(label: string, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "sliderInt",
+          "kind": "function",
+          "doc": "sliderInt(label: string, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;",
+          "signature": "sliderInt(label: string, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "dragFloat",
+          "kind": "function",
+          "doc": "dragFloat(label: string, value: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "dragFloat(label: string, value: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "dragInt",
+          "kind": "function",
+          "doc": "dragInt(label: string, value: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "dragInt(label: string, value: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "inputText",
+          "kind": "function",
+          "doc": "inputText(label: string, value: MutableValue<string>, maxLength?: number, flags?: number): boolean;",
+          "signature": "inputText(label: string, value: MutableValue<string>, maxLength?: number, flags?: number): boolean;"
+        },
+        {
+          "name": "colorEdit3",
+          "kind": "function",
+          "doc": "colorEdit3(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;",
+          "signature": "colorEdit3(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;"
+        },
+        {
+          "name": "colorEdit4",
+          "kind": "function",
+          "doc": "colorEdit4(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;",
+          "signature": "colorEdit4(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;"
+        },
+        {
+          "name": "progressBar",
+          "kind": "function",
+          "doc": "progressBar(fraction: number, width?: number, height?: number, overlay?: string): void;",
+          "signature": "progressBar(fraction: number, width?: number, height?: number, overlay?: string): void;"
+        },
+        {
+          "name": "combo",
+          "kind": "function",
+          "doc": "combo(label: string, currentItem: MutableValue<number>, items: readonly Stringifiable[], popupHeight?: number): boolean;",
+          "signature": "combo(label: string, currentItem: MutableValue<number>, items: readonly Stringifiable[], popupHeight?: number): boolean;"
+        },
+        {
+          "name": "selectable",
+          "kind": "function",
+          "doc": "selectable(label: string, selected?: boolean, flags?: number, width?: number, height?: number): boolean;",
+          "signature": "selectable(label: string, selected?: boolean, flags?: number, width?: number, height?: number): boolean;"
+        },
+        {
+          "name": "collapsingHeader",
+          "kind": "function",
+          "doc": "collapsingHeader(label: string, flags?: number): boolean;",
+          "signature": "collapsingHeader(label: string, flags?: number): boolean;"
+        },
+        {
+          "name": "treeNode",
+          "kind": "function",
+          "doc": "treeNode(label: string): boolean;",
+          "signature": "treeNode(label: string): boolean;"
+        },
+        {
+          "name": "treePop",
+          "kind": "function",
+          "doc": "treePop(): void;",
+          "signature": "treePop(): void;"
+        },
+        {
+          "name": "beginTabBar",
+          "kind": "function",
+          "doc": "beginTabBar(id: string, flags?: number): boolean;",
+          "signature": "beginTabBar(id: string, flags?: number): boolean;"
+        },
+        {
+          "name": "endTabBar",
+          "kind": "function",
+          "doc": "endTabBar(): void;",
+          "signature": "endTabBar(): void;"
+        },
+        {
+          "name": "beginTabItem",
+          "kind": "function",
+          "doc": "beginTabItem(label: string, open?: MutableValue<boolean> | null, flags?: number): boolean;",
+          "signature": "beginTabItem(label: string, open?: MutableValue<boolean> | null, flags?: number): boolean;"
+        },
+        {
+          "name": "endTabItem",
+          "kind": "function",
+          "doc": "endTabItem(): void;",
+          "signature": "endTabItem(): void;"
+        },
+        {
+          "name": "sameLine",
+          "kind": "function",
+          "doc": "sameLine(offsetFromStartX?: number, spacing?: number): void;",
+          "signature": "sameLine(offsetFromStartX?: number, spacing?: number): void;"
+        },
+        {
+          "name": "separator",
+          "kind": "function",
+          "doc": "separator(): void;",
+          "signature": "separator(): void;"
+        },
+        {
+          "name": "spacing",
+          "kind": "function",
+          "doc": "spacing(): void;",
+          "signature": "spacing(): void;"
+        },
+        {
+          "name": "newLine",
+          "kind": "function",
+          "doc": "newLine(): void;",
+          "signature": "newLine(): void;"
+        },
+        {
+          "name": "dummy",
+          "kind": "function",
+          "doc": "dummy(width: number, height: number): void;",
+          "signature": "dummy(width: number, height: number): void;"
+        },
+        {
+          "name": "setNextItemWidth",
+          "kind": "function",
+          "doc": "setNextItemWidth(width: number): void;",
+          "signature": "setNextItemWidth(width: number): void;"
+        },
+        {
+          "name": "pushItemWidth",
+          "kind": "function",
+          "doc": "pushItemWidth(width: number): void;",
+          "signature": "pushItemWidth(width: number): void;"
+        },
+        {
+          "name": "popItemWidth",
+          "kind": "function",
+          "doc": "popItemWidth(): void;",
+          "signature": "popItemWidth(): void;"
+        },
+        {
+          "name": "isItemClicked",
+          "kind": "function",
+          "doc": "isItemClicked(mouseButton?: number): boolean;",
+          "signature": "isItemClicked(mouseButton?: number): boolean;"
+        },
+        {
+          "name": "isItemHovered",
+          "kind": "function",
+          "doc": "isItemHovered(flags?: number): boolean;",
+          "signature": "isItemHovered(flags?: number): boolean;"
+        },
+        {
+          "name": "wantCaptureMouse",
+          "kind": "function",
+          "doc": "wantCaptureMouse(): boolean;",
+          "signature": "wantCaptureMouse(): boolean;"
+        },
+        {
+          "name": "isAnyItemHovered",
+          "kind": "function",
+          "doc": "isAnyItemHovered(): boolean;",
+          "signature": "isAnyItemHovered(): boolean;"
+        },
+        {
+          "name": "isAnyItemActive",
+          "kind": "function",
+          "doc": "isAnyItemActive(): boolean;",
+          "signature": "isAnyItemActive(): boolean;"
+        },
+        {
+          "name": "styleColorsDark",
+          "kind": "function",
+          "doc": "styleColorsDark(): void;",
+          "signature": "styleColorsDark(): void;"
+        },
+        {
+          "name": "styleColorsLight",
+          "kind": "function",
+          "doc": "styleColorsLight(): void;",
+          "signature": "styleColorsLight(): void;"
+        },
+        {
+          "name": "styleColorsClassic",
+          "kind": "function",
+          "doc": "styleColorsClassic(): void;",
+          "signature": "styleColorsClassic(): void;"
+        },
+        {
+          "name": "showDemoWindow",
+          "kind": "function",
+          "doc": "showDemoWindow(open?: MutableValue<boolean> | null): void;",
+          "signature": "showDemoWindow(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "showMetricsWindow",
+          "kind": "function",
+          "doc": "showMetricsWindow(open?: MutableValue<boolean> | null): void;",
+          "signature": "showMetricsWindow(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "showDebugLogWindow",
+          "kind": "function",
+          "doc": "showDebugLogWindow(open?: MutableValue<boolean> | null): void;",
+          "signature": "showDebugLogWindow(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "showIdStackToolWindow",
+          "kind": "function",
+          "doc": "showIdStackToolWindow(open?: MutableValue<boolean> | null): void;",
+          "signature": "showIdStackToolWindow(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "showStyleEditor",
+          "kind": "function",
+          "doc": "showStyleEditor(open?: MutableValue<boolean> | null): void;",
+          "signature": "showStyleEditor(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "showAboutWindow",
+          "kind": "function",
+          "doc": "showAboutWindow(open?: MutableValue<boolean> | null): void;",
+          "signature": "showAboutWindow(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "showUserGuide",
+          "kind": "function",
+          "doc": "showUserGuide(open?: MutableValue<boolean> | null): void;",
+          "signature": "showUserGuide(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "separatorText",
+          "kind": "function",
+          "doc": "separatorText(label: string): void;",
+          "signature": "separatorText(label: string): void;"
+        },
+        {
+          "name": "bullet",
+          "kind": "function",
+          "doc": "bullet(): void;",
+          "signature": "bullet(): void;"
+        },
+        {
+          "name": "bulletText",
+          "kind": "function",
+          "doc": "bulletText(text: Stringifiable): void;",
+          "signature": "bulletText(text: Stringifiable): void;"
+        },
+        {
+          "name": "labelText",
+          "kind": "function",
+          "doc": "labelText(label: string, text: Stringifiable): void;",
+          "signature": "labelText(label: string, text: Stringifiable): void;"
+        },
+        {
+          "name": "textDisabled",
+          "kind": "function",
+          "doc": "textDisabled(text: Stringifiable): void;",
+          "signature": "textDisabled(text: Stringifiable): void;"
+        },
+        {
+          "name": "arrowButton",
+          "kind": "function",
+          "doc": "arrowButton(id: string, direction: number): boolean;",
+          "signature": "arrowButton(id: string, direction: number): boolean;"
+        },
+        {
+          "name": "invisibleButton",
+          "kind": "function",
+          "doc": "invisibleButton(id: string, width: number, height: number, flags?: number): boolean;",
+          "signature": "invisibleButton(id: string, width: number, height: number, flags?: number): boolean;"
+        },
+        {
+          "name": "inputInt",
+          "kind": "function",
+          "doc": "inputInt(label: string, value: MutableValue<number>, step?: number, stepFast?: number, flags?: number): boolean;",
+          "signature": "inputInt(label: string, value: MutableValue<number>, step?: number, stepFast?: number, flags?: number): boolean;"
+        },
+        {
+          "name": "inputFloat",
+          "kind": "function",
+          "doc": "inputFloat(label: string, value: MutableValue<number>, step?: number, stepFast?: number, format?: string, flags?: number): boolean;",
+          "signature": "inputFloat(label: string, value: MutableValue<number>, step?: number, stepFast?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "inputTextMultiline",
+          "kind": "function",
+          "doc": "inputTextMultiline(label: string, value: MutableValue<string>, maxLength?: number, width?: number, height?: number, flags?: number): boolean;",
+          "signature": "inputTextMultiline(label: string, value: MutableValue<string>, maxLength?: number, width?: number, height?: number, flags?: number): boolean;"
+        },
+        {
+          "name": "beginListBox",
+          "kind": "function",
+          "doc": "beginListBox(label: string, width?: number, height?: number): boolean;",
+          "signature": "beginListBox(label: string, width?: number, height?: number): boolean;"
+        },
+        {
+          "name": "endListBox",
+          "kind": "function",
+          "doc": "endListBox(): void;",
+          "signature": "endListBox(): void;"
+        },
+        {
+          "name": "listBox",
+          "kind": "function",
+          "doc": "listBox(label: string, currentItem: MutableValue<number>, items: readonly Stringifiable[], heightInItems?: number): boolean;",
+          "signature": "listBox(label: string, currentItem: MutableValue<number>, items: readonly Stringifiable[], heightInItems?: number): boolean;"
+        },
+        {
+          "name": "colorPicker3",
+          "kind": "function",
+          "doc": "colorPicker3(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;",
+          "signature": "colorPicker3(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;"
+        },
+        {
+          "name": "colorPicker4",
+          "kind": "function",
+          "doc": "colorPicker4(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;",
+          "signature": "colorPicker4(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;"
+        },
+        {
+          "name": "colorButton",
+          "kind": "function",
+          "doc": "colorButton(id: string, color: Color, flags?: number, width?: number, height?: number): boolean;",
+          "signature": "colorButton(id: string, color: Color, flags?: number, width?: number, height?: number): boolean;",
+          "signatures": [
+            "colorButton(id: string, color: Color, flags?: number, width?: number, height?: number): boolean;",
+            "colorButton(id: string, color: Color, options: { flags?: number; width?: number; height?: number; }): boolean;",
+            "colorButton(id: string, red: number, green: number, blue: number, alpha?: number, flags?: number, width?: number, height?: number): boolean;"
+          ]
+        },
+        {
+          "name": "plotLines",
+          "kind": "function",
+          "doc": "plotLines(label: string, values: readonly number[] | NativeArray<number>, options?: PlotOptions): void;",
+          "signature": "plotLines(label: string, values: readonly number[] | NativeArray<number>, options?: PlotOptions): void;"
+        },
+        {
+          "name": "plotHistogram",
+          "kind": "function",
+          "doc": "plotHistogram(label: string, values: readonly number[] | NativeArray<number>, options?: PlotOptions): void;",
+          "signature": "plotHistogram(label: string, values: readonly number[] | NativeArray<number>, options?: PlotOptions): void;"
+        },
+        {
+          "name": "treeNodeEx",
+          "kind": "function",
+          "doc": "treeNodeEx(label: string, flags?: number): boolean;",
+          "signature": "treeNodeEx(label: string, flags?: number): boolean;"
+        },
+        {
+          "name": "dragFloat2",
+          "kind": "function",
+          "doc": "dragFloat2(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "dragFloat2(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "dragFloat3",
+          "kind": "function",
+          "doc": "dragFloat3(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "dragFloat3(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "dragFloat4",
+          "kind": "function",
+          "doc": "dragFloat4(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "dragFloat4(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "dragInt2",
+          "kind": "function",
+          "doc": "dragInt2(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "dragInt2(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "dragInt3",
+          "kind": "function",
+          "doc": "dragInt3(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "dragInt3(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "dragInt4",
+          "kind": "function",
+          "doc": "dragInt4(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "dragInt4(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "sliderFloat2",
+          "kind": "function",
+          "doc": "sliderFloat2(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "sliderFloat2(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "sliderFloat3",
+          "kind": "function",
+          "doc": "sliderFloat3(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "sliderFloat3(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "sliderFloat4",
+          "kind": "function",
+          "doc": "sliderFloat4(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "sliderFloat4(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "sliderInt2",
+          "kind": "function",
+          "doc": "sliderInt2(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "sliderInt2(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "sliderInt3",
+          "kind": "function",
+          "doc": "sliderInt3(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "sliderInt3(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "sliderInt4",
+          "kind": "function",
+          "doc": "sliderInt4(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "sliderInt4(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "inputFloat2",
+          "kind": "function",
+          "doc": "inputFloat2(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;",
+          "signature": "inputFloat2(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "inputFloat3",
+          "kind": "function",
+          "doc": "inputFloat3(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;",
+          "signature": "inputFloat3(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "inputFloat4",
+          "kind": "function",
+          "doc": "inputFloat4(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;",
+          "signature": "inputFloat4(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "inputInt2",
+          "kind": "function",
+          "doc": "inputInt2(label: string, value: NumberArrayValue, flags?: number): boolean;",
+          "signature": "inputInt2(label: string, value: NumberArrayValue, flags?: number): boolean;"
+        },
+        {
+          "name": "inputInt3",
+          "kind": "function",
+          "doc": "inputInt3(label: string, value: NumberArrayValue, flags?: number): boolean;",
+          "signature": "inputInt3(label: string, value: NumberArrayValue, flags?: number): boolean;"
+        },
+        {
+          "name": "inputInt4",
+          "kind": "function",
+          "doc": "inputInt4(label: string, value: NumberArrayValue, flags?: number): boolean;",
+          "signature": "inputInt4(label: string, value: NumberArrayValue, flags?: number): boolean;"
+        },
+        {
+          "name": "dragFloatRange2",
+          "kind": "function",
+          "doc": "dragFloatRange2(label: string, currentMin: MutableValue<number>, currentMax: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, formatMax?: string | null, flags?: number): boolean;",
+          "signature": "dragFloatRange2(label: string, currentMin: MutableValue<number>, currentMax: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, formatMax?: string | null, flags?: number): boolean;"
+        },
+        {
+          "name": "dragIntRange2",
+          "kind": "function",
+          "doc": "dragIntRange2(label: string, currentMin: MutableValue<number>, currentMax: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, formatMax?: string | null, flags?: number): boolean;",
+          "signature": "dragIntRange2(label: string, currentMin: MutableValue<number>, currentMax: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, formatMax?: string | null, flags?: number): boolean;"
+        },
+        {
+          "name": "sliderAngle",
+          "kind": "function",
+          "doc": "sliderAngle(label: string, value: MutableValue<number>, degreesMin?: number, degreesMax?: number, format?: string, flags?: number): boolean;",
+          "signature": "sliderAngle(label: string, value: MutableValue<number>, degreesMin?: number, degreesMax?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "vSliderFloat",
+          "kind": "function",
+          "doc": "vSliderFloat(label: string, width: number, height: number, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;",
+          "signature": "vSliderFloat(label: string, width: number, height: number, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "vSliderInt",
+          "kind": "function",
+          "doc": "vSliderInt(label: string, width: number, height: number, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;",
+          "signature": "vSliderInt(label: string, width: number, height: number, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "toggle",
+          "kind": "function",
+          "doc": "toggle(label: string, value: MutableValue<boolean>): boolean;",
+          "signature": "toggle(label: string, value: MutableValue<boolean>): boolean;"
+        },
+        {
+          "name": "toggleSwitch",
+          "kind": "function",
+          "doc": "toggleSwitch(label: string, value: MutableValue<boolean>): boolean;",
+          "signature": "toggleSwitch(label: string, value: MutableValue<boolean>): boolean;"
+        },
+        {
+          "name": "beginCombo",
+          "kind": "function",
+          "doc": "beginCombo(label: string, preview?: Stringifiable, flags?: number): boolean;",
+          "signature": "beginCombo(label: string, preview?: Stringifiable, flags?: number): boolean;"
+        },
+        {
+          "name": "endCombo",
+          "kind": "function",
+          "doc": "endCombo(): void;",
+          "signature": "endCombo(): void;"
+        },
+        {
+          "name": "listClipper",
+          "kind": "function",
+          "doc": "listClipper(itemCount: number, callback: (start: number, end: number) => void): void;",
+          "signature": "listClipper(itemCount: number, callback: (start: number, end: number) => void): void;",
+          "signatures": [
+            "listClipper(itemCount: number, callback: (start: number, end: number) => void): void;",
+            "listClipper(itemCount: number, options: ListClipperOptions | null | undefined, callback: (start: number, end: number) => void): void;"
+          ]
+        },
+        {
+          "name": "beginMultiSelect",
+          "kind": "function",
+          "doc": "beginMultiSelect(flags?: number, selectionSize?: number, itemsCount?: number): MultiSelectIO;",
+          "signature": "beginMultiSelect(flags?: number, selectionSize?: number, itemsCount?: number): MultiSelectIO;"
+        },
+        {
+          "name": "endMultiSelect",
+          "kind": "function",
+          "doc": "endMultiSelect(rangeSrcReset?: boolean): MultiSelectIO;",
+          "signature": "endMultiSelect(rangeSrcReset?: boolean): MultiSelectIO;"
+        },
+        {
+          "name": "setNextItemSelectionUserData",
+          "kind": "function",
+          "doc": "setNextItemSelectionUserData(id: number): void;",
+          "signature": "setNextItemSelectionUserData(id: number): void;"
+        },
+        {
+          "name": "isItemToggledSelection",
+          "kind": "function",
+          "doc": "isItemToggledSelection(): boolean;",
+          "signature": "isItemToggledSelection(): boolean;"
+        },
+        {
+          "name": "selectionStorage",
+          "kind": "function",
+          "doc": "selectionStorage(): SelectionStorage;",
+          "signature": "selectionStorage(): SelectionStorage;"
+        },
+        {
+          "name": "openPopup",
+          "kind": "function",
+          "doc": "openPopup(id: string, flags?: number): void;",
+          "signature": "openPopup(id: string, flags?: number): void;"
+        },
+        {
+          "name": "beginPopup",
+          "kind": "function",
+          "doc": "beginPopup(id: string, flags?: number): boolean;",
+          "signature": "beginPopup(id: string, flags?: number): boolean;"
+        },
+        {
+          "name": "beginPopupModal",
+          "kind": "function",
+          "doc": "beginPopupModal(name: string, open?: MutableValue<boolean> | null, flags?: number): boolean;",
+          "signature": "beginPopupModal(name: string, open?: MutableValue<boolean> | null, flags?: number): boolean;"
+        },
+        {
+          "name": "beginPopupContextItem",
+          "kind": "function",
+          "doc": "beginPopupContextItem(id?: string | null, flags?: number): boolean;",
+          "signature": "beginPopupContextItem(id?: string | null, flags?: number): boolean;"
+        },
+        {
+          "name": "beginPopupContextWindow",
+          "kind": "function",
+          "doc": "beginPopupContextWindow(id?: string | null, flags?: number): boolean;",
+          "signature": "beginPopupContextWindow(id?: string | null, flags?: number): boolean;"
+        },
+        {
+          "name": "endPopup",
+          "kind": "function",
+          "doc": "endPopup(): void;",
+          "signature": "endPopup(): void;"
+        },
+        {
+          "name": "closeCurrentPopup",
+          "kind": "function",
+          "doc": "closeCurrentPopup(): void;",
+          "signature": "closeCurrentPopup(): void;"
+        },
+        {
+          "name": "isPopupOpen",
+          "kind": "function",
+          "doc": "isPopupOpen(id: string, flags?: number): boolean;",
+          "signature": "isPopupOpen(id: string, flags?: number): boolean;"
+        },
+        {
+          "name": "beginMenuBar",
+          "kind": "function",
+          "doc": "beginMenuBar(): boolean;",
+          "signature": "beginMenuBar(): boolean;"
+        },
+        {
+          "name": "endMenuBar",
+          "kind": "function",
+          "doc": "endMenuBar(): void;",
+          "signature": "endMenuBar(): void;"
+        },
+        {
+          "name": "beginMenu",
+          "kind": "function",
+          "doc": "beginMenu(label: string, enabled?: boolean): boolean;",
+          "signature": "beginMenu(label: string, enabled?: boolean): boolean;"
+        },
+        {
+          "name": "endMenu",
+          "kind": "function",
+          "doc": "endMenu(): void;",
+          "signature": "endMenu(): void;"
+        },
+        {
+          "name": "menuItem",
+          "kind": "function",
+          "doc": "menuItem(label: string, shortcut?: string | null, selected?: MutableValue<boolean> | boolean, enabled?: boolean): boolean;",
+          "signature": "menuItem(label: string, shortcut?: string | null, selected?: MutableValue<boolean> | boolean, enabled?: boolean): boolean;"
+        },
+        {
+          "name": "setTooltip",
+          "kind": "function",
+          "doc": "setTooltip(text: Stringifiable): void;",
+          "signature": "setTooltip(text: Stringifiable): void;"
+        },
+        {
+          "name": "setItemTooltip",
+          "kind": "function",
+          "doc": "setItemTooltip(text: Stringifiable): void;",
+          "signature": "setItemTooltip(text: Stringifiable): void;"
+        },
+        {
+          "name": "beginTooltip",
+          "kind": "function",
+          "doc": "beginTooltip(): boolean;",
+          "signature": "beginTooltip(): boolean;"
+        },
+        {
+          "name": "beginItemTooltip",
+          "kind": "function",
+          "doc": "beginItemTooltip(): boolean;",
+          "signature": "beginItemTooltip(): boolean;"
+        },
+        {
+          "name": "endTooltip",
+          "kind": "function",
+          "doc": "endTooltip(): void;",
+          "signature": "endTooltip(): void;"
+        },
+        {
+          "name": "beginTable",
+          "kind": "function",
+          "doc": "beginTable(id: string, columns: number, flags?: number, outerWidth?: number, outerHeight?: number): boolean;",
+          "signature": "beginTable(id: string, columns: number, flags?: number, outerWidth?: number, outerHeight?: number): boolean;"
+        },
+        {
+          "name": "endTable",
+          "kind": "function",
+          "doc": "endTable(): void;",
+          "signature": "endTable(): void;"
+        },
+        {
+          "name": "tableNextRow",
+          "kind": "function",
+          "doc": "tableNextRow(rowFlags?: number, minRowHeight?: number): void;",
+          "signature": "tableNextRow(rowFlags?: number, minRowHeight?: number): void;"
+        },
+        {
+          "name": "tableNextColumn",
+          "kind": "function",
+          "doc": "tableNextColumn(): boolean;",
+          "signature": "tableNextColumn(): boolean;"
+        },
+        {
+          "name": "tableSetColumnIndex",
+          "kind": "function",
+          "doc": "tableSetColumnIndex(columnIndex: number): boolean;",
+          "signature": "tableSetColumnIndex(columnIndex: number): boolean;"
+        },
+        {
+          "name": "tableSetupColumn",
+          "kind": "function",
+          "doc": "tableSetupColumn(label: string, flags?: number, initWidthOrWeight?: number, userId?: number): void;",
+          "signature": "tableSetupColumn(label: string, flags?: number, initWidthOrWeight?: number, userId?: number): void;"
+        },
+        {
+          "name": "tableGetSortSpecs",
+          "kind": "function",
+          "doc": "tableGetSortSpecs(): TableSortSpecs | null;",
+          "signature": "tableGetSortSpecs(): TableSortSpecs | null;"
+        },
+        {
+          "name": "tableSetupScrollFreeze",
+          "kind": "function",
+          "doc": "tableSetupScrollFreeze(columns: number, rows: number): void;",
+          "signature": "tableSetupScrollFreeze(columns: number, rows: number): void;"
+        },
+        {
+          "name": "tableHeadersRow",
+          "kind": "function",
+          "doc": "tableHeadersRow(): void;",
+          "signature": "tableHeadersRow(): void;"
+        },
+        {
+          "name": "tableSetBgColor",
+          "kind": "function",
+          "doc": "tableSetBgColor(target: number, color: Color, columnIndex?: number): void;",
+          "signature": "tableSetBgColor(target: number, color: Color, columnIndex?: number): void;",
+          "signatures": [
+            "tableSetBgColor(target: number, color: Color, columnIndex?: number): void;",
+            "tableSetBgColor(target: number, red: number, green: number, blue: number, alpha?: number, columnIndex?: number): void;"
+          ]
+        },
+        {
+          "name": "pushStyleColor",
+          "kind": "function",
+          "doc": "pushStyleColor(index: number | string, color: Color): void;",
+          "signature": "pushStyleColor(index: number | string, color: Color): void;",
+          "signatures": [
+            "pushStyleColor(index: number | string, color: Color): void;",
+            "pushStyleColor(index: number | string, red: number, green: number, blue: number, alpha?: number): void;"
+          ]
+        },
+        {
+          "name": "popStyleColor",
+          "kind": "function",
+          "doc": "popStyleColor(count?: number): void;",
+          "signature": "popStyleColor(count?: number): void;"
+        },
+        {
+          "name": "setStyleColor",
+          "kind": "function",
+          "doc": "setStyleColor(index: number | string, color: Color): Api;",
+          "signature": "setStyleColor(index: number | string, color: Color): Api;",
+          "signatures": [
+            "setStyleColor(index: number | string, color: Color): Api;",
+            "setStyleColor(index: number | string, red: number, green: number, blue: number, alpha?: number): Api;"
+          ]
+        },
+        {
+          "name": "setStyleProperties",
+          "kind": "function",
+          "doc": "setStyleProperties(properties: StyleProperties): Api;",
+          "signature": "setStyleProperties(properties: StyleProperties): Api;"
+        },
+        {
+          "name": "setTheme",
+          "kind": "function",
+          "doc": "setTheme(name: ThemeName | string): ThemeName;",
+          "signature": "setTheme(name: ThemeName | string): ThemeName;"
+        },
+        {
+          "name": "pushStyleVar",
+          "kind": "function",
+          "doc": "pushStyleVar(index: number | string, x: number | Point, y?: number): void;",
+          "signature": "pushStyleVar(index: number | string, x: number | Point, y?: number): void;"
+        },
+        {
+          "name": "popStyleVar",
+          "kind": "function",
+          "doc": "popStyleVar(count?: number): void;",
+          "signature": "popStyleVar(count?: number): void;"
+        },
+        {
+          "name": "setWindowFontScale",
+          "kind": "function",
+          "doc": "setWindowFontScale(scale: number): void;",
+          "signature": "setWindowFontScale(scale: number): void;"
+        },
+        {
+          "name": "pushFont",
+          "kind": "function",
+          "doc": "pushFont(font: number | string, fontSize?: number): number;",
+          "signature": "pushFont(font: number | string, fontSize?: number): number;"
+        },
+        {
+          "name": "popFont",
+          "kind": "function",
+          "doc": "popFont(): void;",
+          "signature": "popFont(): void;"
+        },
+        {
+          "name": "withFont",
+          "kind": "function",
+          "doc": "withFont<T>(font: number | string, fontSize: number | null | undefined, body: () => T): T | undefined;",
+          "signature": "withFont<T>(font: number | string, fontSize: number | null | undefined, body: () => T): T | undefined;",
+          "signatures": [
+            "withFont<T>(font: number | string, fontSize: number | null | undefined, body: () => T): T | undefined;",
+            "withFont<T>(font: number | string, body: () => T): T | undefined;"
+          ]
+        },
+        {
+          "name": "createTexture",
+          "kind": "function",
+          "doc": "createTexture(source: TextureSource, options?: TextureOptions | number): Texture;",
+          "signature": "createTexture(source: TextureSource, options?: TextureOptions | number): Texture;"
+        },
+        {
+          "name": "destroyTexture",
+          "kind": "function",
+          "doc": "destroyTexture(texture: Texture): boolean;",
+          "signature": "destroyTexture(texture: Texture): boolean;"
+        },
+        {
+          "name": "image",
+          "kind": "function",
+          "doc": "image(texture: Texture, width?: number | ImageOptions, height?: number, options?: ImageOptions): void;",
+          "signature": "image(texture: Texture, width?: number | ImageOptions, height?: number, options?: ImageOptions): void;"
+        },
+        {
+          "name": "imageButton",
+          "kind": "function",
+          "doc": "imageButton(id: string, texture: Texture, width?: number | ImageOptions, height?: number, options?: ImageOptions): boolean;",
+          "signature": "imageButton(id: string, texture: Texture, width?: number | ImageOptions, height?: number, options?: ImageOptions): boolean;"
+        },
+        {
+          "name": "getWindowDrawList",
+          "kind": "function",
+          "doc": "getWindowDrawList(): DrawList;",
+          "signature": "getWindowDrawList(): DrawList;"
+        },
+        {
+          "name": "getForegroundDrawList",
+          "kind": "function",
+          "doc": "getForegroundDrawList(): DrawList;",
+          "signature": "getForegroundDrawList(): DrawList;"
+        },
+        {
+          "name": "getBackgroundDrawList",
+          "kind": "function",
+          "doc": "getBackgroundDrawList(): DrawList;",
+          "signature": "getBackgroundDrawList(): DrawList;"
+        },
+        {
+          "name": "pushClipRect",
+          "kind": "function",
+          "doc": "pushClipRect(minimum: Point, maximum: Point, intersectWithCurrent?: boolean): void;",
+          "signature": "pushClipRect(minimum: Point, maximum: Point, intersectWithCurrent?: boolean): void;"
+        },
+        {
+          "name": "popClipRect",
+          "kind": "function",
+          "doc": "popClipRect(): void;",
+          "signature": "popClipRect(): void;"
+        },
+        {
+          "name": "pushId",
+          "kind": "function",
+          "doc": "pushId(id: string | number): void;",
+          "signature": "pushId(id: string | number): void;"
+        },
+        {
+          "name": "popId",
+          "kind": "function",
+          "doc": "popId(): void;",
+          "signature": "popId(): void;"
+        },
+        {
+          "name": "beginGroup",
+          "kind": "function",
+          "doc": "beginGroup(): void;",
+          "signature": "beginGroup(): void;"
+        },
+        {
+          "name": "endGroup",
+          "kind": "function",
+          "doc": "endGroup(): void;",
+          "signature": "endGroup(): void;"
+        },
+        {
+          "name": "indent",
+          "kind": "function",
+          "doc": "indent(width?: number): void;",
+          "signature": "indent(width?: number): void;"
+        },
+        {
+          "name": "unindent",
+          "kind": "function",
+          "doc": "unindent(width?: number): void;",
+          "signature": "unindent(width?: number): void;"
+        },
+        {
+          "name": "alignTextToFramePadding",
+          "kind": "function",
+          "doc": "alignTextToFramePadding(): void;",
+          "signature": "alignTextToFramePadding(): void;"
+        },
+        {
+          "name": "beginDisabled",
+          "kind": "function",
+          "doc": "beginDisabled(disabled?: boolean): void;",
+          "signature": "beginDisabled(disabled?: boolean): void;"
+        },
+        {
+          "name": "endDisabled",
+          "kind": "function",
+          "doc": "endDisabled(): void;",
+          "signature": "endDisabled(): void;"
+        },
+        {
+          "name": "getScrollX",
+          "kind": "function",
+          "doc": "getScrollX(): number;",
+          "signature": "getScrollX(): number;"
+        },
+        {
+          "name": "getScrollY",
+          "kind": "function",
+          "doc": "getScrollY(): number;",
+          "signature": "getScrollY(): number;"
+        },
+        {
+          "name": "getScrollMaxX",
+          "kind": "function",
+          "doc": "getScrollMaxX(): number;",
+          "signature": "getScrollMaxX(): number;"
+        },
+        {
+          "name": "getScrollMaxY",
+          "kind": "function",
+          "doc": "getScrollMaxY(): number;",
+          "signature": "getScrollMaxY(): number;"
+        },
+        {
+          "name": "setScrollX",
+          "kind": "function",
+          "doc": "setScrollX(value: number): void;",
+          "signature": "setScrollX(value: number): void;"
+        },
+        {
+          "name": "setScrollY",
+          "kind": "function",
+          "doc": "setScrollY(value: number): void;",
+          "signature": "setScrollY(value: number): void;"
+        },
+        {
+          "name": "setScrollHereX",
+          "kind": "function",
+          "doc": "setScrollHereX(centerRatio?: number): void;",
+          "signature": "setScrollHereX(centerRatio?: number): void;"
+        },
+        {
+          "name": "setScrollHereY",
+          "kind": "function",
+          "doc": "setScrollHereY(centerRatio?: number): void;",
+          "signature": "setScrollHereY(centerRatio?: number): void;"
+        },
+        {
+          "name": "isItemActive",
+          "kind": "function",
+          "doc": "isItemActive(): boolean;",
+          "signature": "isItemActive(): boolean;"
+        },
+        {
+          "name": "isItemEdited",
+          "kind": "function",
+          "doc": "isItemEdited(): boolean;",
+          "signature": "isItemEdited(): boolean;"
+        },
+        {
+          "name": "isItemActivated",
+          "kind": "function",
+          "doc": "isItemActivated(): boolean;",
+          "signature": "isItemActivated(): boolean;"
+        },
+        {
+          "name": "isItemDeactivated",
+          "kind": "function",
+          "doc": "isItemDeactivated(): boolean;",
+          "signature": "isItemDeactivated(): boolean;"
+        },
+        {
+          "name": "isItemDeactivatedAfterEdit",
+          "kind": "function",
+          "doc": "isItemDeactivatedAfterEdit(): boolean;",
+          "signature": "isItemDeactivatedAfterEdit(): boolean;"
+        },
+        {
+          "name": "isItemFocused",
+          "kind": "function",
+          "doc": "isItemFocused(): boolean;",
+          "signature": "isItemFocused(): boolean;"
+        },
+        {
+          "name": "isItemVisible",
+          "kind": "function",
+          "doc": "isItemVisible(): boolean;",
+          "signature": "isItemVisible(): boolean;"
+        },
+        {
+          "name": "isWindowHovered",
+          "kind": "function",
+          "doc": "isWindowHovered(flags?: number): boolean;",
+          "signature": "isWindowHovered(flags?: number): boolean;"
+        },
+        {
+          "name": "isWindowFocused",
+          "kind": "function",
+          "doc": "isWindowFocused(flags?: number): boolean;",
+          "signature": "isWindowFocused(flags?: number): boolean;"
+        },
+        {
+          "name": "isWindowCollapsed",
+          "kind": "function",
+          "doc": "isWindowCollapsed(): boolean;",
+          "signature": "isWindowCollapsed(): boolean;"
+        },
+        {
+          "name": "isWindowAppearing",
+          "kind": "function",
+          "doc": "isWindowAppearing(): boolean;",
+          "signature": "isWindowAppearing(): boolean;"
+        },
+        {
+          "name": "getMousePos",
+          "kind": "function",
+          "doc": "getMousePos(): Vec2;",
+          "signature": "getMousePos(): Vec2;"
+        },
+        {
+          "name": "isMouseDown",
+          "kind": "function",
+          "doc": "isMouseDown(button?: number): boolean;",
+          "signature": "isMouseDown(button?: number): boolean;"
+        },
+        {
+          "name": "isMouseClicked",
+          "kind": "function",
+          "doc": "isMouseClicked(button?: number, repeat?: boolean): boolean;",
+          "signature": "isMouseClicked(button?: number, repeat?: boolean): boolean;"
+        },
+        {
+          "name": "isMouseDoubleClicked",
+          "kind": "function",
+          "doc": "isMouseDoubleClicked(button?: number): boolean;",
+          "signature": "isMouseDoubleClicked(button?: number): boolean;"
+        },
+        {
+          "name": "isMouseReleased",
+          "kind": "function",
+          "doc": "isMouseReleased(button?: number): boolean;",
+          "signature": "isMouseReleased(button?: number): boolean;"
+        },
+        {
+          "name": "isMouseDragging",
+          "kind": "function",
+          "doc": "isMouseDragging(button?: number, lockThreshold?: number): boolean;",
+          "signature": "isMouseDragging(button?: number, lockThreshold?: number): boolean;"
+        },
+        {
+          "name": "getMouseDragDelta",
+          "kind": "function",
+          "doc": "getMouseDragDelta(button?: number, lockThreshold?: number): Vec2;",
+          "signature": "getMouseDragDelta(button?: number, lockThreshold?: number): Vec2;"
+        },
+        {
+          "name": "resetMouseDragDelta",
+          "kind": "function",
+          "doc": "resetMouseDragDelta(button?: number): void;",
+          "signature": "resetMouseDragDelta(button?: number): void;"
+        },
+        {
+          "name": "calcTextSize",
+          "kind": "function",
+          "doc": "calcTextSize(text: Stringifiable, wrapWidth?: number): Vec2;",
+          "signature": "calcTextSize(text: Stringifiable, wrapWidth?: number): Vec2;"
+        },
+        {
+          "name": "getFrameHeight",
+          "kind": "function",
+          "doc": "getFrameHeight(): number;",
+          "signature": "getFrameHeight(): number;"
+        },
+        {
+          "name": "getFrameHeightWithSpacing",
+          "kind": "function",
+          "doc": "getFrameHeightWithSpacing(): number;",
+          "signature": "getFrameHeightWithSpacing(): number;"
+        },
+        {
+          "name": "getTextLineHeight",
+          "kind": "function",
+          "doc": "getTextLineHeight(): number;",
+          "signature": "getTextLineHeight(): number;"
+        },
+        {
+          "name": "getTextLineHeightWithSpacing",
+          "kind": "function",
+          "doc": "getTextLineHeightWithSpacing(): number;",
+          "signature": "getTextLineHeightWithSpacing(): number;"
+        },
+        {
+          "name": "framerate",
+          "kind": "function",
+          "doc": "framerate(): number;",
+          "signature": "framerate(): number;"
+        },
+        {
+          "name": "addInputCharacters",
+          "kind": "function",
+          "doc": "addInputCharacters(text: Stringifiable): void;",
+          "signature": "addInputCharacters(text: Stringifiable): void;"
+        },
+        {
+          "name": "addKeyEvent",
+          "kind": "function",
+          "doc": "addKeyEvent(key: number, down: boolean): void;",
+          "signature": "addKeyEvent(key: number, down: boolean): void;"
+        },
+        {
+          "name": "sendKey",
+          "kind": "function",
+          "doc": "sendKey(key: number): void;",
+          "signature": "sendKey(key: number): void;"
+        },
+        {
+          "name": "addMouseWheel",
+          "kind": "function",
+          "doc": "addMouseWheel(wheelX?: number, wheelY?: number): void;",
+          "signature": "addMouseWheel(wheelX?: number, wheelY?: number): void;"
+        },
+        {
+          "name": "addMousePosEvent",
+          "kind": "function",
+          "doc": "addMousePosEvent(x: number, y: number): void;",
+          "signature": "addMousePosEvent(x: number, y: number): void;"
+        },
+        {
+          "name": "addMouseButtonEvent",
+          "kind": "function",
+          "doc": "addMouseButtonEvent(button: number, down: boolean): void;",
+          "signature": "addMouseButtonEvent(button: number, down: boolean): void;"
+        },
+        {
+          "name": "wantTextInput",
+          "kind": "function",
+          "doc": "wantTextInput(): boolean;",
+          "signature": "wantTextInput(): boolean;"
+        },
+        {
+          "name": "isKeyDown",
+          "kind": "function",
+          "doc": "isKeyDown(key: number): boolean;",
+          "signature": "isKeyDown(key: number): boolean;"
+        },
+        {
+          "name": "isKeyPressed",
+          "kind": "function",
+          "doc": "isKeyPressed(key: number, repeat?: boolean): boolean;",
+          "signature": "isKeyPressed(key: number, repeat?: boolean): boolean;"
+        },
+        {
+          "name": "isKeyReleased",
+          "kind": "function",
+          "doc": "isKeyReleased(key: number): boolean;",
+          "signature": "isKeyReleased(key: number): boolean;"
+        },
+        {
+          "name": "getKeyPressedAmount",
+          "kind": "function",
+          "doc": "getKeyPressedAmount(key: number, repeatDelay: number, rate: number): number;",
+          "signature": "getKeyPressedAmount(key: number, repeatDelay: number, rate: number): number;"
+        },
+        {
+          "name": "getKeyName",
+          "kind": "function",
+          "doc": "getKeyName(key: number): string;",
+          "signature": "getKeyName(key: number): string;"
+        },
+        {
+          "name": "isKeyChordPressed",
+          "kind": "function",
+          "doc": "isKeyChordPressed(keyChord: number): boolean;",
+          "signature": "isKeyChordPressed(keyChord: number): boolean;"
+        },
+        {
+          "name": "shortcut",
+          "kind": "function",
+          "doc": "shortcut(keyChord: number, flags?: number): boolean;",
+          "signature": "shortcut(keyChord: number, flags?: number): boolean;"
+        },
+        {
+          "name": "setNextItemShortcut",
+          "kind": "function",
+          "doc": "setNextItemShortcut(keyChord: number, flags?: number): void;",
+          "signature": "setNextItemShortcut(keyChord: number, flags?: number): void;"
+        },
+        {
+          "name": "getClipboardText",
+          "kind": "function",
+          "doc": "getClipboardText(): string;",
+          "signature": "getClipboardText(): string;"
+        },
+        {
+          "name": "setClipboardText",
+          "kind": "function",
+          "doc": "setClipboardText(text: Stringifiable): void;",
+          "signature": "setClipboardText(text: Stringifiable): void;"
+        },
+        {
+          "name": "beginDragDropSource",
+          "kind": "function",
+          "doc": "beginDragDropSource(flags?: number): boolean;",
+          "signature": "beginDragDropSource(flags?: number): boolean;"
+        },
+        {
+          "name": "setDragDropPayload",
+          "kind": "function",
+          "doc": "setDragDropPayload(type: string, data: JsonSerializable, condition?: number): boolean;",
+          "signature": "setDragDropPayload(type: string, data: JsonSerializable, condition?: number): boolean;"
+        },
+        {
+          "name": "endDragDropSource",
+          "kind": "function",
+          "doc": "endDragDropSource(): void;",
+          "signature": "endDragDropSource(): void;"
+        },
+        {
+          "name": "beginDragDropTarget",
+          "kind": "function",
+          "doc": "beginDragDropTarget(): boolean;",
+          "signature": "beginDragDropTarget(): boolean;"
+        },
+        {
+          "name": "acceptDragDropPayload",
+          "kind": "function",
+          "doc": "acceptDragDropPayload<Data = any>(type: string, flags?: number): DragDropPayload<Data> | null;",
+          "signature": "acceptDragDropPayload<Data = any>(type: string, flags?: number): DragDropPayload<Data> | null;"
+        },
+        {
+          "name": "endDragDropTarget",
+          "kind": "function",
+          "doc": "endDragDropTarget(): void;",
+          "signature": "endDragDropTarget(): void;"
+        },
+        {
+          "name": "getDragDropPayload",
+          "kind": "function",
+          "doc": "getDragDropPayload<Data = any>(): DragDropPayload<Data> | null;",
+          "signature": "getDragDropPayload<Data = any>(): DragDropPayload<Data> | null;"
+        },
+        {
+          "name": "withWindow",
+          "kind": "function",
+          "doc": "withWindow(name: string, open: MutableValue<boolean> | null | undefined, flags: number | undefined, body: FrameBody): boolean;",
+          "signature": "withWindow(name: string, open: MutableValue<boolean> | null | undefined, flags: number | undefined, body: FrameBody): boolean;"
+        },
+        {
+          "name": "withChild",
+          "kind": "function",
+          "doc": "withChild(id: string, width: number | undefined, height: number | undefined, borders: boolean | number | undefined, flags: number | undefined, body: FrameBody): boolean;",
+          "signature": "withChild(id: string, width: number | undefined, height: number | undefined, borders: boolean | number | undefined, flags: number | undefined, body: FrameBody): boolean;"
+        },
+        {
+          "name": "withTreeNode",
+          "kind": "function",
+          "doc": "withTreeNode(label: string, body: FrameBody): boolean;",
+          "signature": "withTreeNode(label: string, body: FrameBody): boolean;"
+        },
+        {
+          "name": "withTabBar",
+          "kind": "function",
+          "doc": "withTabBar(id: string, flags: number | undefined, body: FrameBody): boolean;",
+          "signature": "withTabBar(id: string, flags: number | undefined, body: FrameBody): boolean;"
+        },
+        {
+          "name": "withTabItem",
+          "kind": "function",
+          "doc": "withTabItem(label: string, open: MutableValue<boolean> | null | undefined, flags: number | undefined, body: FrameBody): boolean;",
+          "signature": "withTabItem(label: string, open: MutableValue<boolean> | null | undefined, flags: number | undefined, body: FrameBody): boolean;"
+        },
+        {
+          "name": "withTable",
+          "kind": "function",
+          "doc": "withTable(id: string, columns: number, flags: number | undefined, outerWidth: number | undefined, outerHeight: number | undefined, body: FrameBody): boolean;",
+          "signature": "withTable(id: string, columns: number, flags: number | undefined, outerWidth: number | undefined, outerHeight: number | undefined, body: FrameBody): boolean;"
+        },
+        {
+          "name": "withPopup",
+          "kind": "function",
+          "doc": "withPopup(id: string, flags: number | undefined, body: FrameBody): boolean;",
+          "signature": "withPopup(id: string, flags: number | undefined, body: FrameBody): boolean;"
+        },
+        {
+          "name": "withPopupModal",
+          "kind": "function",
+          "doc": "withPopupModal(name: string, open: MutableValue<boolean> | null | undefined, flags: number | undefined, body: FrameBody): boolean;",
+          "signature": "withPopupModal(name: string, open: MutableValue<boolean> | null | undefined, flags: number | undefined, body: FrameBody): boolean;"
+        },
+        {
+          "name": "withContextItem",
+          "kind": "function",
+          "doc": "withContextItem(id: string | null, flags: number | undefined, body: FrameBody): boolean;",
+          "signature": "withContextItem(id: string | null, flags: number | undefined, body: FrameBody): boolean;",
+          "signatures": [
+            "withContextItem(id: string | null, flags: number | undefined, body: FrameBody): boolean;",
+            "withContextItem(id: string | null, body: FrameBody): boolean;",
+            "withContextItem(body: FrameBody): boolean;"
+          ]
+        },
+        {
+          "name": "withContextWindow",
+          "kind": "function",
+          "doc": "withContextWindow(id: string | null, flags: number | undefined, body: FrameBody): boolean;",
+          "signature": "withContextWindow(id: string | null, flags: number | undefined, body: FrameBody): boolean;",
+          "signatures": [
+            "withContextWindow(id: string | null, flags: number | undefined, body: FrameBody): boolean;",
+            "withContextWindow(id: string | null, body: FrameBody): boolean;",
+            "withContextWindow(body: FrameBody): boolean;"
+          ]
+        },
+        {
+          "name": "withTooltip",
+          "kind": "function",
+          "doc": "withTooltip(body: FrameBody): boolean;",
+          "signature": "withTooltip(body: FrameBody): boolean;"
+        },
+        {
+          "name": "withItemTooltip",
+          "kind": "function",
+          "doc": "withItemTooltip(body: FrameBody): boolean;",
+          "signature": "withItemTooltip(body: FrameBody): boolean;"
+        },
+        {
+          "name": "withMenuBar",
+          "kind": "function",
+          "doc": "withMenuBar(body: FrameBody): boolean;",
+          "signature": "withMenuBar(body: FrameBody): boolean;"
+        },
+        {
+          "name": "withMenu",
+          "kind": "function",
+          "doc": "withMenu(label: string, enabled: boolean | undefined, body: FrameBody): boolean;",
+          "signature": "withMenu(label: string, enabled: boolean | undefined, body: FrameBody): boolean;"
+        },
+        {
+          "name": "withListBox",
+          "kind": "function",
+          "doc": "withListBox(label: string, width: number | undefined, height: number | undefined, body: FrameBody): boolean;",
+          "signature": "withListBox(label: string, width: number | undefined, height: number | undefined, body: FrameBody): boolean;"
+        },
+        {
+          "name": "withCombo",
+          "kind": "function",
+          "doc": "withCombo(label: string, preview: Stringifiable, flags: number | undefined, body: FrameBody): boolean;",
+          "signature": "withCombo(label: string, preview: Stringifiable, flags: number | undefined, body: FrameBody): boolean;"
+        },
+        {
+          "name": "withDragDropSource",
+          "kind": "function",
+          "doc": "withDragDropSource(flags: number | undefined, body: FrameBody): boolean;",
+          "signature": "withDragDropSource(flags: number | undefined, body: FrameBody): boolean;",
+          "signatures": [
+            "withDragDropSource(flags: number | undefined, body: FrameBody): boolean;",
+            "withDragDropSource(body: FrameBody): boolean;"
+          ]
+        },
+        {
+          "name": "withDragDropTarget",
+          "kind": "function",
+          "doc": "withDragDropTarget(body: FrameBody): boolean;",
+          "signature": "withDragDropTarget(body: FrameBody): boolean;"
+        },
+        {
+          "name": "withGroup",
+          "kind": "function",
+          "doc": "withGroup(body: FrameBody): void;",
+          "signature": "withGroup(body: FrameBody): void;"
+        },
+        {
+          "name": "withDisabled",
+          "kind": "function",
+          "doc": "withDisabled(disabled: boolean, body: FrameBody): void;",
+          "signature": "withDisabled(disabled: boolean, body: FrameBody): void;"
+        },
+        {
+          "name": "withId",
+          "kind": "function",
+          "doc": "withId(id: string | number, body: FrameBody): void;",
+          "signature": "withId(id: string | number, body: FrameBody): void;"
+        },
+        {
+          "name": "logWindow",
+          "kind": "function",
+          "doc": "logWindow(id?: string, options?: LogWindowOptions): LogWindow;",
+          "signature": "logWindow(id?: string, options?: LogWindowOptions): LogWindow;"
+        },
+        {
+          "name": "toast",
+          "kind": "function",
+          "doc": "toast(text: Stringifiable, duration?: number | ToastOptions, options?: ToastOptions): Toast;",
+          "signature": "toast(text: Stringifiable, duration?: number | ToastOptions, options?: ToastOptions): Toast;"
+        },
+        {
+          "name": "statsOverlay",
+          "kind": "function",
+          "doc": "statsOverlay(id?: string | StatsOverlayOptions, options?: StatsOverlayOptions): StatsOverlay;",
+          "signature": "statsOverlay(id?: string | StatsOverlayOptions, options?: StatsOverlayOptions): StatsOverlay;"
+        },
+        {
+          "name": "dataTable",
+          "kind": "function",
+          "doc": "dataTable<Row = any>(id: string, headers: readonly DataTableHeaderLike<Row>[], rows: readonly Row[], options?: DataTableOptions<Row>): DataTable<Row>;",
+          "signature": "dataTable<Row = any>(id: string, headers: readonly DataTableHeaderLike<Row>[], rows: readonly Row[], options?: DataTableOptions<Row>): DataTable<Row>;"
+        },
+        {
+          "name": "createWindow",
+          "kind": "function",
+          "doc": "createWindow(renderCallback: RenderCallback, options?: WindowOptions): Session;",
+          "signature": "createWindow(renderCallback: RenderCallback, options?: WindowOptions): Session;"
+        },
+        {
+          "name": "closeWindow",
+          "kind": "function",
+          "doc": "closeWindow(): void;",
+          "signature": "closeWindow(): void;"
+        },
+        {
+          "name": "launchFloaty",
+          "kind": "function",
+          "doc": "launchFloaty(renderCallback: RenderCallback, options?: WindowOptions): Session;",
+          "signature": "launchFloaty(renderCallback: RenderCallback, options?: WindowOptions): Session;"
+        },
+        {
+          "name": "launch",
+          "kind": "function",
+          "doc": "launch(renderCallback: RenderCallback, options?: WindowOptions): Session;",
+          "signature": "launch(renderCallback: RenderCallback, options?: WindowOptions): Session;"
+        },
+        {
+          "name": "launchPrivileged",
+          "kind": "function",
+          "doc": "launchPrivileged(renderCallback: RenderCallback, options?: WindowOptions): Session;",
+          "signature": "launchPrivileged(renderCallback: RenderCallback, options?: WindowOptions): Session;"
+        },
+        {
+          "name": "addButtonEx",
+          "kind": "function",
+          "doc": "addButtonEx(label: Stringifiable, callback: () => void, options?: FloatingButtonOptions): FloatingButton;",
+          "signature": "addButtonEx(label: Stringifiable, callback: () => void, options?: FloatingButtonOptions): FloatingButton;"
+        },
+        {
+          "name": "setTouchable",
+          "kind": "function",
+          "doc": "setTouchable(touchMode: TouchMode | boolean): Session;",
+          "signature": "setTouchable(touchMode: TouchMode | boolean): Session;"
+        },
+        {
+          "name": "setMoreTouch",
+          "kind": "function",
+          "doc": "setMoreTouch(enabled: boolean): Session;",
+          "signature": "setMoreTouch(enabled: boolean): Session;"
+        },
+        {
+          "name": "setGlobalAlpha",
+          "kind": "function",
+          "doc": "setGlobalAlpha(alpha: number): Session;",
+          "signature": "setGlobalAlpha(alpha: number): Session;"
+        },
+        {
+          "name": "setSecure",
+          "kind": "function",
+          "doc": "setSecure(secure: boolean): Session;",
+          "signature": "setSecure(secure: boolean): Session;"
+        },
+        {
+          "name": "collapseWindow",
+          "kind": "function",
+          "doc": "collapseWindow(): Session;",
+          "signature": "collapseWindow(): Session;"
+        },
+        {
+          "name": "expandWindow",
+          "kind": "function",
+          "doc": "expandWindow(): Session;",
+          "signature": "expandWindow(): Session;"
+        },
+        {
+          "name": "getComponent",
+          "kind": "function",
+          "doc": "getComponent(type: string, id: string): Component | null;",
+          "signature": "getComponent(type: string, id: string): Component | null;"
+        },
+        {
+          "name": "alert",
+          "kind": "function",
+          "doc": "alert(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+          "signature": "alert(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+          "signatures": [
+            "alert(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+            "alert(message: Stringifiable, options?: DialogOptions): DialogPromise<boolean>;"
+          ]
+        },
+        {
+          "name": "confirm",
+          "kind": "function",
+          "doc": "confirm(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+          "signature": "confirm(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+          "signatures": [
+            "confirm(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+            "confirm(message: Stringifiable, options?: DialogOptions): DialogPromise<boolean>;"
+          ]
+        },
+        {
+          "name": "singleChoice",
+          "kind": "function",
+          "doc": "singleChoice(title: string, items: ArrayLike<Stringifiable>, selected?: number | null, options?: SingleChoiceOptions): DialogPromise<number>;",
+          "signature": "singleChoice(title: string, items: ArrayLike<Stringifiable>, selected?: number | null, options?: SingleChoiceOptions): DialogPromise<number>;",
+          "signatures": [
+            "singleChoice(title: string, items: ArrayLike<Stringifiable>, selected?: number | null, options?: SingleChoiceOptions): DialogPromise<number>;",
+            "singleChoice(items: ArrayLike<Stringifiable>, selected?: number | null, options?: SingleChoiceOptions): DialogPromise<number>;",
+            "singleChoice(items: ArrayLike<Stringifiable>, options: SingleChoiceOptions): DialogPromise<number>;"
+          ]
+        },
+        {
+          "name": "multiChoice",
+          "kind": "function",
+          "doc": "multiChoice(title: string, items: ArrayLike<Stringifiable>, selected?: readonly number[] | readonly boolean[] | null, options?: MultiChoiceOptions): DialogPromise<number[] | null>;",
+          "signature": "multiChoice(title: string, items: ArrayLike<Stringifiable>, selected?: readonly number[] | readonly boolean[] | null, options?: MultiChoiceOptions): DialogPromise<number[] | null>;",
+          "signatures": [
+            "multiChoice(title: string, items: ArrayLike<Stringifiable>, selected?: readonly number[] | readonly boolean[] | null, options?: MultiChoiceOptions): DialogPromise<number[] | null>;",
+            "multiChoice(items: ArrayLike<Stringifiable>, selected?: readonly number[] | readonly boolean[] | null, options?: MultiChoiceOptions): DialogPromise<number[] | null>;",
+            "multiChoice(items: ArrayLike<Stringifiable>, options: MultiChoiceOptions): DialogPromise<number[] | null>;"
+          ]
+        },
+        {
+          "name": "Ref",
+          "kind": "function",
+          "doc": "Ref<T>(value: T): ValueRef<T>;",
+          "signature": "Ref<T>(value: T): ValueRef<T>;"
+        },
+        {
+          "name": "Dp",
+          "kind": "function",
+          "doc": "Dp(value: number): number;",
+          "signature": "Dp(value: number): number;"
+        },
+        {
+          "name": "Px",
+          "kind": "function",
+          "doc": "Px(value: number): number;",
+          "signature": "Px(value: number): number;"
+        },
+        {
+          "name": "GetBackendCapabilities",
+          "kind": "function",
+          "doc": "GetBackendCapabilities(): BackendCapabilities;",
+          "signature": "GetBackendCapabilities(): BackendCapabilities;"
+        },
+        {
+          "name": "ListExamples",
+          "kind": "function",
+          "doc": "ListExamples(): string[];",
+          "signature": "ListExamples(): string[];"
+        },
+        {
+          "name": "GetExampleSource",
+          "kind": "function",
+          "doc": "GetExampleSource(name: string): string;",
+          "signature": "GetExampleSource(name: string): string;"
+        },
+        {
+          "name": "RunExample",
+          "kind": "function",
+          "doc": "RunExample(name: string, options?: ExampleOptions): Session;",
+          "signature": "RunExample(name: string, options?: ExampleOptions): Session;"
+        },
+        {
+          "name": "LogWindow",
+          "kind": "function",
+          "doc": "LogWindow(id?: string, options?: LogWindowOptions): LogWindow;",
+          "signature": "LogWindow(id?: string, options?: LogWindowOptions): LogWindow;"
+        },
+        {
+          "name": "Toast",
+          "kind": "function",
+          "doc": "Toast(text: Stringifiable, duration?: number | ToastOptions, options?: ToastOptions): Toast;",
+          "signature": "Toast(text: Stringifiable, duration?: number | ToastOptions, options?: ToastOptions): Toast;"
+        },
+        {
+          "name": "Alert",
+          "kind": "function",
+          "doc": "Alert(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+          "signature": "Alert(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+          "signatures": [
+            "Alert(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+            "Alert(message: Stringifiable, options?: DialogOptions): DialogPromise<boolean>;"
+          ]
+        },
+        {
+          "name": "Confirm",
+          "kind": "function",
+          "doc": "Confirm(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+          "signature": "Confirm(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+          "signatures": [
+            "Confirm(title: string, message: string, options?: DialogOptions): DialogPromise<boolean>;",
+            "Confirm(message: Stringifiable, options?: DialogOptions): DialogPromise<boolean>;"
+          ]
+        },
+        {
+          "name": "SingleChoice",
+          "kind": "function",
+          "doc": "SingleChoice(title: string, items: ArrayLike<Stringifiable>, selected?: number | null, options?: SingleChoiceOptions): DialogPromise<number>;",
+          "signature": "SingleChoice(title: string, items: ArrayLike<Stringifiable>, selected?: number | null, options?: SingleChoiceOptions): DialogPromise<number>;",
+          "signatures": [
+            "SingleChoice(title: string, items: ArrayLike<Stringifiable>, selected?: number | null, options?: SingleChoiceOptions): DialogPromise<number>;",
+            "SingleChoice(items: ArrayLike<Stringifiable>, selected?: number | null, options?: SingleChoiceOptions): DialogPromise<number>;",
+            "SingleChoice(items: ArrayLike<Stringifiable>, options: SingleChoiceOptions): DialogPromise<number>;"
+          ]
+        },
+        {
+          "name": "MultiChoice",
+          "kind": "function",
+          "doc": "MultiChoice(title: string, items: ArrayLike<Stringifiable>, selected?: readonly number[] | readonly boolean[] | null, options?: MultiChoiceOptions): DialogPromise<number[] | null>;",
+          "signature": "MultiChoice(title: string, items: ArrayLike<Stringifiable>, selected?: readonly number[] | readonly boolean[] | null, options?: MultiChoiceOptions): DialogPromise<number[] | null>;",
+          "signatures": [
+            "MultiChoice(title: string, items: ArrayLike<Stringifiable>, selected?: readonly number[] | readonly boolean[] | null, options?: MultiChoiceOptions): DialogPromise<number[] | null>;",
+            "MultiChoice(items: ArrayLike<Stringifiable>, selected?: readonly number[] | readonly boolean[] | null, options?: MultiChoiceOptions): DialogPromise<number[] | null>;",
+            "MultiChoice(items: ArrayLike<Stringifiable>, options: MultiChoiceOptions): DialogPromise<number[] | null>;"
+          ]
+        },
+        {
+          "name": "StatsOverlay",
+          "kind": "function",
+          "doc": "StatsOverlay(id?: string | StatsOverlayOptions, options?: StatsOverlayOptions): StatsOverlay;",
+          "signature": "StatsOverlay(id?: string | StatsOverlayOptions, options?: StatsOverlayOptions): StatsOverlay;"
+        },
+        {
+          "name": "DataTable",
+          "kind": "function",
+          "doc": "DataTable<Row = any>(id: string, headers: readonly DataTableHeaderLike<Row>[], rows: readonly Row[], options?: DataTableOptions<Row>): DataTable<Row>;",
+          "signature": "DataTable<Row = any>(id: string, headers: readonly DataTableHeaderLike<Row>[], rows: readonly Row[], options?: DataTableOptions<Row>): DataTable<Row>;"
+        },
+        {
+          "name": "GetComponent",
+          "kind": "function",
+          "doc": "GetComponent(type: string, id: string): Component | null;",
+          "signature": "GetComponent(type: string, id: string): Component | null;"
+        },
+        {
+          "name": "CreateWindow",
+          "kind": "function",
+          "doc": "CreateWindow(renderCallback: RenderCallback, options?: WindowOptions): Session;",
+          "signature": "CreateWindow(renderCallback: RenderCallback, options?: WindowOptions): Session;"
+        },
+        {
+          "name": "CloseWindow",
+          "kind": "function",
+          "doc": "CloseWindow(): void;",
+          "signature": "CloseWindow(): void;"
+        },
+        {
+          "name": "LaunchFloaty",
+          "kind": "function",
+          "doc": "LaunchFloaty(renderCallback: RenderCallback, options?: WindowOptions): Session;",
+          "signature": "LaunchFloaty(renderCallback: RenderCallback, options?: WindowOptions): Session;"
+        },
+        {
+          "name": "Launch",
+          "kind": "function",
+          "doc": "Launch(renderCallback: RenderCallback, options?: WindowOptions): Session;",
+          "signature": "Launch(renderCallback: RenderCallback, options?: WindowOptions): Session;"
+        },
+        {
+          "name": "LaunchPrivileged",
+          "kind": "function",
+          "doc": "LaunchPrivileged(renderCallback: RenderCallback, options?: WindowOptions): Session;",
+          "signature": "LaunchPrivileged(renderCallback: RenderCallback, options?: WindowOptions): Session;"
+        },
+        {
+          "name": "AddButtonEx",
+          "kind": "function",
+          "doc": "AddButtonEx(label: Stringifiable, callback: () => void, options?: FloatingButtonOptions): FloatingButton;",
+          "signature": "AddButtonEx(label: Stringifiable, callback: () => void, options?: FloatingButtonOptions): FloatingButton;"
+        },
+        {
+          "name": "SetTouchable",
+          "kind": "function",
+          "doc": "SetTouchable(touchMode: TouchMode | boolean): Session;",
+          "signature": "SetTouchable(touchMode: TouchMode | boolean): Session;"
+        },
+        {
+          "name": "SetMoreTouch",
+          "kind": "function",
+          "doc": "SetMoreTouch(enabled: boolean): Session;",
+          "signature": "SetMoreTouch(enabled: boolean): Session;"
+        },
+        {
+          "name": "SetGlobalAlpha",
+          "kind": "function",
+          "doc": "SetGlobalAlpha(alpha: number): Session;",
+          "signature": "SetGlobalAlpha(alpha: number): Session;"
+        },
+        {
+          "name": "SetSecure",
+          "kind": "function",
+          "doc": "SetSecure(secure: boolean): Session;",
+          "signature": "SetSecure(secure: boolean): Session;"
+        },
+        {
+          "name": "CollapseWindow",
+          "kind": "function",
+          "doc": "CollapseWindow(): Session;",
+          "signature": "CollapseWindow(): Session;"
+        },
+        {
+          "name": "ExpandWindow",
+          "kind": "function",
+          "doc": "ExpandWindow(): Session;",
+          "signature": "ExpandWindow(): Session;"
+        },
+        {
+          "name": "SetNextWindowPos",
+          "kind": "function",
+          "doc": "SetNextWindowPos(x: number, y: number, condition?: number, pivotX?: number, pivotY?: number): void;",
+          "signature": "SetNextWindowPos(x: number, y: number, condition?: number, pivotX?: number, pivotY?: number): void;"
+        },
+        {
+          "name": "SetNextWindowSize",
+          "kind": "function",
+          "doc": "SetNextWindowSize(width: number, height: number, condition?: number): void;",
+          "signature": "SetNextWindowSize(width: number, height: number, condition?: number): void;"
+        },
+        {
+          "name": "SetNextWindowSizeConstraints",
+          "kind": "function",
+          "doc": "SetNextWindowSizeConstraints(minWidth: number, minHeight: number, maxWidth: number, maxHeight: number): void;",
+          "signature": "SetNextWindowSizeConstraints(minWidth: number, minHeight: number, maxWidth: number, maxHeight: number): void;"
+        },
+        {
+          "name": "SetNextWindowBgAlpha",
+          "kind": "function",
+          "doc": "SetNextWindowBgAlpha(alpha: number): void;",
+          "signature": "SetNextWindowBgAlpha(alpha: number): void;"
+        },
+        {
+          "name": "SetNextWindowFocus",
+          "kind": "function",
+          "doc": "SetNextWindowFocus(): void;",
+          "signature": "SetNextWindowFocus(): void;"
+        },
+        {
+          "name": "SetNextWindowCollapsed",
+          "kind": "function",
+          "doc": "SetNextWindowCollapsed(collapsed: boolean, condition?: number): void;",
+          "signature": "SetNextWindowCollapsed(collapsed: boolean, condition?: number): void;"
+        },
+        {
+          "name": "SetKeyboardFocusHere",
+          "kind": "function",
+          "doc": "SetKeyboardFocusHere(offset?: number): void;",
+          "signature": "SetKeyboardFocusHere(offset?: number): void;"
+        },
+        {
+          "name": "Begin",
+          "kind": "function",
+          "doc": "Begin(name: string, open?: MutableValue<boolean> | null, flags?: number): boolean;",
+          "signature": "Begin(name: string, open?: MutableValue<boolean> | null, flags?: number): boolean;"
+        },
+        {
+          "name": "End",
+          "kind": "function",
+          "doc": "End(): void;",
+          "signature": "End(): void;"
+        },
+        {
+          "name": "BeginChild",
+          "kind": "function",
+          "doc": "BeginChild(id: string, width?: number, height?: number, borders?: boolean | number, flags?: number): boolean;",
+          "signature": "BeginChild(id: string, width?: number, height?: number, borders?: boolean | number, flags?: number): boolean;"
+        },
+        {
+          "name": "EndChild",
+          "kind": "function",
+          "doc": "EndChild(): void;",
+          "signature": "EndChild(): void;"
+        },
+        {
+          "name": "GetWindowPos",
+          "kind": "function",
+          "doc": "GetWindowPos(): Vec2;",
+          "signature": "GetWindowPos(): Vec2;"
+        },
+        {
+          "name": "GetWindowSize",
+          "kind": "function",
+          "doc": "GetWindowSize(): Vec2;",
+          "signature": "GetWindowSize(): Vec2;"
+        },
+        {
+          "name": "GetContentRegionAvail",
+          "kind": "function",
+          "doc": "GetContentRegionAvail(): Vec2;",
+          "signature": "GetContentRegionAvail(): Vec2;"
+        },
+        {
+          "name": "GetCursorPos",
+          "kind": "function",
+          "doc": "GetCursorPos(): Vec2;",
+          "signature": "GetCursorPos(): Vec2;"
+        },
+        {
+          "name": "SetCursorPos",
+          "kind": "function",
+          "doc": "SetCursorPos(x: number, y: number): void;",
+          "signature": "SetCursorPos(x: number, y: number): void;"
+        },
+        {
+          "name": "Text",
+          "kind": "function",
+          "doc": "Text(value: Stringifiable): void;",
+          "signature": "Text(value: Stringifiable): void;"
+        },
+        {
+          "name": "TextWrapped",
+          "kind": "function",
+          "doc": "TextWrapped(value: Stringifiable): void;",
+          "signature": "TextWrapped(value: Stringifiable): void;"
+        },
+        {
+          "name": "TextColored",
+          "kind": "function",
+          "doc": "TextColored(color: Color, value: Stringifiable): void;",
+          "signature": "TextColored(color: Color, value: Stringifiable): void;",
+          "signatures": [
+            "TextColored(color: Color, value: Stringifiable): void;",
+            "TextColored(red: number, green: number, blue: number, alpha: number, value: Stringifiable): void;"
+          ]
+        },
+        {
+          "name": "Button",
+          "kind": "function",
+          "doc": "Button(label: string, width?: number, height?: number): boolean;",
+          "signature": "Button(label: string, width?: number, height?: number): boolean;"
+        },
+        {
+          "name": "SmallButton",
+          "kind": "function",
+          "doc": "SmallButton(label: string): boolean;",
+          "signature": "SmallButton(label: string): boolean;"
+        },
+        {
+          "name": "Checkbox",
+          "kind": "function",
+          "doc": "Checkbox(label: string, value: MutableValue<boolean>): boolean;",
+          "signature": "Checkbox(label: string, value: MutableValue<boolean>): boolean;"
+        },
+        {
+          "name": "RadioButton",
+          "kind": "function",
+          "doc": "RadioButton(label: string, value: MutableValue<number>, buttonValue: number): boolean;",
+          "signature": "RadioButton(label: string, value: MutableValue<number>, buttonValue: number): boolean;"
+        },
+        {
+          "name": "SliderFloat",
+          "kind": "function",
+          "doc": "SliderFloat(label: string, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;",
+          "signature": "SliderFloat(label: string, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "SliderInt",
+          "kind": "function",
+          "doc": "SliderInt(label: string, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;",
+          "signature": "SliderInt(label: string, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "DragFloat",
+          "kind": "function",
+          "doc": "DragFloat(label: string, value: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "DragFloat(label: string, value: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "DragInt",
+          "kind": "function",
+          "doc": "DragInt(label: string, value: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "DragInt(label: string, value: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "InputText",
+          "kind": "function",
+          "doc": "InputText(label: string, value: MutableValue<string>, maxLength?: number, flags?: number): boolean;",
+          "signature": "InputText(label: string, value: MutableValue<string>, maxLength?: number, flags?: number): boolean;"
+        },
+        {
+          "name": "ColorEdit3",
+          "kind": "function",
+          "doc": "ColorEdit3(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;",
+          "signature": "ColorEdit3(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;"
+        },
+        {
+          "name": "ColorEdit4",
+          "kind": "function",
+          "doc": "ColorEdit4(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;",
+          "signature": "ColorEdit4(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;"
+        },
+        {
+          "name": "ProgressBar",
+          "kind": "function",
+          "doc": "ProgressBar(fraction: number, width?: number, height?: number, overlay?: string): void;",
+          "signature": "ProgressBar(fraction: number, width?: number, height?: number, overlay?: string): void;"
+        },
+        {
+          "name": "Combo",
+          "kind": "function",
+          "doc": "Combo(label: string, currentItem: MutableValue<number>, items: readonly Stringifiable[], popupHeight?: number): boolean;",
+          "signature": "Combo(label: string, currentItem: MutableValue<number>, items: readonly Stringifiable[], popupHeight?: number): boolean;"
+        },
+        {
+          "name": "Selectable",
+          "kind": "function",
+          "doc": "Selectable(label: string, selected?: boolean, flags?: number, width?: number, height?: number): boolean;",
+          "signature": "Selectable(label: string, selected?: boolean, flags?: number, width?: number, height?: number): boolean;"
+        },
+        {
+          "name": "CollapsingHeader",
+          "kind": "function",
+          "doc": "CollapsingHeader(label: string, flags?: number): boolean;",
+          "signature": "CollapsingHeader(label: string, flags?: number): boolean;"
+        },
+        {
+          "name": "TreeNode",
+          "kind": "function",
+          "doc": "TreeNode(label: string): boolean;",
+          "signature": "TreeNode(label: string): boolean;"
+        },
+        {
+          "name": "TreePop",
+          "kind": "function",
+          "doc": "TreePop(): void;",
+          "signature": "TreePop(): void;"
+        },
+        {
+          "name": "BeginTabBar",
+          "kind": "function",
+          "doc": "BeginTabBar(id: string, flags?: number): boolean;",
+          "signature": "BeginTabBar(id: string, flags?: number): boolean;"
+        },
+        {
+          "name": "EndTabBar",
+          "kind": "function",
+          "doc": "EndTabBar(): void;",
+          "signature": "EndTabBar(): void;"
+        },
+        {
+          "name": "BeginTabItem",
+          "kind": "function",
+          "doc": "BeginTabItem(label: string, open?: MutableValue<boolean> | null, flags?: number): boolean;",
+          "signature": "BeginTabItem(label: string, open?: MutableValue<boolean> | null, flags?: number): boolean;"
+        },
+        {
+          "name": "EndTabItem",
+          "kind": "function",
+          "doc": "EndTabItem(): void;",
+          "signature": "EndTabItem(): void;"
+        },
+        {
+          "name": "SameLine",
+          "kind": "function",
+          "doc": "SameLine(offsetFromStartX?: number, spacing?: number): void;",
+          "signature": "SameLine(offsetFromStartX?: number, spacing?: number): void;"
+        },
+        {
+          "name": "Separator",
+          "kind": "function",
+          "doc": "Separator(): void;",
+          "signature": "Separator(): void;"
+        },
+        {
+          "name": "Spacing",
+          "kind": "function",
+          "doc": "Spacing(): void;",
+          "signature": "Spacing(): void;"
+        },
+        {
+          "name": "NewLine",
+          "kind": "function",
+          "doc": "NewLine(): void;",
+          "signature": "NewLine(): void;"
+        },
+        {
+          "name": "Dummy",
+          "kind": "function",
+          "doc": "Dummy(width: number, height: number): void;",
+          "signature": "Dummy(width: number, height: number): void;"
+        },
+        {
+          "name": "SetNextItemWidth",
+          "kind": "function",
+          "doc": "SetNextItemWidth(width: number): void;",
+          "signature": "SetNextItemWidth(width: number): void;"
+        },
+        {
+          "name": "PushItemWidth",
+          "kind": "function",
+          "doc": "PushItemWidth(width: number): void;",
+          "signature": "PushItemWidth(width: number): void;"
+        },
+        {
+          "name": "PopItemWidth",
+          "kind": "function",
+          "doc": "PopItemWidth(): void;",
+          "signature": "PopItemWidth(): void;"
+        },
+        {
+          "name": "IsItemClicked",
+          "kind": "function",
+          "doc": "IsItemClicked(mouseButton?: number): boolean;",
+          "signature": "IsItemClicked(mouseButton?: number): boolean;"
+        },
+        {
+          "name": "IsItemHovered",
+          "kind": "function",
+          "doc": "IsItemHovered(flags?: number): boolean;",
+          "signature": "IsItemHovered(flags?: number): boolean;"
+        },
+        {
+          "name": "IsAnyItemHovered",
+          "kind": "function",
+          "doc": "IsAnyItemHovered(): boolean;",
+          "signature": "IsAnyItemHovered(): boolean;"
+        },
+        {
+          "name": "IsAnyItemActive",
+          "kind": "function",
+          "doc": "IsAnyItemActive(): boolean;",
+          "signature": "IsAnyItemActive(): boolean;"
+        },
+        {
+          "name": "ShowDemoWindow",
+          "kind": "function",
+          "doc": "ShowDemoWindow(open?: MutableValue<boolean> | null): void;",
+          "signature": "ShowDemoWindow(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "ShowMetricsWindow",
+          "kind": "function",
+          "doc": "ShowMetricsWindow(open?: MutableValue<boolean> | null): void;",
+          "signature": "ShowMetricsWindow(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "ShowDebugLogWindow",
+          "kind": "function",
+          "doc": "ShowDebugLogWindow(open?: MutableValue<boolean> | null): void;",
+          "signature": "ShowDebugLogWindow(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "ShowIDStackToolWindow",
+          "kind": "function",
+          "doc": "ShowIDStackToolWindow(open?: MutableValue<boolean> | null): void;",
+          "signature": "ShowIDStackToolWindow(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "ShowStyleEditor",
+          "kind": "function",
+          "doc": "ShowStyleEditor(open?: MutableValue<boolean> | null): void;",
+          "signature": "ShowStyleEditor(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "ShowAboutWindow",
+          "kind": "function",
+          "doc": "ShowAboutWindow(open?: MutableValue<boolean> | null): void;",
+          "signature": "ShowAboutWindow(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "ShowUserGuide",
+          "kind": "function",
+          "doc": "ShowUserGuide(open?: MutableValue<boolean> | null): void;",
+          "signature": "ShowUserGuide(open?: MutableValue<boolean> | null): void;"
+        },
+        {
+          "name": "StyleColorsDark",
+          "kind": "function",
+          "doc": "StyleColorsDark(): void;",
+          "signature": "StyleColorsDark(): void;"
+        },
+        {
+          "name": "StyleColorsLight",
+          "kind": "function",
+          "doc": "StyleColorsLight(): void;",
+          "signature": "StyleColorsLight(): void;"
+        },
+        {
+          "name": "StyleColorsClassic",
+          "kind": "function",
+          "doc": "StyleColorsClassic(): void;",
+          "signature": "StyleColorsClassic(): void;"
+        },
+        {
+          "name": "WantCaptureMouse",
+          "kind": "function",
+          "doc": "WantCaptureMouse(): boolean;",
+          "signature": "WantCaptureMouse(): boolean;"
+        },
+        {
+          "name": "SeparatorText",
+          "kind": "function",
+          "doc": "SeparatorText(label: string): void;",
+          "signature": "SeparatorText(label: string): void;"
+        },
+        {
+          "name": "Bullet",
+          "kind": "function",
+          "doc": "Bullet(): void;",
+          "signature": "Bullet(): void;"
+        },
+        {
+          "name": "BulletText",
+          "kind": "function",
+          "doc": "BulletText(text: Stringifiable): void;",
+          "signature": "BulletText(text: Stringifiable): void;"
+        },
+        {
+          "name": "LabelText",
+          "kind": "function",
+          "doc": "LabelText(label: string, text: Stringifiable): void;",
+          "signature": "LabelText(label: string, text: Stringifiable): void;"
+        },
+        {
+          "name": "TextDisabled",
+          "kind": "function",
+          "doc": "TextDisabled(text: Stringifiable): void;",
+          "signature": "TextDisabled(text: Stringifiable): void;"
+        },
+        {
+          "name": "ArrowButton",
+          "kind": "function",
+          "doc": "ArrowButton(id: string, direction: number): boolean;",
+          "signature": "ArrowButton(id: string, direction: number): boolean;"
+        },
+        {
+          "name": "InvisibleButton",
+          "kind": "function",
+          "doc": "InvisibleButton(id: string, width: number, height: number, flags?: number): boolean;",
+          "signature": "InvisibleButton(id: string, width: number, height: number, flags?: number): boolean;"
+        },
+        {
+          "name": "InputInt",
+          "kind": "function",
+          "doc": "InputInt(label: string, value: MutableValue<number>, step?: number, stepFast?: number, flags?: number): boolean;",
+          "signature": "InputInt(label: string, value: MutableValue<number>, step?: number, stepFast?: number, flags?: number): boolean;"
+        },
+        {
+          "name": "InputFloat",
+          "kind": "function",
+          "doc": "InputFloat(label: string, value: MutableValue<number>, step?: number, stepFast?: number, format?: string, flags?: number): boolean;",
+          "signature": "InputFloat(label: string, value: MutableValue<number>, step?: number, stepFast?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "InputTextMultiline",
+          "kind": "function",
+          "doc": "InputTextMultiline(label: string, value: MutableValue<string>, maxLength?: number, width?: number, height?: number, flags?: number): boolean;",
+          "signature": "InputTextMultiline(label: string, value: MutableValue<string>, maxLength?: number, width?: number, height?: number, flags?: number): boolean;"
+        },
+        {
+          "name": "BeginListBox",
+          "kind": "function",
+          "doc": "BeginListBox(label: string, width?: number, height?: number): boolean;",
+          "signature": "BeginListBox(label: string, width?: number, height?: number): boolean;"
+        },
+        {
+          "name": "EndListBox",
+          "kind": "function",
+          "doc": "EndListBox(): void;",
+          "signature": "EndListBox(): void;"
+        },
+        {
+          "name": "ListBox",
+          "kind": "function",
+          "doc": "ListBox(label: string, currentItem: MutableValue<number>, items: readonly Stringifiable[], heightInItems?: number): boolean;",
+          "signature": "ListBox(label: string, currentItem: MutableValue<number>, items: readonly Stringifiable[], heightInItems?: number): boolean;"
+        },
+        {
+          "name": "ColorPicker3",
+          "kind": "function",
+          "doc": "ColorPicker3(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;",
+          "signature": "ColorPicker3(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;"
+        },
+        {
+          "name": "ColorPicker4",
+          "kind": "function",
+          "doc": "ColorPicker4(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;",
+          "signature": "ColorPicker4(label: string, value: MutableValue<readonly number[]> | NativeArray<number>, flags?: number): boolean;"
+        },
+        {
+          "name": "ColorButton",
+          "kind": "function",
+          "doc": "ColorButton(id: string, color: Color, flags?: number, width?: number, height?: number): boolean;",
+          "signature": "ColorButton(id: string, color: Color, flags?: number, width?: number, height?: number): boolean;",
+          "signatures": [
+            "ColorButton(id: string, color: Color, flags?: number, width?: number, height?: number): boolean;",
+            "ColorButton(id: string, color: Color, options: { flags?: number; width?: number; height?: number; }): boolean;",
+            "ColorButton(id: string, red: number, green: number, blue: number, alpha?: number, flags?: number, width?: number, height?: number): boolean;"
+          ]
+        },
+        {
+          "name": "PlotLines",
+          "kind": "function",
+          "doc": "PlotLines(label: string, values: readonly number[] | NativeArray<number>, options?: PlotOptions): void;",
+          "signature": "PlotLines(label: string, values: readonly number[] | NativeArray<number>, options?: PlotOptions): void;"
+        },
+        {
+          "name": "PlotHistogram",
+          "kind": "function",
+          "doc": "PlotHistogram(label: string, values: readonly number[] | NativeArray<number>, options?: PlotOptions): void;",
+          "signature": "PlotHistogram(label: string, values: readonly number[] | NativeArray<number>, options?: PlotOptions): void;"
+        },
+        {
+          "name": "TreeNodeEx",
+          "kind": "function",
+          "doc": "TreeNodeEx(label: string, flags?: number): boolean;",
+          "signature": "TreeNodeEx(label: string, flags?: number): boolean;"
+        },
+        {
+          "name": "VSliderFloat",
+          "kind": "function",
+          "doc": "VSliderFloat(label: string, width: number, height: number, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;",
+          "signature": "VSliderFloat(label: string, width: number, height: number, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "VSliderInt",
+          "kind": "function",
+          "doc": "VSliderInt(label: string, width: number, height: number, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;",
+          "signature": "VSliderInt(label: string, width: number, height: number, value: MutableValue<number>, min: number, max: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "DragFloat2",
+          "kind": "function",
+          "doc": "DragFloat2(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "DragFloat2(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "DragFloat3",
+          "kind": "function",
+          "doc": "DragFloat3(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "DragFloat3(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "DragFloat4",
+          "kind": "function",
+          "doc": "DragFloat4(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "DragFloat4(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "DragInt2",
+          "kind": "function",
+          "doc": "DragInt2(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "DragInt2(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "DragInt3",
+          "kind": "function",
+          "doc": "DragInt3(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "DragInt3(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "DragInt4",
+          "kind": "function",
+          "doc": "DragInt4(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "DragInt4(label: string, value: NumberArrayValue, speed?: number, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "SliderFloat2",
+          "kind": "function",
+          "doc": "SliderFloat2(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "SliderFloat2(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "SliderFloat3",
+          "kind": "function",
+          "doc": "SliderFloat3(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "SliderFloat3(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "SliderFloat4",
+          "kind": "function",
+          "doc": "SliderFloat4(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "SliderFloat4(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "SliderInt2",
+          "kind": "function",
+          "doc": "SliderInt2(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "SliderInt2(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "SliderInt3",
+          "kind": "function",
+          "doc": "SliderInt3(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "SliderInt3(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "SliderInt4",
+          "kind": "function",
+          "doc": "SliderInt4(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;",
+          "signature": "SliderInt4(label: string, value: NumberArrayValue, min?: number, max?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "InputFloat2",
+          "kind": "function",
+          "doc": "InputFloat2(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;",
+          "signature": "InputFloat2(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "InputFloat3",
+          "kind": "function",
+          "doc": "InputFloat3(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;",
+          "signature": "InputFloat3(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "InputFloat4",
+          "kind": "function",
+          "doc": "InputFloat4(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;",
+          "signature": "InputFloat4(label: string, value: NumberArrayValue, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "InputInt2",
+          "kind": "function",
+          "doc": "InputInt2(label: string, value: NumberArrayValue, flags?: number): boolean;",
+          "signature": "InputInt2(label: string, value: NumberArrayValue, flags?: number): boolean;"
+        },
+        {
+          "name": "InputInt3",
+          "kind": "function",
+          "doc": "InputInt3(label: string, value: NumberArrayValue, flags?: number): boolean;",
+          "signature": "InputInt3(label: string, value: NumberArrayValue, flags?: number): boolean;"
+        },
+        {
+          "name": "InputInt4",
+          "kind": "function",
+          "doc": "InputInt4(label: string, value: NumberArrayValue, flags?: number): boolean;",
+          "signature": "InputInt4(label: string, value: NumberArrayValue, flags?: number): boolean;"
+        },
+        {
+          "name": "DragFloatRange2",
+          "kind": "function",
+          "doc": "DragFloatRange2(label: string, currentMin: MutableValue<number>, currentMax: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, formatMax?: string | null, flags?: number): boolean;",
+          "signature": "DragFloatRange2(label: string, currentMin: MutableValue<number>, currentMax: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, formatMax?: string | null, flags?: number): boolean;"
+        },
+        {
+          "name": "DragIntRange2",
+          "kind": "function",
+          "doc": "DragIntRange2(label: string, currentMin: MutableValue<number>, currentMax: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, formatMax?: string | null, flags?: number): boolean;",
+          "signature": "DragIntRange2(label: string, currentMin: MutableValue<number>, currentMax: MutableValue<number>, speed?: number, min?: number, max?: number, format?: string, formatMax?: string | null, flags?: number): boolean;"
+        },
+        {
+          "name": "SliderAngle",
+          "kind": "function",
+          "doc": "SliderAngle(label: string, value: MutableValue<number>, degreesMin?: number, degreesMax?: number, format?: string, flags?: number): boolean;",
+          "signature": "SliderAngle(label: string, value: MutableValue<number>, degreesMin?: number, degreesMax?: number, format?: string, flags?: number): boolean;"
+        },
+        {
+          "name": "Toggle",
+          "kind": "function",
+          "doc": "Toggle(label: string, value: MutableValue<boolean>): boolean;",
+          "signature": "Toggle(label: string, value: MutableValue<boolean>): boolean;"
+        },
+        {
+          "name": "ToggleSwitch",
+          "kind": "function",
+          "doc": "ToggleSwitch(label: string, value: MutableValue<boolean>): boolean;",
+          "signature": "ToggleSwitch(label: string, value: MutableValue<boolean>): boolean;"
+        },
+        {
+          "name": "BeginCombo",
+          "kind": "function",
+          "doc": "BeginCombo(label: string, preview?: Stringifiable, flags?: number): boolean;",
+          "signature": "BeginCombo(label: string, preview?: Stringifiable, flags?: number): boolean;"
+        },
+        {
+          "name": "EndCombo",
+          "kind": "function",
+          "doc": "EndCombo(): void;",
+          "signature": "EndCombo(): void;"
+        },
+        {
+          "name": "ListClipper",
+          "kind": "function",
+          "doc": "ListClipper(itemCount: number, callback: (start: number, end: number) => void): void;",
+          "signature": "ListClipper(itemCount: number, callback: (start: number, end: number) => void): void;",
+          "signatures": [
+            "ListClipper(itemCount: number, callback: (start: number, end: number) => void): void;",
+            "ListClipper(itemCount: number, options: ListClipperOptions | null | undefined, callback: (start: number, end: number) => void): void;"
+          ]
+        },
+        {
+          "name": "BeginMultiSelect",
+          "kind": "function",
+          "doc": "BeginMultiSelect(flags?: number, selectionSize?: number, itemsCount?: number): MultiSelectIO;",
+          "signature": "BeginMultiSelect(flags?: number, selectionSize?: number, itemsCount?: number): MultiSelectIO;"
+        },
+        {
+          "name": "EndMultiSelect",
+          "kind": "function",
+          "doc": "EndMultiSelect(rangeSrcReset?: boolean): MultiSelectIO;",
+          "signature": "EndMultiSelect(rangeSrcReset?: boolean): MultiSelectIO;"
+        },
+        {
+          "name": "SetNextItemSelectionUserData",
+          "kind": "function",
+          "doc": "SetNextItemSelectionUserData(id: number): void;",
+          "signature": "SetNextItemSelectionUserData(id: number): void;"
+        },
+        {
+          "name": "IsItemToggledSelection",
+          "kind": "function",
+          "doc": "IsItemToggledSelection(): boolean;",
+          "signature": "IsItemToggledSelection(): boolean;"
+        },
+        {
+          "name": "SelectionStorage",
+          "kind": "function",
+          "doc": "SelectionStorage(): SelectionStorage;",
+          "signature": "SelectionStorage(): SelectionStorage;"
+        },
+        {
+          "name": "OpenPopup",
+          "kind": "function",
+          "doc": "OpenPopup(id: string, flags?: number): void;",
+          "signature": "OpenPopup(id: string, flags?: number): void;"
+        },
+        {
+          "name": "BeginPopup",
+          "kind": "function",
+          "doc": "BeginPopup(id: string, flags?: number): boolean;",
+          "signature": "BeginPopup(id: string, flags?: number): boolean;"
+        },
+        {
+          "name": "BeginPopupModal",
+          "kind": "function",
+          "doc": "BeginPopupModal(name: string, open?: MutableValue<boolean> | null, flags?: number): boolean;",
+          "signature": "BeginPopupModal(name: string, open?: MutableValue<boolean> | null, flags?: number): boolean;"
+        },
+        {
+          "name": "BeginPopupContextItem",
+          "kind": "function",
+          "doc": "BeginPopupContextItem(id?: string | null, flags?: number): boolean;",
+          "signature": "BeginPopupContextItem(id?: string | null, flags?: number): boolean;"
+        },
+        {
+          "name": "BeginPopupContextWindow",
+          "kind": "function",
+          "doc": "BeginPopupContextWindow(id?: string | null, flags?: number): boolean;",
+          "signature": "BeginPopupContextWindow(id?: string | null, flags?: number): boolean;"
+        },
+        {
+          "name": "EndPopup",
+          "kind": "function",
+          "doc": "EndPopup(): void;",
+          "signature": "EndPopup(): void;"
+        },
+        {
+          "name": "CloseCurrentPopup",
+          "kind": "function",
+          "doc": "CloseCurrentPopup(): void;",
+          "signature": "CloseCurrentPopup(): void;"
+        },
+        {
+          "name": "IsPopupOpen",
+          "kind": "function",
+          "doc": "IsPopupOpen(id: string, flags?: number): boolean;",
+          "signature": "IsPopupOpen(id: string, flags?: number): boolean;"
+        },
+        {
+          "name": "BeginMenuBar",
+          "kind": "function",
+          "doc": "BeginMenuBar(): boolean;",
+          "signature": "BeginMenuBar(): boolean;"
+        },
+        {
+          "name": "EndMenuBar",
+          "kind": "function",
+          "doc": "EndMenuBar(): void;",
+          "signature": "EndMenuBar(): void;"
+        },
+        {
+          "name": "BeginMenu",
+          "kind": "function",
+          "doc": "BeginMenu(label: string, enabled?: boolean): boolean;",
+          "signature": "BeginMenu(label: string, enabled?: boolean): boolean;"
+        },
+        {
+          "name": "EndMenu",
+          "kind": "function",
+          "doc": "EndMenu(): void;",
+          "signature": "EndMenu(): void;"
+        },
+        {
+          "name": "MenuItem",
+          "kind": "function",
+          "doc": "MenuItem(label: string, shortcut?: string | null, selected?: MutableValue<boolean> | boolean, enabled?: boolean): boolean;",
+          "signature": "MenuItem(label: string, shortcut?: string | null, selected?: MutableValue<boolean> | boolean, enabled?: boolean): boolean;"
+        },
+        {
+          "name": "SetTooltip",
+          "kind": "function",
+          "doc": "SetTooltip(text: Stringifiable): void;",
+          "signature": "SetTooltip(text: Stringifiable): void;"
+        },
+        {
+          "name": "SetItemTooltip",
+          "kind": "function",
+          "doc": "SetItemTooltip(text: Stringifiable): void;",
+          "signature": "SetItemTooltip(text: Stringifiable): void;"
+        },
+        {
+          "name": "BeginTooltip",
+          "kind": "function",
+          "doc": "BeginTooltip(): boolean;",
+          "signature": "BeginTooltip(): boolean;"
+        },
+        {
+          "name": "BeginItemTooltip",
+          "kind": "function",
+          "doc": "BeginItemTooltip(): boolean;",
+          "signature": "BeginItemTooltip(): boolean;"
+        },
+        {
+          "name": "EndTooltip",
+          "kind": "function",
+          "doc": "EndTooltip(): void;",
+          "signature": "EndTooltip(): void;"
+        },
+        {
+          "name": "BeginTable",
+          "kind": "function",
+          "doc": "BeginTable(id: string, columns: number, flags?: number, outerWidth?: number, outerHeight?: number): boolean;",
+          "signature": "BeginTable(id: string, columns: number, flags?: number, outerWidth?: number, outerHeight?: number): boolean;"
+        },
+        {
+          "name": "EndTable",
+          "kind": "function",
+          "doc": "EndTable(): void;",
+          "signature": "EndTable(): void;"
+        },
+        {
+          "name": "TableNextRow",
+          "kind": "function",
+          "doc": "TableNextRow(rowFlags?: number, minRowHeight?: number): void;",
+          "signature": "TableNextRow(rowFlags?: number, minRowHeight?: number): void;"
+        },
+        {
+          "name": "TableNextColumn",
+          "kind": "function",
+          "doc": "TableNextColumn(): boolean;",
+          "signature": "TableNextColumn(): boolean;"
+        },
+        {
+          "name": "TableSetColumnIndex",
+          "kind": "function",
+          "doc": "TableSetColumnIndex(columnIndex: number): boolean;",
+          "signature": "TableSetColumnIndex(columnIndex: number): boolean;"
+        },
+        {
+          "name": "TableSetupColumn",
+          "kind": "function",
+          "doc": "TableSetupColumn(label: string, flags?: number, initWidthOrWeight?: number, userId?: number): void;",
+          "signature": "TableSetupColumn(label: string, flags?: number, initWidthOrWeight?: number, userId?: number): void;"
+        },
+        {
+          "name": "TableGetSortSpecs",
+          "kind": "function",
+          "doc": "TableGetSortSpecs(): TableSortSpecs | null;",
+          "signature": "TableGetSortSpecs(): TableSortSpecs | null;"
+        },
+        {
+          "name": "TableSetupScrollFreeze",
+          "kind": "function",
+          "doc": "TableSetupScrollFreeze(columns: number, rows: number): void;",
+          "signature": "TableSetupScrollFreeze(columns: number, rows: number): void;"
+        },
+        {
+          "name": "TableHeadersRow",
+          "kind": "function",
+          "doc": "TableHeadersRow(): void;",
+          "signature": "TableHeadersRow(): void;"
+        },
+        {
+          "name": "TableSetBgColor",
+          "kind": "function",
+          "doc": "TableSetBgColor(target: number, color: Color, columnIndex?: number): void;",
+          "signature": "TableSetBgColor(target: number, color: Color, columnIndex?: number): void;",
+          "signatures": [
+            "TableSetBgColor(target: number, color: Color, columnIndex?: number): void;",
+            "TableSetBgColor(target: number, red: number, green: number, blue: number, alpha?: number, columnIndex?: number): void;"
+          ]
+        },
+        {
+          "name": "PushStyleColor",
+          "kind": "function",
+          "doc": "PushStyleColor(index: number | string, color: Color): void;",
+          "signature": "PushStyleColor(index: number | string, color: Color): void;",
+          "signatures": [
+            "PushStyleColor(index: number | string, color: Color): void;",
+            "PushStyleColor(index: number | string, red: number, green: number, blue: number, alpha?: number): void;"
+          ]
+        },
+        {
+          "name": "PopStyleColor",
+          "kind": "function",
+          "doc": "PopStyleColor(count?: number): void;",
+          "signature": "PopStyleColor(count?: number): void;"
+        },
+        {
+          "name": "SetStyleColor",
+          "kind": "function",
+          "doc": "SetStyleColor(index: number | string, color: Color): Api;",
+          "signature": "SetStyleColor(index: number | string, color: Color): Api;",
+          "signatures": [
+            "SetStyleColor(index: number | string, color: Color): Api;",
+            "SetStyleColor(index: number | string, red: number, green: number, blue: number, alpha?: number): Api;"
+          ]
+        },
+        {
+          "name": "SetStyleProperties",
+          "kind": "function",
+          "doc": "SetStyleProperties(properties: StyleProperties): Api;",
+          "signature": "SetStyleProperties(properties: StyleProperties): Api;"
+        },
+        {
+          "name": "SetTheme",
+          "kind": "function",
+          "doc": "SetTheme(name: ThemeName | string): ThemeName;",
+          "signature": "SetTheme(name: ThemeName | string): ThemeName;"
+        },
+        {
+          "name": "PushStyleVar",
+          "kind": "function",
+          "doc": "PushStyleVar(index: number | string, x: number | Point, y?: number): void;",
+          "signature": "PushStyleVar(index: number | string, x: number | Point, y?: number): void;"
+        },
+        {
+          "name": "PopStyleVar",
+          "kind": "function",
+          "doc": "PopStyleVar(count?: number): void;",
+          "signature": "PopStyleVar(count?: number): void;"
+        },
+        {
+          "name": "SetWindowFontScale",
+          "kind": "function",
+          "doc": "SetWindowFontScale(scale: number): void;",
+          "signature": "SetWindowFontScale(scale: number): void;"
+        },
+        {
+          "name": "PushFont",
+          "kind": "function",
+          "doc": "PushFont(font: number | string, fontSize?: number): number;",
+          "signature": "PushFont(font: number | string, fontSize?: number): number;"
+        },
+        {
+          "name": "PopFont",
+          "kind": "function",
+          "doc": "PopFont(): void;",
+          "signature": "PopFont(): void;"
+        },
+        {
+          "name": "WithFont",
+          "kind": "function",
+          "doc": "WithFont<T>(font: number | string, fontSize: number | null | undefined, body: () => T): T | undefined;",
+          "signature": "WithFont<T>(font: number | string, fontSize: number | null | undefined, body: () => T): T | undefined;",
+          "signatures": [
+            "WithFont<T>(font: number | string, fontSize: number | null | undefined, body: () => T): T | undefined;",
+            "WithFont<T>(font: number | string, body: () => T): T | undefined;"
+          ]
+        },
+        {
+          "name": "Icon",
+          "kind": "function",
+          "doc": "Icon(name: string, label?: Stringifiable): string;",
+          "signature": "Icon(name: string, label?: Stringifiable): string;"
+        },
+        {
+          "name": "ColorU32",
+          "kind": "function",
+          "doc": "ColorU32(red: number | Color, green?: number, blue?: number, alpha?: number): number;",
+          "signature": "ColorU32(red: number | Color, green?: number, blue?: number, alpha?: number): number;"
+        },
+        {
+          "name": "CreateTexture",
+          "kind": "function",
+          "doc": "CreateTexture(source: TextureSource, options?: TextureOptions | number): Texture;",
+          "signature": "CreateTexture(source: TextureSource, options?: TextureOptions | number): Texture;"
+        },
+        {
+          "name": "DestroyTexture",
+          "kind": "function",
+          "doc": "DestroyTexture(texture: Texture): boolean;",
+          "signature": "DestroyTexture(texture: Texture): boolean;"
+        },
+        {
+          "name": "Image",
+          "kind": "function",
+          "doc": "Image(texture: Texture, width?: number | ImageOptions, height?: number, options?: ImageOptions): void;",
+          "signature": "Image(texture: Texture, width?: number | ImageOptions, height?: number, options?: ImageOptions): void;"
+        },
+        {
+          "name": "ImageButton",
+          "kind": "function",
+          "doc": "ImageButton(id: string, texture: Texture, width?: number | ImageOptions, height?: number, options?: ImageOptions): boolean;",
+          "signature": "ImageButton(id: string, texture: Texture, width?: number | ImageOptions, height?: number, options?: ImageOptions): boolean;"
+        },
+        {
+          "name": "GetWindowDrawList",
+          "kind": "function",
+          "doc": "GetWindowDrawList(): DrawList;",
+          "signature": "GetWindowDrawList(): DrawList;"
+        },
+        {
+          "name": "GetForegroundDrawList",
+          "kind": "function",
+          "doc": "GetForegroundDrawList(): DrawList;",
+          "signature": "GetForegroundDrawList(): DrawList;"
+        },
+        {
+          "name": "GetBackgroundDrawList",
+          "kind": "function",
+          "doc": "GetBackgroundDrawList(): DrawList;",
+          "signature": "GetBackgroundDrawList(): DrawList;"
+        },
+        {
+          "name": "PushID",
+          "kind": "function",
+          "doc": "PushID(id: string | number): void;",
+          "signature": "PushID(id: string | number): void;"
+        },
+        {
+          "name": "PopID",
+          "kind": "function",
+          "doc": "PopID(): void;",
+          "signature": "PopID(): void;"
+        },
+        {
+          "name": "BeginGroup",
+          "kind": "function",
+          "doc": "BeginGroup(): void;",
+          "signature": "BeginGroup(): void;"
+        },
+        {
+          "name": "EndGroup",
+          "kind": "function",
+          "doc": "EndGroup(): void;",
+          "signature": "EndGroup(): void;"
+        },
+        {
+          "name": "Indent",
+          "kind": "function",
+          "doc": "Indent(width?: number): void;",
+          "signature": "Indent(width?: number): void;"
+        },
+        {
+          "name": "Unindent",
+          "kind": "function",
+          "doc": "Unindent(width?: number): void;",
+          "signature": "Unindent(width?: number): void;"
+        },
+        {
+          "name": "AlignTextToFramePadding",
+          "kind": "function",
+          "doc": "AlignTextToFramePadding(): void;",
+          "signature": "AlignTextToFramePadding(): void;"
+        },
+        {
+          "name": "BeginDisabled",
+          "kind": "function",
+          "doc": "BeginDisabled(disabled?: boolean): void;",
+          "signature": "BeginDisabled(disabled?: boolean): void;"
+        },
+        {
+          "name": "EndDisabled",
+          "kind": "function",
+          "doc": "EndDisabled(): void;",
+          "signature": "EndDisabled(): void;"
+        },
+        {
+          "name": "GetScrollX",
+          "kind": "function",
+          "doc": "GetScrollX(): number;",
+          "signature": "GetScrollX(): number;"
+        },
+        {
+          "name": "GetScrollY",
+          "kind": "function",
+          "doc": "GetScrollY(): number;",
+          "signature": "GetScrollY(): number;"
+        },
+        {
+          "name": "GetScrollMaxX",
+          "kind": "function",
+          "doc": "GetScrollMaxX(): number;",
+          "signature": "GetScrollMaxX(): number;"
+        },
+        {
+          "name": "GetScrollMaxY",
+          "kind": "function",
+          "doc": "GetScrollMaxY(): number;",
+          "signature": "GetScrollMaxY(): number;"
+        },
+        {
+          "name": "SetScrollX",
+          "kind": "function",
+          "doc": "SetScrollX(value: number): void;",
+          "signature": "SetScrollX(value: number): void;"
+        },
+        {
+          "name": "SetScrollY",
+          "kind": "function",
+          "doc": "SetScrollY(value: number): void;",
+          "signature": "SetScrollY(value: number): void;"
+        },
+        {
+          "name": "SetScrollHereX",
+          "kind": "function",
+          "doc": "SetScrollHereX(centerRatio?: number): void;",
+          "signature": "SetScrollHereX(centerRatio?: number): void;"
+        },
+        {
+          "name": "SetScrollHereY",
+          "kind": "function",
+          "doc": "SetScrollHereY(centerRatio?: number): void;",
+          "signature": "SetScrollHereY(centerRatio?: number): void;"
+        },
+        {
+          "name": "IsItemActive",
+          "kind": "function",
+          "doc": "IsItemActive(): boolean;",
+          "signature": "IsItemActive(): boolean;"
+        },
+        {
+          "name": "IsItemEdited",
+          "kind": "function",
+          "doc": "IsItemEdited(): boolean;",
+          "signature": "IsItemEdited(): boolean;"
+        },
+        {
+          "name": "IsItemActivated",
+          "kind": "function",
+          "doc": "IsItemActivated(): boolean;",
+          "signature": "IsItemActivated(): boolean;"
+        },
+        {
+          "name": "IsItemDeactivated",
+          "kind": "function",
+          "doc": "IsItemDeactivated(): boolean;",
+          "signature": "IsItemDeactivated(): boolean;"
+        },
+        {
+          "name": "IsItemDeactivatedAfterEdit",
+          "kind": "function",
+          "doc": "IsItemDeactivatedAfterEdit(): boolean;",
+          "signature": "IsItemDeactivatedAfterEdit(): boolean;"
+        },
+        {
+          "name": "IsItemFocused",
+          "kind": "function",
+          "doc": "IsItemFocused(): boolean;",
+          "signature": "IsItemFocused(): boolean;"
+        },
+        {
+          "name": "IsItemVisible",
+          "kind": "function",
+          "doc": "IsItemVisible(): boolean;",
+          "signature": "IsItemVisible(): boolean;"
+        },
+        {
+          "name": "IsWindowHovered",
+          "kind": "function",
+          "doc": "IsWindowHovered(flags?: number): boolean;",
+          "signature": "IsWindowHovered(flags?: number): boolean;"
+        },
+        {
+          "name": "IsWindowFocused",
+          "kind": "function",
+          "doc": "IsWindowFocused(flags?: number): boolean;",
+          "signature": "IsWindowFocused(flags?: number): boolean;"
+        },
+        {
+          "name": "IsWindowCollapsed",
+          "kind": "function",
+          "doc": "IsWindowCollapsed(): boolean;",
+          "signature": "IsWindowCollapsed(): boolean;"
+        },
+        {
+          "name": "IsWindowAppearing",
+          "kind": "function",
+          "doc": "IsWindowAppearing(): boolean;",
+          "signature": "IsWindowAppearing(): boolean;"
+        },
+        {
+          "name": "GetMousePos",
+          "kind": "function",
+          "doc": "GetMousePos(): Vec2;",
+          "signature": "GetMousePos(): Vec2;"
+        },
+        {
+          "name": "IsMouseDown",
+          "kind": "function",
+          "doc": "IsMouseDown(button?: number): boolean;",
+          "signature": "IsMouseDown(button?: number): boolean;"
+        },
+        {
+          "name": "IsMouseClicked",
+          "kind": "function",
+          "doc": "IsMouseClicked(button?: number, repeat?: boolean): boolean;",
+          "signature": "IsMouseClicked(button?: number, repeat?: boolean): boolean;"
+        },
+        {
+          "name": "IsMouseDoubleClicked",
+          "kind": "function",
+          "doc": "IsMouseDoubleClicked(button?: number): boolean;",
+          "signature": "IsMouseDoubleClicked(button?: number): boolean;"
+        },
+        {
+          "name": "IsMouseReleased",
+          "kind": "function",
+          "doc": "IsMouseReleased(button?: number): boolean;",
+          "signature": "IsMouseReleased(button?: number): boolean;"
+        },
+        {
+          "name": "IsMouseDragging",
+          "kind": "function",
+          "doc": "IsMouseDragging(button?: number, lockThreshold?: number): boolean;",
+          "signature": "IsMouseDragging(button?: number, lockThreshold?: number): boolean;"
+        },
+        {
+          "name": "GetMouseDragDelta",
+          "kind": "function",
+          "doc": "GetMouseDragDelta(button?: number, lockThreshold?: number): Vec2;",
+          "signature": "GetMouseDragDelta(button?: number, lockThreshold?: number): Vec2;"
+        },
+        {
+          "name": "ResetMouseDragDelta",
+          "kind": "function",
+          "doc": "ResetMouseDragDelta(button?: number): void;",
+          "signature": "ResetMouseDragDelta(button?: number): void;"
+        },
+        {
+          "name": "CalcTextSize",
+          "kind": "function",
+          "doc": "CalcTextSize(text: Stringifiable, wrapWidth?: number): Vec2;",
+          "signature": "CalcTextSize(text: Stringifiable, wrapWidth?: number): Vec2;"
+        },
+        {
+          "name": "GetFrameHeight",
+          "kind": "function",
+          "doc": "GetFrameHeight(): number;",
+          "signature": "GetFrameHeight(): number;"
+        },
+        {
+          "name": "GetFrameHeightWithSpacing",
+          "kind": "function",
+          "doc": "GetFrameHeightWithSpacing(): number;",
+          "signature": "GetFrameHeightWithSpacing(): number;"
+        },
+        {
+          "name": "GetTextLineHeight",
+          "kind": "function",
+          "doc": "GetTextLineHeight(): number;",
+          "signature": "GetTextLineHeight(): number;"
+        },
+        {
+          "name": "GetTextLineHeightWithSpacing",
+          "kind": "function",
+          "doc": "GetTextLineHeightWithSpacing(): number;",
+          "signature": "GetTextLineHeightWithSpacing(): number;"
+        },
+        {
+          "name": "IsKeyDown",
+          "kind": "function",
+          "doc": "IsKeyDown(key: number): boolean;",
+          "signature": "IsKeyDown(key: number): boolean;"
+        },
+        {
+          "name": "IsKeyPressed",
+          "kind": "function",
+          "doc": "IsKeyPressed(key: number, repeat?: boolean): boolean;",
+          "signature": "IsKeyPressed(key: number, repeat?: boolean): boolean;"
+        },
+        {
+          "name": "IsKeyReleased",
+          "kind": "function",
+          "doc": "IsKeyReleased(key: number): boolean;",
+          "signature": "IsKeyReleased(key: number): boolean;"
+        },
+        {
+          "name": "GetKeyPressedAmount",
+          "kind": "function",
+          "doc": "GetKeyPressedAmount(key: number, repeatDelay: number, rate: number): number;",
+          "signature": "GetKeyPressedAmount(key: number, repeatDelay: number, rate: number): number;"
+        },
+        {
+          "name": "GetKeyName",
+          "kind": "function",
+          "doc": "GetKeyName(key: number): string;",
+          "signature": "GetKeyName(key: number): string;"
+        },
+        {
+          "name": "IsKeyChordPressed",
+          "kind": "function",
+          "doc": "IsKeyChordPressed(keyChord: number): boolean;",
+          "signature": "IsKeyChordPressed(keyChord: number): boolean;"
+        },
+        {
+          "name": "Shortcut",
+          "kind": "function",
+          "doc": "Shortcut(keyChord: number, flags?: number): boolean;",
+          "signature": "Shortcut(keyChord: number, flags?: number): boolean;"
+        },
+        {
+          "name": "SetNextItemShortcut",
+          "kind": "function",
+          "doc": "SetNextItemShortcut(keyChord: number, flags?: number): void;",
+          "signature": "SetNextItemShortcut(keyChord: number, flags?: number): void;"
+        },
+        {
+          "name": "GetClipboardText",
+          "kind": "function",
+          "doc": "GetClipboardText(): string;",
+          "signature": "GetClipboardText(): string;"
+        },
+        {
+          "name": "SetClipboardText",
+          "kind": "function",
+          "doc": "SetClipboardText(text: Stringifiable): void;",
+          "signature": "SetClipboardText(text: Stringifiable): void;"
+        },
+        {
+          "name": "BeginDragDropSource",
+          "kind": "function",
+          "doc": "BeginDragDropSource(flags?: number): boolean;",
+          "signature": "BeginDragDropSource(flags?: number): boolean;"
+        },
+        {
+          "name": "SetDragDropPayload",
+          "kind": "function",
+          "doc": "SetDragDropPayload(type: string, data: JsonSerializable, condition?: number): boolean;",
+          "signature": "SetDragDropPayload(type: string, data: JsonSerializable, condition?: number): boolean;"
+        },
+        {
+          "name": "EndDragDropSource",
+          "kind": "function",
+          "doc": "EndDragDropSource(): void;",
+          "signature": "EndDragDropSource(): void;"
+        },
+        {
+          "name": "BeginDragDropTarget",
+          "kind": "function",
+          "doc": "BeginDragDropTarget(): boolean;",
+          "signature": "BeginDragDropTarget(): boolean;"
+        },
+        {
+          "name": "AcceptDragDropPayload",
+          "kind": "function",
+          "doc": "AcceptDragDropPayload<Data = any>(type: string, flags?: number): DragDropPayload<Data> | null;",
+          "signature": "AcceptDragDropPayload<Data = any>(type: string, flags?: number): DragDropPayload<Data> | null;"
+        },
+        {
+          "name": "EndDragDropTarget",
+          "kind": "function",
+          "doc": "EndDragDropTarget(): void;",
+          "signature": "EndDragDropTarget(): void;"
+        },
+        {
+          "name": "GetDragDropPayload",
+          "kind": "function",
+          "doc": "GetDragDropPayload<Data = any>(): DragDropPayload<Data> | null;",
+          "signature": "GetDragDropPayload<Data = any>(): DragDropPayload<Data> | null;"
+        },
+        {
+          "name": "WithDragDropSource",
+          "kind": "function",
+          "doc": "WithDragDropSource(flags: number | undefined, body: FrameBody): boolean;",
+          "signature": "WithDragDropSource(flags: number | undefined, body: FrameBody): boolean;",
+          "signatures": [
+            "WithDragDropSource(flags: number | undefined, body: FrameBody): boolean;",
+            "WithDragDropSource(body: FrameBody): boolean;"
+          ]
+        },
+        {
+          "name": "WithDragDropTarget",
+          "kind": "function",
+          "doc": "WithDragDropTarget(body: FrameBody): boolean;",
+          "signature": "WithDragDropTarget(body: FrameBody): boolean;"
+        },
+        {
+          "name": "PushClipRect",
+          "kind": "function",
+          "doc": "PushClipRect(minimum: Point, maximum: Point, intersectWithCurrent?: boolean): void;",
+          "signature": "PushClipRect(minimum: Point, maximum: Point, intersectWithCurrent?: boolean): void;"
+        },
+        {
+          "name": "PopClipRect",
+          "kind": "function",
+          "doc": "PopClipRect(): void;",
+          "signature": "PopClipRect(): void;"
+        },
+        {
+          "name": "AddMousePosEvent",
+          "kind": "function",
+          "doc": "AddMousePosEvent(x: number, y: number): void;",
+          "signature": "AddMousePosEvent(x: number, y: number): void;"
+        },
+        {
+          "name": "AddMouseButtonEvent",
+          "kind": "function",
+          "doc": "AddMouseButtonEvent(button: number, down: boolean): void;",
+          "signature": "AddMouseButtonEvent(button: number, down: boolean): void;"
+        }
+      ]
+    },
+    "imgui.Appearance": {
+      "doc": "AutoJs6 imgui.Appearance API",
+      "members": [
+        {
+          "name": "Flat",
+          "kind": "variable",
+          "doc": "Flat: \"flat\";",
+          "signature": "Flat: \"flat\";"
+        },
+        {
+          "name": "Rounded",
+          "kind": "variable",
+          "doc": "Rounded: \"rounded\";",
+          "signature": "Rounded: \"rounded\";"
+        },
+        {
+          "name": "Card",
+          "kind": "variable",
+          "doc": "Card: \"card\";",
+          "signature": "Card: \"card\";"
+        }
+      ]
+    },
+    "imgui.BackendStatus": {
+      "doc": "AutoJs6 imgui.BackendStatus API",
+      "members": [
+        {
+          "name": "Available",
+          "kind": "variable",
+          "doc": "Available: \"available\";",
+          "signature": "Available: \"available\";"
+        },
+        {
+          "name": "Experimental",
+          "kind": "variable",
+          "doc": "Experimental: \"experimental\";",
+          "signature": "Experimental: \"experimental\";"
+        },
+        {
+          "name": "Unavailable",
+          "kind": "variable",
+          "doc": "Unavailable: \"unavailable\";",
+          "signature": "Unavailable: \"unavailable\";"
+        },
+        {
+          "name": "Deferred",
+          "kind": "variable",
+          "doc": "Deferred: \"deferred\";",
+          "signature": "Deferred: \"deferred\";"
+        }
+      ]
+    },
+    "imgui.Limits": {
+      "doc": "AutoJs6 imgui.Limits API",
+      "members": [
+        {
+          "name": "InputTextMaxBytes",
+          "kind": "variable",
+          "doc": "InputTextMaxBytes: 65536;",
+          "signature": "InputTextMaxBytes: 65536;"
+        },
+        {
+          "name": "SelectionMaxItems",
+          "kind": "variable",
+          "doc": "SelectionMaxItems: 512;",
+          "signature": "SelectionMaxItems: 512;"
+        },
+        {
+          "name": "InputQueueCapacity",
+          "kind": "variable",
+          "doc": "InputQueueCapacity: 2048;",
+          "signature": "InputQueueCapacity: 2048;"
+        },
+        {
+          "name": "DragDropPayloadMaxBytes",
+          "kind": "variable",
+          "doc": "DragDropPayloadMaxBytes: 65536;",
+          "signature": "DragDropPayloadMaxBytes: 65536;"
+        }
+      ]
+    },
+    "imgui.LogLevel": {
+      "doc": "AutoJs6 imgui.LogLevel API",
+      "members": [
+        {
+          "name": "Log",
+          "kind": "variable",
+          "doc": "Log: \"log\";",
+          "signature": "Log: \"log\";"
+        },
+        {
+          "name": "Debug",
+          "kind": "variable",
+          "doc": "Debug: \"debug\";",
+          "signature": "Debug: \"debug\";"
+        },
+        {
+          "name": "Info",
+          "kind": "variable",
+          "doc": "Info: \"info\";",
+          "signature": "Info: \"info\";"
+        },
+        {
+          "name": "Warn",
+          "kind": "variable",
+          "doc": "Warn: \"warn\";",
+          "signature": "Warn: \"warn\";"
+        },
+        {
+          "name": "Error",
+          "kind": "variable",
+          "doc": "Error: \"error\";",
+          "signature": "Error: \"error\";"
+        }
+      ]
+    },
+    "imgui.Themes": {
+      "doc": "AutoJs6 imgui.Themes API",
+      "members": [
+        {
+          "name": "Dark",
+          "kind": "variable",
+          "doc": "Dark: \"dark\";",
+          "signature": "Dark: \"dark\";"
+        },
+        {
+          "name": "Light",
+          "kind": "variable",
+          "doc": "Light: \"light\";",
+          "signature": "Light: \"light\";"
+        },
+        {
+          "name": "Classic",
+          "kind": "variable",
+          "doc": "Classic: \"classic\";",
+          "signature": "Classic: \"classic\";"
+        },
+        {
+          "name": "Pink",
+          "kind": "variable",
+          "doc": "Pink: \"pink\";",
+          "signature": "Pink: \"pink\";"
+        },
+        {
+          "name": "Blue",
+          "kind": "variable",
+          "doc": "Blue: \"blue\";",
+          "signature": "Blue: \"blue\";"
+        },
+        {
+          "name": "ModernDark",
+          "kind": "variable",
+          "doc": "ModernDark: \"modern-dark\";",
+          "signature": "ModernDark: \"modern-dark\";"
+        },
+        {
+          "name": "CyanDusk",
+          "kind": "variable",
+          "doc": "CyanDusk: \"cyan-dusk\";",
+          "signature": "CyanDusk: \"cyan-dusk\";"
+        },
+        {
+          "name": "OrangeDark",
+          "kind": "variable",
+          "doc": "OrangeDark: \"orange-dark\";",
+          "signature": "OrangeDark: \"orange-dark\";"
+        },
+        {
+          "name": "CrystalClear",
+          "kind": "variable",
+          "doc": "CrystalClear: \"crystal-clear\";",
+          "signature": "CrystalClear: \"crystal-clear\";"
+        },
+        {
+          "name": "VibrantNight",
+          "kind": "variable",
+          "doc": "VibrantNight: \"vibrant-night\";",
+          "signature": "VibrantNight: \"vibrant-night\";"
+        },
+        {
+          "name": "PurpleDream",
+          "kind": "variable",
+          "doc": "PurpleDream: \"purple-dream\";",
+          "signature": "PurpleDream: \"purple-dream\";"
+        }
+      ]
+    },
+    "imgui.ToastPosition": {
+      "doc": "AutoJs6 imgui.ToastPosition API",
+      "members": [
+        {
+          "name": "TopLeft",
+          "kind": "variable",
+          "doc": "TopLeft: \"top-left\";",
+          "signature": "TopLeft: \"top-left\";"
+        },
+        {
+          "name": "TopCenter",
+          "kind": "variable",
+          "doc": "TopCenter: \"top-center\";",
+          "signature": "TopCenter: \"top-center\";"
+        },
+        {
+          "name": "TopRight",
+          "kind": "variable",
+          "doc": "TopRight: \"top-right\";",
+          "signature": "TopRight: \"top-right\";"
+        },
+        {
+          "name": "Center",
+          "kind": "variable",
+          "doc": "Center: \"center\";",
+          "signature": "Center: \"center\";"
+        },
+        {
+          "name": "BottomLeft",
+          "kind": "variable",
+          "doc": "BottomLeft: \"bottom-left\";",
+          "signature": "BottomLeft: \"bottom-left\";"
+        },
+        {
+          "name": "BottomCenter",
+          "kind": "variable",
+          "doc": "BottomCenter: \"bottom-center\";",
+          "signature": "BottomCenter: \"bottom-center\";"
+        },
+        {
+          "name": "BottomRight",
+          "kind": "variable",
+          "doc": "BottomRight: \"bottom-right\";",
+          "signature": "BottomRight: \"bottom-right\";"
+        }
+      ]
+    },
+    "imgui.TouchMode": {
+      "doc": "AutoJs6 imgui.TouchMode API",
+      "members": [
+        {
+          "name": "Touchable",
+          "kind": "variable",
+          "doc": "Touchable: \"touchable\";",
+          "signature": "Touchable: \"touchable\";"
+        },
+        {
+          "name": "Passthrough",
+          "kind": "variable",
+          "doc": "Passthrough: \"passthrough\";",
+          "signature": "Passthrough: \"passthrough\";"
+        },
+        {
+          "name": "Auto",
+          "kind": "variable",
+          "doc": "Auto: \"auto\";",
+          "signature": "Auto: \"auto\";"
+        }
+      ]
+    },
+    "imgui.WindowMode": {
+      "doc": "AutoJs6 imgui.WindowMode API",
+      "members": [
+        {
+          "name": "Overlay",
+          "kind": "variable",
+          "doc": "Overlay: \"overlay\";",
+          "signature": "Overlay: \"overlay\";"
+        },
+        {
+          "name": "Activity",
+          "kind": "variable",
+          "doc": "Activity: \"activity\";",
+          "signature": "Activity: \"activity\";"
+        },
+        {
+          "name": "Privileged",
+          "kind": "variable",
+          "doc": "Privileged: \"privileged\";",
+          "signature": "Privileged: \"privileged\";"
+        }
+      ]
+    },
     "installer": {
       "doc": "AutoJs6 Installer API",
       "members": [
@@ -32963,6 +36882,48 @@
       "doc": "AutoJs6 util.versionCodes API",
       "members": [
         {
+          "name": "M",
+          "kind": "variable",
+          "doc": "M: Util.VersionCodes.Info;",
+          "signature": "M: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "N",
+          "kind": "variable",
+          "doc": "N: Util.VersionCodes.Info;",
+          "signature": "N: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "O",
+          "kind": "variable",
+          "doc": "O: Util.VersionCodes.Info;",
+          "signature": "O: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "P",
+          "kind": "variable",
+          "doc": "P: Util.VersionCodes.Info;",
+          "signature": "P: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "Q",
+          "kind": "variable",
+          "doc": "Q: Util.VersionCodes.Info;",
+          "signature": "Q: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "R",
+          "kind": "variable",
+          "doc": "R: Util.VersionCodes.Info;",
+          "signature": "R: Util.VersionCodes.Info;"
+        },
+        {
+          "name": "S",
+          "kind": "variable",
+          "doc": "S: Util.VersionCodes.Info;",
+          "signature": "S: Util.VersionCodes.Info;"
+        },
+        {
           "name": "UPSIDE_DOWN_CAKE",
           "kind": "variable",
           "doc": "UPSIDE_DOWN_CAKE: Util.VersionCodes.Info;",
@@ -32981,58 +36942,16 @@
           "signature": "S_V2: Util.VersionCodes.Info;"
         },
         {
-          "name": "S",
-          "kind": "variable",
-          "doc": "S: Util.VersionCodes.Info;",
-          "signature": "S: Util.VersionCodes.Info;"
-        },
-        {
-          "name": "R",
-          "kind": "variable",
-          "doc": "R: Util.VersionCodes.Info;",
-          "signature": "R: Util.VersionCodes.Info;"
-        },
-        {
-          "name": "Q",
-          "kind": "variable",
-          "doc": "Q: Util.VersionCodes.Info;",
-          "signature": "Q: Util.VersionCodes.Info;"
-        },
-        {
-          "name": "P",
-          "kind": "variable",
-          "doc": "P: Util.VersionCodes.Info;",
-          "signature": "P: Util.VersionCodes.Info;"
-        },
-        {
           "name": "O_MR1",
           "kind": "variable",
           "doc": "O_MR1: Util.VersionCodes.Info;",
           "signature": "O_MR1: Util.VersionCodes.Info;"
         },
         {
-          "name": "O",
-          "kind": "variable",
-          "doc": "O: Util.VersionCodes.Info;",
-          "signature": "O: Util.VersionCodes.Info;"
-        },
-        {
           "name": "N_MR1",
           "kind": "variable",
           "doc": "N_MR1: Util.VersionCodes.Info;",
           "signature": "N_MR1: Util.VersionCodes.Info;"
-        },
-        {
-          "name": "N",
-          "kind": "variable",
-          "doc": "N: Util.VersionCodes.Info;",
-          "signature": "N: Util.VersionCodes.Info;"
-        },
-        {
-          "name": "M",
-          "kind": "variable",
-          "doc": "M: Util.VersionCodes.Info;",
-          "signature": "M: Util.VersionCodes.Info;"
         },
         {
           "name": "LOLLIPOP_MR1",
@@ -34162,7 +38081,9 @@
     "XML",
     "XMLList",
     "Namespace",
-    "QName"
+    "QName",
+    "imgui",
+    "$imgui"
   ],
   "globalMembers": {
     "app": [
@@ -34250,6 +38171,7 @@
     "$http": "http",
     "$i18n": "i18n",
     "$images": "images",
+    "$imgui": "imgui",
     "$installer": "installer",
     "$mail": "mail",
     "$epub": "epub",

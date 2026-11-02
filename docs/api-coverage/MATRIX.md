@@ -15,17 +15,15 @@
 
 | 列 | 取值 |
 |---|---|
-| doc | none 592 / mention 278 / heading 2712 / signature 0 / example 0 |
-| dts | none 597 / name 1738 / arity 314 / typed 933 |
-| ace | none 1002 / semantic 946 / static 1634 |
+| doc | none 9 / mention 529 / heading 3044 / signature 0 / example 0 |
+| dts | none 10 / name 2325 / arity 314 / typed 933 |
+| ace | none 415 / semantic 946 / static 2221 |
 
 类型比对 (P2.4, ksp: script-modules.json 的参数 / 返回类型与 d.ts, 见 tools/api-coverage/type-map.json; 一致的行 dts 记 typed): typed 1016 / differs 0 / unmapped 252 / no-dts 0 行; 其余行没有 Kotlin 类型 (@ScriptInstall 名称, 原型成员, 返回对象成员).
 
 排除理由缺失: 0. Bun 缺能力名: 0. 策略冲突: 无.
 
 拒绝入口 (运行时声明只返回 never / Promise<never>, 记 pending, 排除须由规则给理由; Q26): Node main 2 / Node Worker 2 / Bun 2. 句柄类型 (runtime-policy.json returnedObjects, Q27) 的成员按运行时类型逐个比对.
-
-名称门禁暂缓 (policy.json deferredNameGate; doc / d.ts / Ace 列照实记录, 缺口不计入 check.py 失败): imgui 588 行 (Q115 (a): 文档 / d.ts / Ace 由 P5.2f-2 补, 待 imgui R 系列稳定).
 
 ## 排除规则
 
@@ -143,7 +141,7 @@
 | gallery | 11 | 11 | 11 | - | 11 | 11 / 0 / 0 | 11 / 0 / 0 | 11 / 0 / 0 |
 | http | 21 | 20 | 20 | 20 / 20 | 20 | 0 / 21 / 0 | 0 / 21 / 0 | 0 / 21 / 0 |
 | images | 82 | 82 | 82 | 79 / 79 | 82 | 82 / 0 / 0 | 82 / 0 / 0 | 82 / 0 / 0 |
-| imgui | 588 | 0 | 0 | - | 0 | 0 / 588 / 0 | 0 / 588 / 0 | 0 / 588 / 0 |
+| imgui | 588 | 332 | 587 | - | 587 | 0 / 588 / 0 | 0 / 588 / 0 | 0 / 588 / 0 |
 | installer | 16 | 16 | 16 | - | 16 | 16 / 0 / 0 | 16 / 0 / 0 | 16 / 0 / 0 |
 | jsox | 2 | 2 | 2 | 2 / 2 | 2 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | keys | 12 | 12 | 12 | 12 / 12 | 12 | 12 / 0 / 0 | 12 / 0 / 0 | 12 / 0 / 0 |
