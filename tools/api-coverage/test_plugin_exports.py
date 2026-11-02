@@ -11,6 +11,31 @@ import runtime_matrix
 HOST = Path(__file__).resolve().parents[2]
 CONTRACT = 'plugin-api/compose-ui-api/src/main/java/org/autojs/plugin/compose/api'
 POLICY = {'pluginExports': {'compose': {'kind': 'compose-ui-catalog', 'module': 'compose', 'root': CONTRACT}}}
+DTS = '''declare namespace Sample {
+    type Listener = (event: { readonly name: string }) => void;
+    /** A comment does not declare fake(): void; */
+    interface Base<Options extends object = object> {
+        /** The id. */
+        readonly id: string;
+        visible: boolean;
+        close(reason?: string): this;
+    }
+    interface Extra { extra?: number; readonly other: "a;b{c"; }
+    interface Panel<Row = any, Handler extends (value: Row) => void = () => void> extends Base<{ size: number }>, Extra, Promise<Row> {
+        close(): this;
+        on<Name extends "a" | "b">(name: Name, listener: Listener): this;
+        on(name: "c"): this;
+        snapshot(): {
+            /** Inside a return type: not a member of Panel. */
+            readonly nested: number;
+        };
+        render(
+            first: number,
+            inner: { skipped: number },
+        ): void;
+    }
+}
+'''
 
 
 def copy_contract(target):
@@ -100,6 +125,52 @@ class ComposeCatalogueTests(unittest.TestCase):
             self.assertEqual(('skipped', [], []), runtime_matrix.compare_pending_baseline(matrix, baseline))
             with self.assertRaises(ValueError):
                 runtime_matrix.write_pending_baseline(matrix, baseline, allow_new=True)
+
+
+class DtsInterfaceTests(unittest.TestCase):
+    """Members of the interfaces of a plugin's d.ts, for the objects its JavaScript builds (P5.2f-2 card D, Q217 (a))."""
+
+    @staticmethod
+    def write_config(directory, root):
+        config = Path(directory) / 'returned-objects.json'
+        config.write_text(json.dumps({'objects': [
+            {'object': 'SamplePanel', 'class': 'Sample.Panel', 'memberSource': 'plugin:sample', 'catalog': 'Panel', 'producers': ['sample.open']},
+        ]}), encoding='utf-8')
+        return config, {'pluginExports': {'sample': {'kind': 'dts-interfaces', 'plugin': 'AutoJs6-Plugin-Sample', 'file': 'sample.d.ts', 'root': root}}}
+
+    def test_members_of_an_interface_and_its_bases(self):
+        with tempfile.TemporaryDirectory() as directory:
+            (Path(directory) / 'sample.d.ts').write_text(DTS, encoding='utf-8')
+            config, policy = self.write_config(directory, directory)
+            result = {'modules': [], 'records': [{'api': 'sample.open', 'module': 'sample', 'ownerModule': 'sample', 'member': 'open'}],
+                      'dataSource': {'kind': 'ksp'}}
+            plugin_exports.attach(HOST, result, policy)
+            sample = result['pluginExports']['sample']
+            self.assertEqual(('read', [], []), (sample['status'], sample['records'], sample['problems']))
+            self.assertEqual({'interfaces': 3, 'members': 13}, sample['counts'])
+            self.assertEqual({'Panel': ['Promise']}, sample['externalBases'])
+            # close hides the member of Base, on is one member for two overloads, nested object types are not members.
+            members = {member['name']: member for member in sample['members']['Panel']}
+            self.assertEqual(['close', 'on', 'snapshot', 'render', 'id', 'visible', 'extra', 'other'], list(members))
+            self.assertEqual(('Functions', 'Functions', 'Getters', 'GettersAndSetters'),
+                             tuple(members[name]['kind'] for name in ('close', 'on', 'id', 'visible')))
+            self.assertEqual((None, 'Base', 'Extra'), tuple(members[name].get('inheritedFrom') for name in ('close', 'id', 'extra')))
+            self.assertTrue(members['id']['source'].endswith('sample.d.ts'))
+            attach_returned(HOST, result, None, config)
+            panel = result['returnedObjects'][0]
+            self.assertEqual(('SamplePanel', ['sample.open'], True, 8), (panel['object'], panel['producers'], panel['complete'], len(panel['members'])))
+
+    def test_source_is_skipped_without_the_checkout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config, policy = self.write_config(directory, str(Path(directory) / 'no-such-checkout'))
+            result = {'modules': [], 'records': [], 'dataSource': {'kind': 'ksp'}}
+            plugin_exports.attach(HOST, result, policy)
+            self.assertEqual('skipped', result['pluginExports']['sample']['status'])
+            self.assertEqual(['sample'], result['dataSource']['pluginExportsSkipped'])
+            attach_returned(HOST, result, None, config)
+            self.assertEqual([], result['returnedObjects'])
+            self.assertEqual(['SamplePanel'], result['returnedObjectsStats']['skipped'])
+            self.assertEqual([], result['returnedObjectsStats']['problems'])
 
 
 if __name__ == '__main__':

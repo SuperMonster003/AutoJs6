@@ -429,6 +429,16 @@
       "source": "appendix D D-23, maintainer 2026-11-01 (Q213 (b), Q214 (a))"
     },
     {
+      "id": "imgui-rhino-only-members",
+      "match": ["*#*"],
+      "memberSource": "plugin:imgui",
+      "columns": ["node_main", "node_worker", "bun"],
+      "status": "not-portable", "reason": "rhino-only",
+      "equivalent": "engines.execScript of a Rhino script that opens the window, events.broadcast between the scripts",
+      "note": "the objects imgui returns (Session, DrawList, ...) only exist in the Rhino script that opened the window, for the reason of imgui-rhino-only; new members of the plugin's imgui.d.ts fall under this rule, and the row id `<object>#<member>` is why imgui.* does not reach them",
+      "source": "appendix D D-23, maintainer 2026-11-01 (Q213 (b), Q214 (a), Q217 (a))"
+    },
+    {
       "id": "java-prototype",
       "match": ["unwrapJavaObject", "util.unwrapJavaObject", "isJavaObject", "isJavaClass", "isJavaPackage"],
       "columns": ["node_main", "node_worker", "bun"],

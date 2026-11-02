@@ -638,7 +638,8 @@ Java objects whose members are not enumerated)).
   forwarding the scanner cannot see (`Color` forwards any colors function).
 - `policy`: the `members` of the entry.
 - `plugin:<name>`: the list `catalog` of a plugin contract source (`policy.json` `pluginExports`, below):
-  the Compose catalogue modifiers of `ComposeModifier`, its shortcut accessors of `ComposeNode`;
+  the Compose catalogue modifiers of `ComposeModifier`, its shortcut accessors of `ComposeNode`, an interface
+  of `imgui.d.ts` for the `Imgui*` objects (there `class` is that interface: no host class exists);
   `catalogProducers` makes every row the source adds a producer; `members` adds the names the object defines
   itself (the properties and operations of `ComposeNode`, appendix C Q106 (a)).
 
@@ -706,8 +707,9 @@ count as exports of their module (Q22 (a)).
 ### Plugin contract exports (P5.2c, Q75 (a))
 
 `plugin_exports.py` adds the names a plugin contract defines although no host module registers
-them one by one; `policy.json` `pluginExports` lists the sources. The only kind,
-`compose-ui-catalog`, reads the Compose UI catalogue the compose module installs at run time
+them one by one; `policy.json` `pluginExports` lists the sources, of two kinds.
+
+`compose-ui-catalog` reads the Compose UI catalogue the compose module installs at run time
 (the KSP `installsComputed` of `compose`) from the contract sources in the host,
 `plugin-api/compose-ui-api` (`V1Catalog`, `ComposeUiV2`, `AndroidViewInteropV1` and the
 vocabulary constants they reference); the 3-Block Compose plugin only renders it:
@@ -719,9 +721,20 @@ vocabulary constants they reference); the 3-Block Compose plugin only renders it
   the shortcuts (8, `w` / `h` / `padding` / ...) the accessors of `ComposeNode`, which every node
   factory returns (`returned-objects.json` entries with `memberSource` `plugin:compose`).
 
-A constant of the vocabulary objects that the catalogue functions no longer reference, or a
-reference that is not a constant, is a problem and fails the check. `root` is relative to the host
-or absolute, and `rootEnvironment` names a variable overriding it. Without the sources the
+`dts-interfaces` (P5.2f-2 card D, Q217 (a)) reads the TypeScript declarations a plugin ships, for
+objects its JavaScript builds, which no host source lists. `imgui` is the only source: `file` in
+`root`, the `AutoJs6-Plugin-ImGui` checkout next to the host (`AUTOJS6_IMGUI_TYPES_ROOT` overrides it;
+the API coverage workflow checks it out). Every interface of the file gets one list, with the members
+its `extends` clause brings in (`inheritedFrom`): a name the interface declares hides the inherited
+one, overloads are one member, and members of nested object types are not listed. A base outside the
+file (`Promise` of `DialogPromise`) goes to `externalBases`, its members are not listed. The source adds
+no export rows, the host registers `imgui`: the 13 `Imgui*` entries of `returned-objects.json` take the
+list their `catalog` names, so a member the plugin adds fails the check until it has documentation, d.ts
+and Ace. The runtime cells of those rows are one rule, `imgui-rhino-only-members`.
+
+For the Compose catalogue, a constant of the vocabulary objects that the catalogue functions no longer
+reference, or a reference that is not a constant, is a problem and fails the check. `root` is relative
+to the host or absolute, and `rootEnvironment` names a variable overriding it. Without the sources the
 source is `skipped` (`summary.json` `pluginExports`, `exports.json` `dataSource.pluginExportsSkipped`):
 its rows and objects are left out, `MATRIX.md`, the pending baseline and the documentation tables are
 reported as skipped instead of compared, and neither `MATRIX.md` nor the baseline is written.

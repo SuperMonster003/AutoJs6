@@ -213,6 +213,75 @@
       "object": "ComposeRef", "class": "org.autojs.autojs.runtime.api.modules.compose.ComposeRef", "memberSource": "augment-prototype",
       "producers": ["compose.ref"], "probe": "compose.ref.()", "documentation": ["compose"],
       "note": "Q106 (a), P3.3"
+    },
+    {
+      "object": "ImguiSession", "class": "ImGui.Session", "memberSource": "plugin:imgui", "catalog": "Session",
+      "producers": ["imgui.createWindow", "imgui.CreateWindow", "imgui.launch", "imgui.Launch", "imgui.launchFloaty", "imgui.LaunchFloaty", "imgui.launchPrivileged", "imgui.LaunchPrivileged", "imgui.runExample", "imgui.RunExample", "imgui.collapseWindow", "imgui.CollapseWindow", "imgui.expandWindow", "imgui.ExpandWindow", "imgui.setGlobalAlpha", "imgui.SetGlobalAlpha", "imgui.setMoreTouch", "imgui.SetMoreTouch", "imgui.setSecure", "imgui.SetSecure", "imgui.setTouchable", "imgui.SetTouchable"],
+      "probe": "imgui.createWindow.()", "documentation": ["imguiSessionType"],
+      "note": "Q217 (a), P5.2f-2 card D: the objects imgui returns are JavaScript objects of the plugin's index.js, so no host class lists them and `class` is the interface of the plugin's imgui.d.ts; members come from that file with their bases (policy.json pluginExports imgui). Session adds the four dialog functions of DialogMethods"
+    },
+    {
+      "object": "ImguiDrawList", "class": "ImGui.DrawList", "memberSource": "plugin:imgui", "catalog": "DrawList",
+      "producers": ["imgui.getWindowDrawList", "imgui.GetWindowDrawList", "imgui.getForegroundDrawList", "imgui.GetForegroundDrawList", "imgui.getBackgroundDrawList", "imgui.GetBackgroundDrawList"],
+      "probe": "imgui.getWindowDrawList.()", "documentation": ["imguiDrawListType"],
+      "note": "Q217 (a), P5.2f-2 card D"
+    },
+    {
+      "object": "ImguiFloatingButton", "class": "ImGui.FloatingButton", "memberSource": "plugin:imgui", "catalog": "FloatingButton",
+      "producers": ["imgui.addButtonEx", "imgui.AddButtonEx"], "probe": "imgui.addButtonEx.()", "documentation": ["imguiFloatingButtonType"],
+      "note": "Q217 (a), P5.2f-2 card D"
+    },
+    {
+      "object": "ImguiComponent", "class": "ImGui.Component", "memberSource": "plugin:imgui", "catalog": "Component",
+      "producers": ["imgui.getComponent", "imgui.GetComponent"], "probe": "imgui.getComponent.()", "documentation": ["imguiComponentType"],
+      "note": "Q217 (a), P5.2f-2 card D: the base of the components below, whose pages and rows repeat its members"
+    },
+    {
+      "object": "ImguiDataTable", "class": "ImGui.DataTable", "memberSource": "plugin:imgui", "catalog": "DataTable",
+      "producers": ["imgui.dataTable", "imgui.DataTable"], "probe": "imgui.dataTable.()", "documentation": ["imguiDataTableType"],
+      "note": "Q217 (a), P5.2f-2 card D"
+    },
+    {
+      "object": "ImguiLogWindow", "class": "ImGui.LogWindow", "memberSource": "plugin:imgui", "catalog": "LogWindow",
+      "producers": ["imgui.logWindow", "imgui.LogWindow"], "probe": "imgui.logWindow.()", "documentation": ["imguiLogWindowType"],
+      "note": "Q217 (a), P5.2f-2 card D"
+    },
+    {
+      "object": "ImguiToast", "class": "ImGui.Toast", "memberSource": "plugin:imgui", "catalog": "Toast",
+      "producers": ["imgui.toast", "imgui.Toast"], "probe": "imgui.toast.()", "documentation": ["imguiToastType"],
+      "note": "Q217 (a), P5.2f-2 card D"
+    },
+    {
+      "object": "ImguiStatsOverlay", "class": "ImGui.StatsOverlay", "memberSource": "plugin:imgui", "catalog": "StatsOverlay",
+      "producers": ["imgui.statsOverlay", "imgui.StatsOverlay"], "probe": "imgui.statsOverlay.()", "documentation": ["imguiStatsOverlayType"],
+      "note": "Q217 (a), P5.2f-2 card D"
+    },
+    {
+      "object": "ImguiDialog", "class": "ImGui.Dialog", "memberSource": "plugin:imgui", "catalog": "Dialog",
+      "producers": ["imgui.alert", "imgui.Alert", "imgui.confirm", "imgui.Confirm", "imgui.singleChoice", "imgui.SingleChoice", "imgui.multiChoice", "imgui.MultiChoice"],
+      "probe": "imgui.alert.().controller", "documentation": ["imguiDialogType"],
+      "note": "Q217 (a), P5.2f-2 card D: the controller of the promise the dialog functions return"
+    },
+    {
+      "object": "ImguiDialogPromise", "class": "ImGui.DialogPromise", "memberSource": "plugin:imgui", "catalog": "DialogPromise",
+      "producers": ["imgui.alert", "imgui.Alert", "imgui.confirm", "imgui.Confirm", "imgui.singleChoice", "imgui.SingleChoice", "imgui.multiChoice", "imgui.MultiChoice"],
+      "probe": "imgui.alert.()", "documentation": ["imguiDialogPromiseType"],
+      "note": "Q217 (a), P5.2f-2 card D: then / catch / finally are the members of the standard Promise (externalBases), not listed"
+    },
+    {
+      "object": "ImguiTexture", "class": "ImGui.Texture", "memberSource": "plugin:imgui", "catalog": "Texture",
+      "producers": ["imgui.createTexture", "imgui.CreateTexture"], "probe": "imgui.createTexture.()", "documentation": ["imguiTextureType"],
+      "note": "Q217 (a), P5.2f-2 card D"
+    },
+    {
+      "object": "ImguiSelectionStorage", "class": "ImGui.SelectionStorage", "memberSource": "plugin:imgui", "catalog": "SelectionStorage",
+      "producers": ["imgui.selectionStorage", "imgui.SelectionStorage"], "probe": "imgui.selectionStorage.()", "documentation": ["imguiSelectionStorageType"],
+      "note": "Q217 (a), P5.2f-2 card D"
+    },
+    {
+      "object": "ImguiMultiSelectIO", "class": "ImGui.MultiSelectIO", "memberSource": "plugin:imgui", "catalog": "MultiSelectIO",
+      "producers": ["imgui.beginMultiSelect", "imgui.BeginMultiSelect", "imgui.endMultiSelect", "imgui.EndMultiSelect"], "probe": "imgui.beginMultiSelect.()", "documentation": ["imguiMultiSelectIOType"],
+      "note": "Q217 (a), P5.2f-2 card D"
     }
   ],
   "prototypes": [

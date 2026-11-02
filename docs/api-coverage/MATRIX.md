@@ -1,23 +1,23 @@
-<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3582 -->
+<!-- runtime-matrix: schema=autojs6-runtime-matrix-v1 dataSource=ksp rows=3891 -->
 # AutoJs6 脚本 API 运行时覆盖矩阵
 
 由 `tools/api-coverage/runtime_matrix.py` 生成 (`python tools/api-coverage/check.py --matrix`), 不要手改. 定义见 `docs/api-coverage/ROADMAP.md` 第 4 节, 机读版本是 CI 产物 `build/reports/api-coverage/runtime-matrix.json`, 人工标注 (别名映射, 排除理由, 等价写法) 只在 `tools/api-coverage/runtime-policy.json`; 排除规则已拍板 (D12 / Q1, ROADMAP 附录 D), 新增排除先登记待决; pending 只能减少 (`tools/api-coverage/pending-baseline.json`).
 
-数据源: ksp, 3582 行 (显式导出 2026, 原型成员 205, 返回对象成员 1351).
+数据源: ksp, 3891 行 (显式导出 2026, 原型成员 205, 返回对象成员 1660).
 
 ## 状态汇总
 
 | 列 | bridged | local-shim | capability-gated | not-portable | denied | pending |
 |---|---:|---:|---:|---:|---:|---:|
-| Node main | 1685 | 369 | 0 | 1528 | 0 | 0 |
-| Node Worker | 1685 | 366 | 0 | 1531 | 0 | 0 |
-| Bun | 0 | 377 | 1674 | 1531 | 0 | 0 |
+| Node main | 1685 | 369 | 0 | 1837 | 0 | 0 |
+| Node Worker | 1685 | 366 | 0 | 1840 | 0 | 0 |
+| Bun | 0 | 377 | 1674 | 1840 | 0 | 0 |
 
 | 列 | 取值 |
 |---|---|
-| doc | none 9 / mention 529 / heading 3044 / signature 0 / example 0 |
-| dts | none 10 / name 2325 / arity 314 / typed 933 |
-| ace | none 415 / semantic 946 / static 2221 |
+| doc | none 9 / mention 564 / heading 3318 / signature 0 / example 0 |
+| dts | none 10 / name 2634 / arity 314 / typed 933 |
+| ace | none 415 / semantic 1255 / static 2221 |
 
 类型比对 (P2.4, ksp: script-modules.json 的参数 / 返回类型与 d.ts, 见 tools/api-coverage/type-map.json; 一致的行 dts 记 typed): typed 1016 / differs 0 / unmapped 252 / no-dts 0 行; 其余行没有 Kotlin 类型 (@ScriptInstall 名称, 原型成员, 返回对象成员).
 
@@ -31,6 +31,7 @@
 |---|---|---:|---:|---:|---|
 | http-java-objects | not-portable: java-prototype | 2 | 2 | 2 | fetch / Node autojs6:fetch request options (method, headers, body) instead of the OkHttp client and request objects |
 | imgui-rhino-only | not-portable: rhino-only | 587 | 587 | 587 | engines.execScript of a Rhino script that opens the window, events.broadcast between the scripts |
+| imgui-rhino-only-members | not-portable: rhino-only | 309 | 309 | 309 | engines.execScript of a Rhino script that opens the window, events.broadcast between the scripts |
 | internal-exports | not-portable: rhino-only | 10 | 10 | 10 |  |
 | java-introspection | not-portable: java-prototype | 3 | 3 | 3 | java module handles (java.callInstance(handle, "getClass")) |
 | java-prototype | not-portable: java-prototype | 5 | 5 | 5 | java module handles (java.create / java.callInstance / java.callStatic) |
@@ -81,6 +82,19 @@
 | Flow# | 106 | 25 | 106 | - | 106 | 106 / 0 / 0 | 106 / 0 / 0 | 106 / 0 / 0 |
 | ImageFeatures# | 10 | 10 | 10 | - | 10 | 0 / 10 / 0 | 0 / 10 / 0 | 0 / 10 / 0 |
 | ImageWrapper# | 15 | 15 | 15 | - | 6 | 0 / 15 / 0 | 0 / 15 / 0 | 0 / 15 / 0 |
+| ImguiComponent# | 11 | 11 | 11 | - | 11 | 0 / 11 / 0 | 0 / 11 / 0 | 0 / 11 / 0 |
+| ImguiDataTable# | 31 | 31 | 31 | - | 31 | 0 / 31 / 0 | 0 / 31 / 0 | 0 / 31 / 0 |
+| ImguiDialog# | 19 | 19 | 19 | - | 19 | 0 / 19 / 0 | 0 / 19 / 0 | 0 / 19 / 0 |
+| ImguiDialogPromise# | 3 | 3 | 3 | - | 3 | 0 / 3 / 0 | 0 / 3 / 0 | 0 / 3 / 0 |
+| ImguiDrawList# | 71 | 36 | 71 | - | 71 | 0 / 71 / 0 | 0 / 71 / 0 | 0 / 71 / 0 |
+| ImguiFloatingButton# | 24 | 24 | 24 | - | 24 | 0 / 24 / 0 | 0 / 24 / 0 | 0 / 24 / 0 |
+| ImguiLogWindow# | 26 | 26 | 26 | - | 26 | 0 / 26 / 0 | 0 / 26 / 0 | 0 / 26 / 0 |
+| ImguiMultiSelectIO# | 5 | 5 | 5 | - | 5 | 0 / 5 / 0 | 0 / 5 / 0 | 0 / 5 / 0 |
+| ImguiSelectionStorage# | 6 | 6 | 6 | - | 6 | 0 / 6 / 0 | 0 / 6 / 0 | 0 / 6 / 0 |
+| ImguiSession# | 70 | 70 | 70 | - | 70 | 0 / 70 / 0 | 0 / 70 / 0 | 0 / 70 / 0 |
+| ImguiStatsOverlay# | 17 | 17 | 17 | - | 17 | 0 / 17 / 0 | 0 / 17 / 0 | 0 / 17 / 0 |
+| ImguiTexture# | 8 | 8 | 8 | - | 8 | 0 / 8 / 0 | 0 / 8 / 0 | 0 / 8 / 0 |
+| ImguiToast# | 18 | 18 | 18 | - | 18 | 0 / 18 / 0 | 0 / 18 / 0 | 0 / 18 / 0 |
 | InjectableWebClient# | 2 | 2 | 2 | - | 0 | 2 / 0 / 0 | 2 / 0 / 0 | 2 / 0 / 0 |
 | InjectableWebView# | 1 | 1 | 1 | - | 0 | 1 / 0 / 0 | 1 / 0 / 0 | 1 / 0 / 0 |
 | IntentTask# | 19 | 0 | 19 | - | 0 | 0 / 19 / 0 | 0 / 19 / 0 | 0 / 19 / 0 |
@@ -528,6 +542,380 @@
 | `ImageWrapper#shoot` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `ImageWrapper#size` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
 | `ImageWrapper#width` | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) | not-portable: java-prototype (java-prototype-objects) |
+
+### ImguiComponent#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiComponent#close` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiComponent#closeReason` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiComponent#closed` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiComponent#hide` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiComponent#id` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiComponent#options` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiComponent#session` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiComponent#show` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiComponent#toggle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiComponent#type` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiComponent#visible` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiDataTable#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiDataTable#addRow` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#clear` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#clearRows` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#clearSelection` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#close` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#closeReason` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#closed` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#deleteRow` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#getRows` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#headers` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#hide` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#id` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#isSelected` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#multiSelect` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#open` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#options` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#removeRow` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#removeSelected` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#renderTable` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#rows` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#selectRow` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#selectedIndices` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#selectedRows` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#session` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#setRows` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#show` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#sortable` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#toggle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#type` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#updateRow` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDataTable#visible` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiDialog#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiDialog#accept` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#cancel` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#cancelValue` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#close` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#closeReason` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#closed` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#dialogType` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#hide` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#id` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#message` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#open` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#options` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#promise` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#session` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#show` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#title` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#toggle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#type` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialog#visible` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiDialogPromise#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiDialogPromise#accept` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialogPromise#cancel` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDialogPromise#controller` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiDrawList#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiDrawList#AddBezierCubic` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddBezierQuadratic` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddCircle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddCircleFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddConcavePolyFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddConvexPolyFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddEllipse` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddEllipseFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddImage` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddImageQuad` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddImageRounded` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddLine` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddNgon` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddNgonFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddPolyline` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddQuad` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddQuadFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddRect` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddRectFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddRectFilledMultiColor` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddText` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddTriangle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#AddTriangleFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PathArcTo` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PathArcToFast` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PathBezierCubicCurveTo` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PathBezierQuadraticCurveTo` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PathClear` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PathFillConcave` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PathFillConvex` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PathLineTo` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PathRect` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PathStroke` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PopClipRect` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#PushClipRect` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addBezierCubic` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addBezierQuadratic` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addCircle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addCircleFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addConcavePolyFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addConvexPolyFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addEllipse` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addEllipseFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addImage` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addImageQuad` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addImageRounded` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addLine` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addNgon` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addNgonFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addPolyline` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addQuad` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addQuadFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addRect` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addRectFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addRectFilledMultiColor` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addText` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addTriangle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#addTriangleFilled` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#layer` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#pathArcTo` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#pathArcToFast` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#pathBezierCubicCurveTo` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#pathBezierQuadraticCurveTo` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#pathClear` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#pathFillConcave` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#pathFillConvex` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#pathLineTo` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#pathRect` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#pathStroke` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#popClipRect` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiDrawList#pushClipRect` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiFloatingButton#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiFloatingButton#alpha` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#close` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#closed` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#height` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#hide` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#moreTouch` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#secure` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#session` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#setAlpha` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#setMoreTouch` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#setPosition` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#setSecure` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#setText` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#setTouchable` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#setVisible` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#show` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#text` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#touchable` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#view` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#visible` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#width` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#window` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#x` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiFloatingButton#y` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiLogWindow#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiLogWindow#append` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#appendLog` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#autoScroll` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#clear` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#close` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#closeReason` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#closed` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#debug` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#entries` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#error` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#export` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#exportText` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#hide` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#id` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#info` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#log` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#maxEntries` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#open` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#options` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#render` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#session` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#show` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#toggle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#type` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#visible` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiLogWindow#warn` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiMultiSelectIO#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiMultiSelectIO#itemsCount` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiMultiSelectIO#navIdItem` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiMultiSelectIO#navIdSelected` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiMultiSelectIO#rangeSrcItem` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiMultiSelectIO#requests` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiSelectionStorage#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiSelectionStorage#apply` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSelectionStorage#clear` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSelectionStorage#has` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSelectionStorage#setItemSelected` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSelectionStorage#size` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSelectionStorage#toArray` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiSession#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiSession#addButtonEx` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#alert` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#alpha` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#appearance` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#buttons` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#capture` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#close` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#closeReason` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#closed` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#collapse` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#collapsed` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#collapsedFps` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#components` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#confirm` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#createTexture` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#dataTable` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#debug` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#density` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#destroyTexture` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#displayHeight` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#displayWidth` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#expand` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#fontScale` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#fonts` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#fps` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#frameScheduler` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#getBackendInfo` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#getComponent` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#getFps` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#height` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#idle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#idleDelay` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#idleFps` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#imeView` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#iniPath` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#interactiveRegionCount` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#logWindow` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#mode` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#moreTouch` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#multiChoice` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#off` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#on` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#once` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#paused` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#privilegedBackend` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#ready` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#secure` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#setAlpha` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#setFontScale` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#setFps` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#setIdleFps` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#setMoreTouch` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#setPosition` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#setSecure` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#setSize` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#setTouchable` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#singleChoice` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#statsOverlay` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#surface` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#surfaceView` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#textures` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#theme` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#toast` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#toggleCollapsed` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#touchMode` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#touchable` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#width` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#window` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#x` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiSession#y` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiStatsOverlay#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiStatsOverlay#close` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#closeReason` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#closed` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#fps` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#frameTime` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#frameTimes` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#hide` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#historySize` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#id` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#options` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#session` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#show` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#snapshot` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#toggle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#type` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#visible` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiStatsOverlay#workTime` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiTexture#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiTexture#close` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiTexture#dispose` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiTexture#handle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiTexture#height` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiTexture#isDisposed` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiTexture#toString` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiTexture#update` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiTexture#width` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+
+### ImguiToast#
+
+| 行 id | Node main | Node Worker | Bun |
+|---|---|---|---|
+| `ImguiToast#close` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#closeReason` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#closed` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#createdAt` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#duration` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#expiresAt` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#hide` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#id` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#level` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#options` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#position` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#session` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#show` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#text` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#toggle` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#type` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#update` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
+| `ImguiToast#visible` | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) | not-portable: rhino-only (imgui-rhino-only-members) |
 
 ### IntentTask#
 

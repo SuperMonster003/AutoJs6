@@ -943,6 +943,16 @@ class RepositoryTest(unittest.TestCase):
         # P5.2f-2: documentation, d.ts and Ace cover the module, so no name gate is deferred any more.
         self.assertEqual(self.matrix['summary']['deferredNameGate'], {})
 
+    def test_p5_2f2_members(self):
+        # Q217 (a), card D: the objects imgui returns are read from the plugin's d.ts, and one rule covers their members.
+        rows = [row for row in self.matrix['rows'] if row['memberSource'] == 'plugin:imgui']
+        if not rows:
+            self.skipTest('the members come from the AutoJs6-Plugin-ImGui checkout')
+        self.assertEqual(len({row['object'] for row in rows}), 13)
+        for column in ['node_main', 'node_worker', 'bun']:
+            self.assertEqual({(row[column]['status'], row[column].get('reason'), row[column].get('rule')) for row in rows},
+                             {('not-portable', 'rhino-only', 'imgui-rhino-only-members')}, column)
+
     def test_p2_3(self):
         # Q18 (a): every @ScriptPrototype module is listed, its members are rows like exports, Java internals are excluded.
         self.assertEqual(self.exports['prototypesStats']['problems'], [])

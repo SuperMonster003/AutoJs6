@@ -2,12 +2,17 @@
 """Script API names a plugin contract defines (api-coverage P5.2c, roadmap appendix C Q75 (a)).
 
 policy.json "pluginExports" names contracts whose names scripts reach although no host module registers them one by
-one. The only source is the Compose UI catalogue (kind "compose-ui-catalog"), the contract the 3-Block Compose plugin
-renders and the compose module installs at run time (the KSP "installsComputed" of compose): the NODE components are
-the functions `compose.<Name>`, the modifiers the methods of `compose.modifier()` chains, the shortcuts the accessors
-every Compose node defines. The catalogue is read statically from the Kotlin sources of the contract
-(`plugin-api/compose-ui-api`): component, modifier and shortcut names are the constants of the vocabulary objects
-the catalogue functions reference.
+one. Two kinds of source:
+
+- "compose-ui-catalog": the Compose UI catalogue, the contract the 3-Block Compose plugin renders and the compose module
+  installs at run time (the KSP "installsComputed" of compose): the NODE components are the functions `compose.<Name>`,
+  the modifiers the methods of `compose.modifier()` chains, the shortcuts the accessors every Compose node defines. The
+  catalogue is read statically from the Kotlin sources of the contract (`plugin-api/compose-ui-api`): component, modifier
+  and shortcut names are the constants of the vocabulary objects the catalogue functions reference.
+- "dts-interfaces" (P5.2f-2 card D, roadmap appendix C Q217 (a)): the TypeScript declarations a plugin ships, for objects
+  it builds in JavaScript, which no host source lists (the objects `imgui` returns). The members of every interface of
+  the file are read statically, those inherited through `extends` included, one list per interface. It adds no export
+  rows: the host registers the module, and returned objects take the list named by their `catalog`.
 
 A source whose root is missing (another checkout layout, a machine without the contract) is "skipped": its rows are
 left out and the matrix, the pending baseline and the documentation tables are reported as skipped, not stale.
@@ -18,8 +23,12 @@ from pathlib import Path
 import re
 
 from extract_exports import end_group, masked
+from returned_objects import blank, member_depth_matches
 
 SOURCE_PREFIX = 'plugin:'
+DTS_INTERFACE = re.compile(r'\binterface\s+(\w+)')
+# One member of an interface body: a method (`name(` or `name<`, overloads repeat it) or a property (`name:`).
+DTS_MEMBER = re.compile(r'(?m)(?:^|(?<=[;{]))[ \t]*(readonly\s+)?([A-Za-z_$][\w$]*)\??[ \t]*([(<:])')
 COMPOSE_FILES = {'vocabulary': 'ComposeUiVocabulary.kt', 'v1': 'catalog/V1Catalog.kt', 'v2': 'v2/ComposeUiV2.kt',
                  'interop': 'interop/AndroidViewInteropV1.kt'}
 
@@ -144,6 +153,80 @@ def _spec_call(text, region, call, qualifier, name, table):
     return any(re.search(r'\b' + call + r'\(\s*' + qualifier + r'\.' + key + r'\b', text[region[0]:region[1]]) for key in keys)
 
 
+def interface_body(code, start):
+    """Offset of the `{` opening the interface body after start (a type parameter may hold an object type)."""
+    depth = 0
+    for index in range(start, len(code)):
+        if code[index] == '<':
+            depth += 1
+        elif code[index] == '>' and code[index - 1] != '=':
+            depth -= 1
+        elif code[index] == '{' and not depth:
+            return index
+    raise ValueError(f'no interface body after offset {start}')
+
+
+def interface_parents(header):
+    """Names in the `extends` clause of an interface header, without their type arguments (or type parameters)."""
+    header = header.replace('=>', '  ')
+    while re.search(r'<[^<>]*>', header):
+        header = re.sub(r'<[^<>]*>', '', header)
+    clause = re.search(r'\bextends\b(.*)', header, re.S)
+    return [name.strip() for name in clause[1].split(',')] if clause else []
+
+
+def read_interfaces(text):
+    """{name: {members: [(member, kind, line)], parents: [names]}} of the interfaces in d.ts source; an overload is one member."""
+    code = blank(text)
+    interfaces = {}
+    for match in DTS_INTERFACE.finditer(code):
+        start = interface_body(code, match.end())
+        item = interfaces.setdefault(match[1], {'members': [], 'parents': []})
+        item['parents'] += interface_parents(code[match.end():start])
+        names = {member[0] for member in item['members']}
+        for member in member_depth_matches(DTS_MEMBER, code, code, start, end_group(code, start), group=2):
+            if member[2] not in names:
+                names.add(member[2])
+                kind = 'Functions' if member[3] != ':' else 'Getters' if member[1] else 'GettersAndSetters'
+                item['members'].append((member[2], kind, line_of(code, member.start(2))))
+    return interfaces
+
+
+def interface_members(interfaces, name):
+    """(members, external bases) of an interface, following `extends`: a name it declares hides the inherited one, a base
+    outside the file (`Promise`) is listed and its members are not. A member is (member, kind, line, declaring interface)."""
+    members = [item + (name,) for item in interfaces[name]['members']]
+    external = []
+    for parent in interfaces[name]['parents']:
+        if parent not in interfaces:
+            external.append(parent)
+            continue
+        inherited, outer = interface_members(interfaces, parent)
+        names = {member[0] for member in members}
+        members += [member for member in inherited if member[0] not in names]
+        external += [base for base in outer if base not in external]
+    return members, external
+
+
+def read_dts_source(host, config):
+    """The pluginExports entry of a "dts-interfaces" source: members[<interface>] for returned objects, no records."""
+    root = resolve_root(host, config)
+    path = root / config['file'] if root else None
+    if path is None or not path.is_file():
+        return {'status': 'skipped', 'root': config.get('root'), 'reason': 'contract sources not found', 'problems': []}
+    interfaces = read_interfaces(path.read_text(encoding='utf-8'))
+    lists, bases = {}, {}
+    for name in interfaces:
+        members, external = interface_members(interfaces, name)
+        lists[name] = [dict({'name': member, 'kind': kind, 'source': relative(host, path), 'line': line, 'arity': None},
+                            **({'inheritedFrom': owner} if owner != name else {})) for member, kind, line, owner in members]
+        if external:
+            bases[name] = external
+    return {'status': 'read', 'root': relative(host, root), 'plugin': config.get('plugin'), 'records': [], 'members': lists, 'externalBases': bases,
+            'counts': {'interfaces': len(lists), 'members': sum(len(items) for items in lists.values())},
+            'problems': [] if lists else [f'{config["file"]}: no interface declared']}
+
+
 def resolve_root(host, config):
     """The contract root: `root` of the config (absolute, or relative to the host), else None."""
     value = os.environ.get(config.get('rootEnvironment') or '') or config.get('root')
@@ -154,8 +237,9 @@ def resolve_root(host, config):
 
 
 def relative(host, path):
+    """Path relative to the host, a sibling checkout included (`../AutoJs6-Plugin-ImGui/...`), absolute on another drive."""
     try:
-        return Path(path).resolve().relative_to(Path(host).resolve()).as_posix()
+        return Path(os.path.relpath(Path(path).resolve(), Path(host).resolve())).as_posix()
     except ValueError:
         return Path(path).as_posix()
 
@@ -164,12 +248,15 @@ def attach(host, result, policy):
     """Adds the plugin-defined export records (metadata plugin:<name>) and result["pluginExports"].
 
     result["pluginExports"][name]: {status: read | skipped, root, reason, module, counts, records (row ids),
-    members: {modifiers: [...], shortcuts: [...]}, problems}. Returned objects with memberSource plugin:<name> take
-    their members from members[<entry catalog>] (returned_objects.py)."""
+    members: {modifiers: [...], shortcuts: [...]} (dts-interfaces: one list per interface), problems}. Returned objects
+    with memberSource plugin:<name> take their members from members[<entry catalog>] (returned_objects.py)."""
     sources = {}
     known = {record['api'] for record in result['records']}
     for name, config in sorted((policy or {}).get('pluginExports', {}).items()):
         if name.startswith('_'):
+            continue
+        if config.get('kind') == 'dts-interfaces':
+            sources[name] = read_dts_source(host, config)
             continue
         if config.get('kind') != 'compose-ui-catalog':
             sources[name] = {'status': 'skipped', 'reason': f'unknown kind {config.get("kind")}', 'problems': [f'{name}: unknown kind {config.get("kind")}']}

@@ -233,6 +233,13 @@
       "module": "compose",
       "root": "plugin-api/compose-ui-api/src/main/java/org/autojs/plugin/compose/api",
       "rootEnvironment": "AUTOJS6_COMPOSE_UI_API_ROOT"
+    },
+    "imgui": {
+      "kind": "dts-interfaces",
+      "plugin": "AutoJs6-Plugin-ImGui",
+      "file": "imgui.d.ts",
+      "root": "../AutoJs6-Plugin-ImGui/app/src/main/assets/types",
+      "rootEnvironment": "AUTOJS6_IMGUI_TYPES_ROOT"
     }
   }
 }

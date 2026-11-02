@@ -68,6 +68,9 @@ on:
       mail_plugin_ref:
         description: Mail plugin branch or commit (empty uses default branch)
         required: false
+      imgui_plugin_ref:
+        description: ImGui plugin branch or commit (empty uses default branch)
+        required: false
 
 permissions:
   contents: read
@@ -133,6 +136,12 @@ jobs:
           repository: ${{ github.repository_owner }}/AutoJs6-Plugin-Three-Stamp-Mail
           ref: ${{ inputs.mail_plugin_ref }}
           path: AutoJs6-Plugin-Three-Stamp-Mail
+          lfs: false
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/AutoJs6-Plugin-ImGui
+          ref: ${{ inputs.imgui_plugin_ref }}
+          path: AutoJs6-Plugin-ImGui
           lfs: false
       - uses: actions/checkout@v4
         with:
