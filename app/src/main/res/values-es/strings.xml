@@ -325,6 +325,7 @@
     <string name="error_apk_native_cxx_runtime_too_old">%1$s de %2$s necesita un entorno de ejecución de C++ más reciente que libc++_shared.so de %3$s. Faltan %4$d símbolos, como %5$s. Actualice el plugin que proporciona el entorno de ejecución más antiguo.</string>
     <string name="error_apk_native_library_conflict">La biblioteca nativa %1$s difiere entre %2$s y %3$s. Un APK empaquetado solo puede contener una copia. Actualice uno de los plugins o desmarque una de las bibliotecas.</string>
     <string name="error_apk_native_opencv_runtime_conflict">%2$s incluye su propio %1$s, que difiere de la copia del plugin OpenCV. Actualice %2$s a una versión que enlace OpenCV de forma privada, o desmarque una de las bibliotecas.</string>
+    <string name="error_apk_paddle_ocr_onnx_runtime_requires_opencv_plugin">Empaquetar Paddle OCR (ONNX Runtime) también requiere el plugin OpenCV, que proporciona su entorno de ejecución nativo. Instale y active el plugin OpenCV y vuelva a intentarlo. (%1$s)</string>
     <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">Las aplicaciones empaquetadas solo admiten el plugin Paddle OCR (PP-OCRv3). Los plugins PP-OCRv4 / PP-OCRv5 / PP-OCRv6 solo se pueden usar en AutoJs6. Instale y habilite el plugin PP-OCRv3 e inténtelo de nuevo.</string>
     <string name="error_app_not_installed">La aplicación no está instalada</string>
     <string name="error_app_not_installed_with_name">La aplicación no está instalada: \"%s\"</string>
@@ -389,6 +390,7 @@
     <string name="error_download_interrupted">Descarga interrumpida</string>
     <string name="error_editor_encoding_validation_incomplete">La validación de la codificación del archivo está incompleta. Abra Codificación del archivo y use Recargar o Convertir antes de guardar.</string>
     <string name="error_email_taken">El correo electrónico está ocupado</string>
+    <string name="error_embedded_paddle_ocr_onnx_runtime_libraries_missing">Faltan bibliotecas nativas en Paddle OCR (ONNX Runtime) integrado: %1$s. Vuelva a empaquetar con Paddle OCR activado.</string>
     <string name="error_empty_broadcast_selection">Debe seleccionarse al menos una emisión</string>
     <string name="error_empty_github_release_assets">No hay activos de la versión de GitHub para descargar</string>
     <string name="error_empty_shell_command">El comando está vacío</string>
@@ -2204,6 +2206,7 @@
     <string name="text_install_plugin_from_url">Instalar complemento desde \"URL\"</string>
     <string name="text_installable">Instalable</string>
     <string name="text_installed">Instalado</string>
+    <string name="text_installed_ocr_plugin_profiles">Perfiles de los plugins OCR instalados: %1$s.</string>
     <string name="text_integrity_verification_failed">La verificación de integridad falló</string>
     <string name="text_intelligent_mine">Mis bibliotecas</string>
     <string name="text_intelligent_preset_material_day_night">Material día y noche</string>

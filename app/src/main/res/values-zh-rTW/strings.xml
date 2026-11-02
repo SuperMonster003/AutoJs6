@@ -322,6 +322,7 @@
     <string name="error_apk_native_cxx_runtime_too_old">%1$s (來自 %2$s) 需要比 %3$s 提供的 libc++_shared.so 更新的 C++ 執行階段. 缺少 %4$d 個符號, 例如 %5$s. 請更新提供舊版執行階段的外掛.</string>
     <string name="error_apk_native_library_conflict">原生程式庫 %1$s 在 %2$s 與 %3$s 中的內容不同. 打包的 APK 只能包含其中一份. 請更新其中一個外掛, 或取消勾選其中一個程式庫.</string>
     <string name="error_apk_native_opencv_runtime_conflict">%2$s 自帶的 %1$s 與 OpenCV 外掛提供的不同. 請將 %2$s 更新到私有連結 OpenCV 的版本, 或取消勾選其中一個程式庫.</string>
+    <string name="error_apk_paddle_ocr_onnx_runtime_requires_opencv_plugin">打包 Paddle OCR (ONNX Runtime) 還需要 OpenCV 外掛提供原生執行階段程式庫. 請安裝並啟用 OpenCV 外掛後重試. (%1$s)</string>
     <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">打包的應用程式僅支援 Paddle OCR (PP-OCRv3) 外掛. PP-OCRv4 / PP-OCRv5 / PP-OCRv6 外掛只能在 AutoJs6 中使用. 請安裝並啟用 PP-OCRv3 外掛後重試.</string>
     <string name="error_app_not_installed">應用未安裝</string>
     <string name="error_app_not_installed_with_name">應用未安裝: \"%s\"</string>
@@ -386,6 +387,7 @@
     <string name="error_download_interrupted">下載中斷</string>
     <string name="error_editor_encoding_validation_incomplete">檔案編碼驗證尚未完成. 儲存前請開啟檔案編碼並使用重新載入或轉換.</string>
     <string name="error_email_taken">郵箱已被佔用</string>
+    <string name="error_embedded_paddle_ocr_onnx_runtime_libraries_missing">內建 Paddle OCR (ONNX Runtime) 缺少原生程式庫: %1$s, 請在打包時勾選並注入 Paddle OCR 後重試.</string>
     <string name="error_empty_broadcast_selection">需至少選擇一個廣播事件</string>
     <string name="error_empty_github_release_assets">無可供下載的 GitHub 發行版資源</string>
     <string name="error_empty_shell_command">命令為空</string>
@@ -2201,6 +2203,7 @@
     <string name="text_install_plugin_from_url">從 \"URL\" 安裝外掛</string>
     <string name="text_installable">可安裝</string>
     <string name="text_installed">已安裝</string>
+    <string name="text_installed_ocr_plugin_profiles">已安裝的 OCR 外掛提供的 profile: %1$s.</string>
     <string name="text_integrity_verification_failed">完整性驗證失敗</string>
     <string name="text_intelligent_mine">我的</string>
     <string name="text_intelligent_preset_material_day_night">材料設計日夜配對</string>

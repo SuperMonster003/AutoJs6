@@ -326,6 +326,7 @@
     <string name="error_apk_native_cxx_runtime_too_old">%2$s の %1$s には %3$s の libc++_shared.so より新しい C++ ランタイムが必要です. %4$d 個のシンボルが見つかりません (例: %5$s). 古いランタイムを提供するプラグインを更新してください.</string>
     <string name="error_apk_native_library_conflict">ネイティブライブラリ %1$s の内容が %2$s と %3$s で異なります. パッケージ化された APK に含められるのは 1 つだけです. いずれかのプラグインを更新するか, いずれかのライブラリの選択を解除してください.</string>
     <string name="error_apk_native_opencv_runtime_conflict">%2$s に含まれる %1$s は OpenCV プラグインのものと異なります. %2$s を OpenCV を内部にリンクするバージョンに更新するか, いずれかのライブラリの選択を解除してください.</string>
+    <string name="error_apk_paddle_ocr_onnx_runtime_requires_opencv_plugin">Paddle OCR (ONNX Runtime) のパッケージ化には, ネイティブランタイムを提供する OpenCV プラグインも必要です. OpenCV プラグインをインストールして有効にし, 再試行してください. (%1$s)</string>
     <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">パッケージ化されたアプリは Paddle OCR (PP-OCRv3) プラグインのみに対応しています. PP-OCRv4 / PP-OCRv5 / PP-OCRv6 プラグインは AutoJs6 本体でのみ使用できます. PP-OCRv3 プラグインをインストールして有効化してから再試行してください.</string>
     <string name="error_app_not_installed">アプリがインストールされていません</string>
     <string name="error_app_not_installed_with_name">\"%s\" アプリがインストールされていません</string>
@@ -390,6 +391,7 @@
     <string name="error_download_interrupted">ダウンロードが中断される</string>
     <string name="error_editor_encoding_validation_incomplete">ファイルのエンコーディング検証が完了していません. 保存する前にファイルエンコーディングを開き, 再読み込みまたは変換を実行してください.</string>
     <string name="error_email_taken">メールが取られている</string>
+    <string name="error_embedded_paddle_ocr_onnx_runtime_libraries_missing">組み込みの Paddle OCR (ONNX Runtime) にネイティブライブラリがありません: %1$s. Paddle OCR を有効にして再度パッケージ化してください.</string>
     <string name="error_empty_broadcast_selection">少なくとも一つのブロードキャストが選択されていなければならない</string>
     <string name="error_empty_github_release_assets">ダウンロードする GitHub リリースアセットがない</string>
     <string name="error_empty_shell_command">コマンドが空である</string>
@@ -2205,6 +2207,7 @@
     <string name="text_install_plugin_from_url">\"URL\" からプラグインをインストール</string>
     <string name="text_installable">インストール可</string>
     <string name="text_installed">インストール済み</string>
+    <string name="text_installed_ocr_plugin_profiles">インストール済み OCR プラグインのプロファイル: %1$s.</string>
     <string name="text_integrity_verification_failed">整合性の検証に失敗しました</string>
     <string name="text_intelligent_mine">マイライブラリ</string>
     <string name="text_intelligent_preset_material_day_night">マテリアル昼夜ペア</string>

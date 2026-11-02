@@ -327,6 +327,7 @@
     <string name="error_apk_native_cxx_runtime_too_old">تحتاج %1$s من %2$s إلى بيئة تشغيل C++ أحدث من libc++_shared.so المقدمة من %3$s. عدد الرموز المفقودة %4$d, مثل %5$s. يرجى تحديث الإضافة التي توفر بيئة التشغيل الأقدم.</string>
     <string name="error_apk_native_library_conflict">تختلف المكتبة الأصلية %1$s بين %2$s و%3$s. يمكن أن يحتوي ملف APK المحزّم على نسخة واحدة فقط. يرجى تحديث إحدى الإضافات أو إلغاء تحديد إحدى المكتبات.</string>
     <string name="error_apk_native_opencv_runtime_conflict">يأتي %2$s بنسخته الخاصة من %1$s, وهي تختلف عن نسخة إضافة OpenCV. يرجى تحديث %2$s إلى إصدار يربط OpenCV بشكل خاص, أو إلغاء تحديد إحدى المكتبات.</string>
+    <string name="error_apk_paddle_ocr_onnx_runtime_requires_opencv_plugin">يتطلب تضمين Paddle OCR (ONNX Runtime) في الحزمة أيضا إضافة OpenCV التي توفر بيئة التشغيل الأصلية. ثبت إضافة OpenCV وفعلها ثم حاول مجددا. (%1$s)</string>
     <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">تدعم التطبيقات المحزّمة إضافة Paddle OCR (PP-OCRv3) فقط. لا يمكن استخدام إضافات PP-OCRv4 / PP-OCRv5 / PP-OCRv6 إلا داخل AutoJs6 نفسه. يرجى تثبيت إضافة PP-OCRv3 وتفعيلها ثم المحاولة مرة أخرى.</string>
     <string name="error_app_not_installed">التطبيق غير مثبت</string>
     <string name="error_app_not_installed_with_name">التطبيق غير مثبت: \"%s\"</string>
@@ -391,6 +392,7 @@
     <string name="error_download_interrupted">تنزيل المقاطعة</string>
     <string name="error_editor_encoding_validation_incomplete">لم يكتمل التحقق من ترميز الملف. افتح ترميز الملف واستخدم إعادة التحميل أو التحويل قبل الحفظ.</string>
     <string name="error_email_taken">يتم أخذ البريد الإلكتروني</string>
+    <string name="error_embedded_paddle_ocr_onnx_runtime_libraries_missing">مكتبات أصلية مفقودة في Paddle OCR (ONNX Runtime) المضمن: %1$s. أعد إنشاء الحزمة مع تفعيل Paddle OCR.</string>
     <string name="error_empty_broadcast_selection">يجب اختيار بث واحد على الأقل</string>
     <string name="error_empty_github_release_assets">لا توجد أصول إصدار GitHub للتنزيل</string>
     <string name="error_empty_shell_command">الأمر فارغ</string>
@@ -2206,6 +2208,7 @@
     <string name="text_install_plugin_from_url">تثبيت الملحق من \"URL\"</string>
     <string name="text_installable">قابل للتثبيت</string>
     <string name="text_installed">مثبّت</string>
+    <string name="text_installed_ocr_plugin_profiles">ملفات التعريف لإضافات OCR المثبتة: %1$s.</string>
     <string name="text_integrity_verification_failed">فشل التحقق من السلامة</string>
     <string name="text_intelligent_mine">مكتباتي</string>
     <string name="text_intelligent_preset_material_day_night">ألوان المواد نهارا وليلا</string>

@@ -327,6 +327,7 @@
     <string name="error_apk_native_cxx_runtime_too_old">%2$s의 %1$s에는 %3$s의 libc++_shared.so보다 최신 C++ 런타임이 필요합니다. %4$d개의 심볼이 없습니다 (예: %5$s). 오래된 런타임을 제공하는 플러그인을 업데이트하세요.</string>
     <string name="error_apk_native_library_conflict">네이티브 라이브러리 %1$s의 내용이 %2$s와 %3$s에서 다릅니다. 패키징된 APK에는 하나만 포함할 수 있습니다. 플러그인 중 하나를 업데이트하거나 라이브러리 중 하나의 선택을 해제하세요.</string>
     <string name="error_apk_native_opencv_runtime_conflict">%2$s에 포함된 %1$s이(가) OpenCV 플러그인의 것과 다릅니다. %2$s을(를) OpenCV를 비공개로 링크하는 버전으로 업데이트하거나 라이브러리 중 하나의 선택을 해제하세요.</string>
+    <string name="error_apk_paddle_ocr_onnx_runtime_requires_opencv_plugin">Paddle OCR (ONNX Runtime)을 패키징하려면 네이티브 런타임을 제공하는 OpenCV 플러그인도 필요합니다. OpenCV 플러그인을 설치하고 활성화한 후 다시 시도하세요. (%1$s)</string>
     <string name="error_apk_paddle_ocr_requires_pp_ocrv3_plugin">패키징된 앱은 Paddle OCR (PP-OCRv3) 플러그인만 지원합니다. PP-OCRv4 / PP-OCRv5 / PP-OCRv6 플러그인은 AutoJs6 자체에서만 사용할 수 있습니다. PP-OCRv3 플러그인을 설치하고 활성화한 후 다시 시도하세요.</string>
     <string name="error_app_not_installed">앱이 설치되지 않았습니다</string>
     <string name="error_app_not_installed_with_name">앱이 설치되지 않았습니다: \"%s\"</string>
@@ -391,6 +392,7 @@
     <string name="error_download_interrupted">다운로드가 중단되었습니다</string>
     <string name="error_editor_encoding_validation_incomplete">파일 인코딩 검증이 완료되지 않았습니다. 저장하기 전에 파일 인코딩을 열고 다시 로드 또는 변환을 사용하세요.</string>
     <string name="error_email_taken">이메일이 가져옵니다</string>
+    <string name="error_embedded_paddle_ocr_onnx_runtime_libraries_missing">내장 Paddle OCR (ONNX Runtime)에 네이티브 라이브러리가 없습니다: %1$s. Paddle OCR을 활성화하여 다시 패키징하세요.</string>
     <string name="error_empty_broadcast_selection">적어도 하나의 방송이 선택되어야합니다</string>
     <string name="error_empty_github_release_assets">다운로드 할 자산이 없습니다</string>
     <string name="error_empty_shell_command">명령이 비어 있습니다</string>
@@ -2206,6 +2208,7 @@
     <string name="text_install_plugin_from_url">\"URL\"에서 플러그인 설치</string>
     <string name="text_installable">설치 가능</string>
     <string name="text_installed">설치됨</string>
+    <string name="text_installed_ocr_plugin_profiles">설치된 OCR 플러그인의 프로필: %1$s.</string>
     <string name="text_integrity_verification_failed">무결성 검증에 실패했습니다</string>
     <string name="text_intelligent_mine">내 라이브러리</string>
     <string name="text_intelligent_preset_material_day_night">머티리얼 주야간 쌍</string>
