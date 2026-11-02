@@ -730,6 +730,7 @@
     <string name="plugin_local_network_denied">Non autorisé. Appuyez pour autoriser ce plugin.</string>
     <string name="plugin_local_network_enable_explanation">Pour activer %1$s sous Android 17 ou version ultérieure, autorisez les appareils à proximité pour ce plugin. Sans autorisation, le commutateur reste désactivé. Le démarrage automatique ne demande aucune autorisation.</string>
     <string name="plugin_local_network_granted">Autorisé. Appuyez pour gérer les autorisations de ce plugin.</string>
+    <string name="plugin_storage_access_explanation">%1$s lit et écrit des fichiers sous sa propre identité, les autorisations d\'AutoJs6 ne s\'appliquent donc pas à lui. Autorisez l\'accès à tous les fichiers sur la page suivante (Stockage sous Android 10 et versions antérieures), puis relancez le script.</string>
     <string name="prompt_ace_editor_plugin_required">Installez ou activez le plugin de l\'éditeur Ace dans le Centre des plugins pour utiliser le moteur Ace.</string>
     <string name="prompt_add_ignored_app_version">Êtes-vous sûr d\'ignorer la version de mise à jour actuelle?\nVous pouvez gérer toutes les versions ignorées dans les paramètres de l\'application.</string>
     <string name="prompt_add_ignored_plugin_version">Êtes-vous sûr d\'ignorer la version de mise à jour actuelle?\nVous pouvez gérer toutes les versions ignorées dans les paramètres du plugin.</string>

@@ -727,6 +727,7 @@
     <string name="plugin_local_network_denied">未允許. 按一下為此外掛程式授權.</string>
     <string name="plugin_local_network_enable_explanation">在 Android 17 或以上啟用 %1$s 前, 請允許此外掛程式存取附近的裝置. 未獲授權時開關保持關閉, 自動啟動不會彈出授權要求.</string>
     <string name="plugin_local_network_granted">已允許. 按一下管理此外掛程式的權限.</string>
+    <string name="plugin_storage_access_explanation">%1$s 以自己的身分讀寫檔案, AutoJs6 的權限對它不起作用. 請在下一頁允許它存取所有檔案 (Android 10 及更早版本是 \"儲存空間\" 權限), 然後重新執行指令碼.</string>
     <string name="prompt_ace_editor_plugin_required">請在插件中心安裝或啓用 Ace 編輯器插件, 然後再使用 Ace 引擎.</string>
     <string name="prompt_add_ignored_app_version">確定忽略當前更新版本嗎?\n在應用設置中可管理已忽略的所有版本.</string>
     <string name="prompt_add_ignored_plugin_version">確定忽略當前更新版本嗎?\n在插件設置中可管理已忽略的所有版本.</string>

@@ -728,6 +728,7 @@
     <string name="plugin_local_network_denied">未允许. 点击为此插件授权.</string>
     <string name="plugin_local_network_enable_explanation">在 Android 17 及以上开启 %1$s 前, 请允许此插件访问附近的设备. 未获授权时开关保持关闭, 自动启动不会弹出授权请求.</string>
     <string name="plugin_local_network_granted">已允许. 点击管理此插件的权限.</string>
+    <string name="plugin_storage_access_explanation">%1$s 以自己的身份读写文件, AutoJs6 的权限对它不起作用. 请在下一页允许它访问所有文件 (Android 10 及更早版本是 \"存储\" 权限), 然后重新运行脚本.</string>
     <string name="prompt_ace_editor_plugin_required">请在插件中心安装或启用 Ace 编辑器插件, 然后再使用 Ace 引擎.</string>
     <string name="prompt_add_ignored_app_version">确定忽略当前更新版本吗?\n在应用设置中可管理已忽略的所有版本.</string>
     <string name="prompt_add_ignored_plugin_version">确定忽略当前更新版本吗?\n在插件设置中可管理已忽略的所有版本.</string>

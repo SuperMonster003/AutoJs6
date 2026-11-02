@@ -16,6 +16,7 @@ import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants
 import org.autojs.autojs.core.plugin.bun.BunRuntimeBinderCallLane
 import org.autojs.autojs.core.plugin.bun.BunRuntimeCleanupBinderCallLane
 import org.autojs.autojs.core.plugin.bun.BunRuntimePluginClient
+import org.autojs.autojs.core.plugin.center.PluginStorageAccess
 import org.autojs.autojs.core.plugin.scope.BridgeExecutionScope
 import org.autojs.autojs.engine.encryption.ScriptEncryption
 import org.autojs.autojs.execution.ExecutionConfig
@@ -84,7 +85,7 @@ class BunPluginScriptEngine internal constructor(
         check(activeExecutionId.compareAndSet(null, executionId)) { "Bun engine already has an active execution" }
         val timeoutMillis = executionTimeoutMillis(scriptSource)
         val executionConsole = consoleFactory().apply { setTitle(scriptSource.name) }
-        val callback = OutputCallback(executionId, selection.providerUid, executionConsole)
+        val callback = OutputCallback(executionId, selection.providerUid, executionConsole, PluginStorageAccess.Prompt(appContext, PluginStorageAccess.BUN_PACKAGE)::onErrorOutput)
         var payloadFile: File? = null
         val broker = createCapabilityBroker(selection, executionId, executionConsole, logicalSourceName(scriptSource))
         // Released in the order of the former finally: broker, callback, console, then a payload not unlinked yet.
@@ -326,6 +327,7 @@ class BunPluginScriptEngine internal constructor(
         private val executionId: String,
         private val expectedProviderUid: Int,
         private val executionConsole: ConsoleImpl,
+        private val onErrorOutput: (String) -> Unit = {},
     ) {
         private val closed = AtomicBoolean(false)
         private val acceptedOutputBytes = AtomicLong(0L)
@@ -375,6 +377,7 @@ class BunPluginScriptEngine internal constructor(
             val identity = Binder.clearCallingIdentity()
             try {
                 if (!closed.get()) executionConsole.println(level, text)
+                if (level == Log.ERROR) onErrorOutput(text)
             } finally {
                 Binder.restoreCallingIdentity(identity)
             }

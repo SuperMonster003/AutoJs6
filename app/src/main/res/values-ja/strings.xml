@@ -731,6 +731,7 @@
     <string name="plugin_local_network_denied">未許可. タップしてこのプラグインに権限を付与します.</string>
     <string name="plugin_local_network_enable_explanation">Android 17 以降で %1$s を有効にするには, このプラグインに付近のデバイスへのアクセスを許可してください. 未許可の場合はスイッチがオフのままになり, 自動起動では権限を要求しません.</string>
     <string name="plugin_local_network_granted">許可済み. タップしてこのプラグインの権限を管理します.</string>
+    <string name="plugin_storage_access_explanation">%1$s は独自の ID でファイルを読み書きするため, AutoJs6 の権限は適用されません. 次のページですべてのファイルへのアクセスを許可し (Android 10 以前はストレージ), スクリプトを再実行してください.</string>
     <string name="prompt_ace_editor_plugin_required">Ace エディタープラグインをプラグインセンターでインストールまたは有効化してから, Ace エンジンを使用してください.</string>
     <string name="prompt_add_ignored_app_version">現在のアップデートバージョンを無視して大丈夫ですか?\n無視したバージョンは, アプリの設定で管理することができます</string>
     <string name="prompt_add_ignored_plugin_version">現在のアップデートバージョンを無視して大丈夫ですか?\n無視したバージョンは, プラグインの設定で管理することができます</string>

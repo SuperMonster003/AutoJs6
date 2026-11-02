@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import org.autojs.autojs.core.console.ConsoleImpl
 import org.autojs.autojs.core.looper.LooperHelper
+import org.autojs.autojs.core.plugin.center.PluginStorageAccess
 import org.autojs.autojs.core.plugin.typescript.CompiledTypeScriptSource
 import org.autojs.autojs.core.plugin.typescript.TypeScriptExecutionCompiler
 import org.autojs.autojs.core.plugin.typescript.TypeScriptNodeRuntimeProjectBuilder
@@ -27,6 +28,7 @@ class NodePluginJavaScriptEngine(
 
     @Volatile
     private var activeExecutionId: String? = null
+    private val storagePrompt by lazy { PluginStorageAccess.Prompt(androidContext, PluginStorageAccess.NODE_PACKAGE) }
 
     @Volatile
     var lastPluginScriptResult: NodePluginScriptResult? = null
@@ -326,6 +328,7 @@ class NodePluginJavaScriptEngine(
 
     private fun printScriptOutput(level: Int, text: String) {
         if (text.isEmpty()) return
+        if (level == Log.ERROR) storagePrompt.onErrorOutput(text)
         val console = runCatching { runtime.console }.getOrNull()
         nodePluginConsoleOutputLines(text).forEach { line ->
             if (line.isEmpty()) {

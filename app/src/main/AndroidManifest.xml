@@ -1134,6 +1134,13 @@
             android:theme="@style/ScriptTheme.Transparent" />
 
         <activity
+            android:name="org.autojs.autojs.core.plugin.center.PluginStorageAccessActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity="org.autojs.autojs.core.plugin.center.PluginStorageAccessActivity"
+            android:theme="@style/ScriptTheme.Transparent" />
+
+        <activity
             android:name="org.autojs.autojs.core.activity.StartForResultActivity"
             android:excludeFromRecents="true"
             android:taskAffinity="org.autojs.autojs.core.activity.StartForResultActivity"
