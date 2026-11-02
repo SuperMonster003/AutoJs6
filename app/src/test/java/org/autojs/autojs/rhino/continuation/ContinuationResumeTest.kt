@@ -133,6 +133,24 @@ class ContinuationResumeTest {
         assertEquals("caught later", steps())
     }
 
+    /**
+     * A resume returns the value of the last statement, and null is one: `runtime.putProperty` as the last statement of a
+     * script failed with a NullPointerException as `resumeContinuation` declared a result that is not null.
+     */
+    @Test
+    fun aResumedScriptMayEndWithNull() {
+        suspendScript("suspendHere(); steps.push('done'); null;")
+        continuation.resumeWith(Continuation.Result.success("x"))
+        assertEquals("done", steps())
+    }
+
+    @Test
+    fun aRejectedScriptMayEndWithNull() {
+        suspendScript("try { suspendHere(); } catch (e) { steps.push('caught ' + e); } null;")
+        continuation.resumeWith(Continuation.Result.failure("rejected"))
+        assertEquals("caught rejected", steps())
+    }
+
     private fun suspendScript(source: String = "steps.push(suspendHere()); steps.push('done');") {
         val script = cx.compileString(source, "main", 1, null)
         try {

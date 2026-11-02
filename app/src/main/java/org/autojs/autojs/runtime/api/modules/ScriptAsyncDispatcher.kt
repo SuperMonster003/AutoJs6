@@ -1,6 +1,7 @@
 package org.autojs.autojs.runtime.api.modules
 
 import org.autojs.autojs.core.looper.Timer
+import org.autojs.autojs.rhino.AutoJsContext
 import org.autojs.autojs.runtime.ScriptRuntime
 import org.autojs.autojs.runtime.api.ScriptPromiseAdapter
 import org.autojs.autojs.util.RhinoUtils
@@ -82,7 +83,7 @@ internal class ScriptAsyncDispatcher private constructor(
             RhinoUtils.toJsValue(scriptRuntime.topLevelScope, value)
         },
         drainMicrotasks = {
-            Context.getCurrentContext()?.processMicrotasks()
+            (Context.getCurrentContext() as? AutoJsContext)?.runMicrotasks()
         },
         releaseWait = if (keepAlive) captureWaitRelease(scriptRuntime) else ({}),
         timer = scriptRuntime.timers.timerForCurrentThread ?: scriptRuntime.timers.mainTimer,

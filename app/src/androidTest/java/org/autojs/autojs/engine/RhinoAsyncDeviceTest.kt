@@ -122,6 +122,34 @@ class RhinoAsyncDeviceTest {
         assertEquals("2|caught no|3|6|function settled|resumed", run.result)
     }
 
+    /**
+     * A module of the host settles through a [ScriptAsyncDispatcher], which runs the microtasks after each delivery: the coroutine
+     * resumes there, and suspends there again. Its last statement returns null, which is also the value of the last resume.
+     * zh-CN: 宿主模块经 [ScriptAsyncDispatcher] 落定, 它在每次投递后运行微任务: 协程在那里恢复, 也在那里再次挂起. 脚本最后一条语句的值是 null, 这也是最后一次恢复的返回值.
+     */
+    @Test
+    fun aCoroutineAwaitsOneAfterTheOtherThroughADispatcher() {
+        val script = """
+            var log = [];
+            function settled(value) {
+                var dispatcher = new org.autojs.autojs.runtime.api.modules.ScriptAsyncDispatcher(runtime, true);
+                var adapter = new org.autojs.autojs.runtime.api.ScriptPromiseAdapter();
+                var promise = ResultAdapter.promise(adapter);
+                new java.lang.Thread(new java.lang.Runnable({
+                    run: function () { dispatcher.resolve(adapter, value, function () {}); },
+                })).start();
+                return promise;
+            }
+            log.push(settled(1).await());
+            log.push(settled(2).await());
+            log.push(continuation.await(settled(3)));
+            runtime.putProperty('rhino.result', log.join('|'));
+        """.trimIndent()
+        val run = start(StringScriptSource("rhino-async-dispatcher", script), coroutines())
+        run.finish()
+        assertEquals("1|2|3", run.result)
+    }
+
     /** A coroutine cannot suspend inside an async function: the error can be read and caught, and nothing hangs. */
     @Test
     fun aCoroutineInsideAnAsyncFunctionIsAReadableError() {

@@ -92,12 +92,12 @@ class AutoJsContext(factory: ContextFactory?) : Context(factory) {
         return continuationPending
     }
 
-    override fun resumeContinuation(continuation: Any, scope: VarScope?, functionResult: Any?): Any {
+    override fun resumeContinuation(continuation: Any, scope: VarScope?, functionResult: Any?): Any? {
         continuations.remove(continuation)
         return super.resumeContinuation(continuation, scope, functionResult)
     }
 
-    override fun resumeContinuationWithError(continuation: Any, scope: VarScope?, error: Any?): Any {
+    override fun resumeContinuationWithError(continuation: Any, scope: VarScope?, error: Any?): Any? {
         continuations.remove(continuation)
         return super.resumeContinuationWithError(continuation, scope, error)
     }
