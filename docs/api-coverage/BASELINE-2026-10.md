@@ -1572,6 +1572,7 @@ Redmi bek749scrwv4wo8h (arm64, API 33), 调试包: 宿主 6551 md5 0bf64799 (HEA
 ### 23.6 遗留
 
 - fork 补丁未入 fork 仓库: 共享签出自 19:28 起处于 rhino-p8 的上游合并中. 补丁在共享笔记 `api-cov-q205-fork.patch` (430 行, 6 个文件), 宿主 jar 已含此 API, 补丁入库前从 fork 重建 jar 会让宿主编译失败. 登记 Q223.
+- 2026-11-02 补记: 上游合并结束后补丁已入 fork 246901d27 (基于 507e5f7ed, Java 文件都能干净应用, 只有 HOOKS.md 要手工合, 钩子合计 702 -> 728 行). 在 fork HEAD 的副本上验证: `:rhino:test` 4459 例 0 失败 4 跳过 (含 HooksRegistryTest 2 例, ContinuationResumeErrorTest 11 例), `:tests` Continuation / Generator 33 例 0 失败, spotlessCheck 通过. Q223 已决, 宿主 jar 不变, 由 P9.7 重建.
 
 ## 24. P6.1 最低版本抽样 (2026-11-01, 子会话 api-cov-p6-1-minapi)
 
