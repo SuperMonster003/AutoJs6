@@ -1879,7 +1879,7 @@ P5 全部完成. 按 Q260 (a) 只 bump TS 声明与 Ace, Node / Bun / ImGui / �
 | 仓库 | 改动前 | 改动后 | 提交 |
 |---|---|---|---|
 | TS 声明 | 4.86.0 | 4.87.0 | 170b45b |
-| Ace | 2.48.0 / 391 | 2.49.0 / 392, 捆绑声明 4.87.0 | ab0dc66 |
+| Ace | 2.48.0 / 391 | 2.49.0 / 392 -> 393 (Q262 (b)), 捆绑声明 4.87.0 | ab0dc66, efb96ea |
 | Node | 2.1.0 / 376 | 不动 | - |
 | Bun | 0.22.0 / 349 | 不动 | - |
 | ImGui | 1.18.1 / versionCode 63 | 不动 (已发布, tag v1.18.1 = 836f12f) | - |
@@ -1957,5 +1957,7 @@ OnePlus OPD2413 (ColorOS V15.0.1, API 35) 上抽样新增能力的授权, provid
 | 宿主 | 803bf1e65 | `RootUtils` 串行, `RootUtilsRootShellTest` |
 | 宿主 | (本节所在提交) | 脚本, 报告, README, ROADMAP 勾选 P6.2, 附录 C Q240 / Q241, 本节 |
 | 文档 | eaf4d58 | `runtimeApis` "宿主在后台" 一节; 生成物留给下次生成 |
+
+门禁: 宿主 9d25939d4, TS 170b45b, Ace ab0dc66, Node bd51cb89, Bun ad4eb91, 文档 eaf4d58, ImGui 65315bc 的 HEAD 副本 (KSP 1355737 字节): `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` 退出 0, failures 空, MATRIX 与 pending baseline current, pending 0 / 0 / 0, 运行时块 102 页 current.
 
 Q242 ~ Q245 未用. 矩阵与 `pending-baseline.json` 不变. 版本没有 bump.
