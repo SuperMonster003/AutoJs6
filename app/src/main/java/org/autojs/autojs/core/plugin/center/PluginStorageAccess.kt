@@ -73,9 +73,11 @@ object PluginStorageAccess {
         /** To be called with the script's error output. zh-CN: 以脚本的错误输出调用. */
         fun onErrorOutput(text: String) {
             if (shown.get() || !isDenied(text) || isGranted(appContext, packageName) || !shown.compareAndSet(false, true)) return
+            // An unanswered prompt may wait behind other apps: it gives way, or the system would bring it back with its old plugin.
+            // zh-CN: 未作答的提示可能留在其他应用之后: 让它让位, 否则系统会把它连同旧的插件一起带回前台.
             Intent(appContext, PluginStorageAccessActivity::class.java)
                 .putExtra(PluginStorageAccessActivity.EXTRA_PACKAGE, packageName)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 .startSafely(appContext)
         }
     }
