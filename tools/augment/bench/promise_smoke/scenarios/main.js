@@ -62,13 +62,14 @@ javaThread(function () { java.lang.Thread.sleep(20); adapter.resolve('adapter');
 out('K5-adapter', adapted.await());
 
 // The thread the callbacks run on when another thread settles.
-var where = [];
+// The two reactions run at the same time on two threads, so each has a variable of its own: pushing to one array lost an element.
+var whereJava, whereThreads;
 var jp = new Promise(function (r) { javaThread(function () { java.lang.Thread.sleep(20); r(1); }); });
-jp.then(function () { where.push('java:' + (onMain() ? 'main' : 'other')); });
+jp.then(function () { whereJava = 'java:' + (onMain() ? 'main' : 'other'); });
 var tp = new Promise(function (r) { threads.start(function () { sleep(20); r(1); }); });
-tp.then(function () { where.push('threads:' + (onMain() ? 'main' : 'other')); });
+tp.then(function () { whereThreads = 'threads:' + (onMain() ? 'main' : 'other'); });
 continuation.delay(300);
-out('T1-callback-thread', where.sort().join());
+out('T1-callback-thread', [whereJava, whereThreads].join());
 
 // Flow: await() of a chain is Kotlin calling the await of a Promise.
 try {
