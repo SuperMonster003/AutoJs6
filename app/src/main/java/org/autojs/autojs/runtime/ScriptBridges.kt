@@ -16,6 +16,7 @@ import org.mozilla.javascript.NativeArray
 import org.mozilla.javascript.Scriptable
 import org.mozilla.javascript.ScriptableObject
 import org.mozilla.javascript.Undefined
+import org.mozilla.javascript.json.JsonParser
 
 /**
  * Created by Stardust on Jul 21, 2017.
@@ -76,6 +77,11 @@ class ScriptBridges : IScriptBridges {
             asCoroutine -> callFunctionAsCoroutine(engine?.runtime, func, niceScope, thisObj, niceArgs)
             else -> callFunction(engine?.runtime, func, niceScope, thisObj, niceArgs)
         }
+    }
+
+    /** JSON [text] as the objects and arrays of this script's scope. zh-CN: 把 JSON [text] 解析为本脚本作用域里的对象与数组. */
+    fun parseJson(text: String): Any? = useJsContext { cx ->
+        JsonParser(cx, engine?.runtime?.topLevelScope ?: cx.getOrCreateStandardObjects()).parseValue(text)
     }
 
     override fun toArray(o: Iterable<*>?): NativeArray = useJsContext { cx ->

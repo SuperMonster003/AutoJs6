@@ -308,12 +308,12 @@ def case_details(runtime, serial, check):
     ready = out.get("ready") or {}
     check(f"{runtime} arguments", (ready.get("title"), ready.get("count"), ready.get("flag")) == ("escape", 3, True),
           json.dumps([ready.get("title"), ready.get("count"), ready.get("flag")]))
-    print(f"  {runtime} Rhino to main (object, array, text, number, true, null): {json.dumps(out.get('raw'), ensure_ascii=False)[:200]}")
+    check(f"{runtime} Rhino to main values", out.get("raw") == [{"a": 1}, [1, "two"], "text", 2.5, True, None], json.dumps(out.get("raw"), ensure_ascii=False)[:200])
     check(f"{runtime} Rhino to main JSON text", ready.get("title") == "escape")
-    # An object reaches Rhino as a Java map: no JS property reads, so the page has scripts send JSON text.
+    # Objects travel both ways (Q218 (a)); the JSON text of the page's example works as well.
     echo = out.get("echo.object") or {}
-    check(f"{runtime} main to Rhino object", echo.get("java") is True and json.loads(echo.get("json") or "null") == {"action": "close", "nested": {"n": 2}},
-          f"java map, action {echo.get('action')}")
+    check(f"{runtime} main to Rhino object", echo.get("java") is False and (echo.get("action"), echo.get("n")) == ("close", "2")
+          and json.loads(echo.get("json") or "null") == {"action": "close", "nested": {"n": 2}}, f"action {echo.get('action')}")
     check(f"{runtime} main to Rhino text and number", (out.get("echo.text") or {}).get("type") == "string" and (out.get("echo.number") or {}).get("type") == "number")
     frames = out.get("frames") or [0, 0]
     check(f"{runtime} frames past timeoutMs", frames[1] > frames[0], f"{frames[0]} -> {frames[1]}")

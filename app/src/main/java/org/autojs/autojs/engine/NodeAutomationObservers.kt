@@ -13,8 +13,11 @@ import org.autojs.autojs.core.automator.AccessibilityEventWrapper
 import org.autojs.autojs.core.broadcast.BroadcastEmitter
 import org.autojs.autojs.core.inputevent.InputEventObserver
 import org.autojs.autojs.core.inputevent.TouchObserver
+import org.autojs.autojs.util.RhinoUtils
 import org.json.JSONArray
 import org.json.JSONObject
+import org.mozilla.javascript.Scriptable
+import org.mozilla.javascript.Undefined
 
 /**
  * The event sources of Rhino's automation family for the JS runtimes (api-coverage P3.4), as execution-owned sessions of
@@ -100,12 +103,28 @@ internal object NodeAutomationObservers {
         session.detach = { emitter.unregister() }
     }
 
-    /** A JSON value of a broadcast sent from a JS runtime as the Java value Rhino listeners receive (objects as maps, arrays as lists). */
+    /** A JSON value of a broadcast sent from a JS runtime as a value of the broadcast list (objects and arrays stay JSON, see [BroadcastEmitter.Json]). */
     fun javaValue(value: Any?): Any? = when (value) {
         null, JSONObject.NULL -> null
-        is JSONObject -> value.keys().asSequence().associateWithTo(LinkedHashMap()) { javaValue(value.opt(it)) }
-        is JSONArray -> (0 until value.length()).mapTo(ArrayList()) { javaValue(value.opt(it)) }
+        is JSONObject, is JSONArray -> BroadcastEmitter.Json(value.toString())
         else -> value
+    }
+
+    /**
+     * A broadcast argument as the JSON value a JS runtime receives. Rhino objects and arrays follow JSON.stringify: functions
+     * and undefined are left out of objects and are null in arrays, a toJSON method is used, and so on. A whole argument that
+     * has no JSON text (a function, undefined, NaN, the infinities) is null, as an element of an array would be. So is one
+     * that JSON.stringify refuses (a cycle, a throwing toJSON): the sender is another script, which a listener must not fail.
+     * zh-CN: 广播参数转为 JS 运行时收到的 JSON 值. Rhino 对象与数组遵循 JSON.stringify: 函数与 undefined 在对象里省略, 在数组里为 null, 会使用
+     * toJSON 方法, 等等. 没有 JSON 文本的整个参数 (函数, undefined, NaN, 无穷大) 为 null, 与数组元素一样. JSON.stringify 拒绝的参数 (循环引用, 抛出异常的
+     * toJSON) 同样为 null: 发送方是另一个脚本, 监听方不能让它失败.
+     */
+    fun broadcastJson(value: Any?): Any = when (value) {
+        null, is Undefined -> JSONObject.NULL
+        is BroadcastEmitter.Json -> NodeBridgeJson.parseJsonValue(value.text)
+        is Scriptable -> (runCatching { RhinoUtils.js_json_stringify(value) }.getOrNull() as? String)?.let(NodeBridgeJson::parseJsonValue) ?: JSONObject.NULL
+        is Number -> if (value.toDouble().isFinite()) value else JSONObject.NULL
+        else -> NodeBridgeJson.valueToJson(value).let { text -> runCatching { NodeBridgeJson.parseJsonValue(text) }.getOrDefault(text) }
     }
 
     private fun eventJson(name: String, event: AccessibilityEventWrapper): JSONObject = JSONObject()
@@ -117,10 +136,8 @@ internal object NodeAutomationObservers {
     /** A broadcast listener of one session: what other scripts (and this one) emit is published, not run on a Rhino timer. */
     private class SessionBroadcastEmitter(private val session: NodeEventObservers.Session) : BroadcastEmitter(null, null) {
         override fun onBroadcast(eventName: String, vararg args: Any?): Boolean {
-            session.publish(JSONObject().put("type", "broadcast").put("name", eventName).put("args", JSONArray(args.map(NodeBridgeJson::valueToJson).map(::jsonValue))))
+            session.publish(JSONObject().put("type", "broadcast").put("name", eventName).put("args", JSONArray(args.map(::broadcastJson))))
             return true
         }
-
-        private fun jsonValue(text: String): Any = runCatching { org.json.JSONTokener(text).nextValue() }.getOrDefault(text)
     }
 }
