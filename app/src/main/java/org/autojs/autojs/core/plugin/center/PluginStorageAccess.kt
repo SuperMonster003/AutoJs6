@@ -15,10 +15,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 /**
  * Shared storage access of the runtime plugins (api-coverage Q228 (b)). A plugin process has its own UID, so its file I/O
  * does not use the grants of AutoJs6, and the plugin has no screen to ask for its own. Each execution watches the error
- * output of the script ([Prompt]): the first EACCES on shared storage, while the plugin holds no grant, opens one prompt that
- * leads to the plugin's page in system settings. EACCES itself reaches the script unchanged.
+ * output of the script ([Prompt]): the first refused access to shared storage, while the plugin holds no grant, opens one prompt
+ * that leads to the plugin's page in system settings. The error itself reaches the script unchanged.
  * zh-CN: 运行时插件的共享存储授权 (api-coverage Q228 (b)). 插件进程有自己的 UID, 其文件读写用不上 AutoJs6 的授权, 插件也没有界面可以申请. 每次执行观察脚本的
- * 错误输出 ([Prompt]): 插件未授权时, 共享存储上的第一个 EACCES 打开一次提示, 通向系统设置里该插件的页面. EACCES 本身照常到达脚本.
+ * 错误输出 ([Prompt]): 插件未授权时, 共享存储上第一次被拒绝的访问打开一次提示, 通向系统设置里该插件的页面. 错误本身照常到达脚本.
  */
 object PluginStorageAccess {
 
@@ -28,14 +28,17 @@ object PluginStorageAccess {
     // The platform keeps AppOpsManager.OPSTR_MANAGE_EXTERNAL_STORAGE hidden. zh-CN: 平台未公开 AppOpsManager.OPSTR_MANAGE_EXTERNAL_STORAGE.
     private const val OP_MANAGE_EXTERNAL_STORAGE = "android:manage_external_storage"
 
+    private val refusal = Regex("""\b(EACCES|EPERM)\b""")
     private val sharedStoragePath = Regex("""(^|[^\w/.-])(/sdcard|/mnt/sdcard|/storage/)""")
 
     /**
-     * Whether the output [text] reports EACCES on shared storage, in any of the forms of a Node.js or Bun error and of the
-     * `files` module (`open failed: EACCES`).
-     * zh-CN: 输出 [text] 是否报告了共享存储上的 EACCES, 包括 Node.js 与 Bun 的错误形式以及 `files` 模块的形式 (`open failed: EACCES`).
+     * Whether the output [text] reports a refused access to shared storage in the form of a Node.js or Bun error: EACCES, or
+     * EPERM, which Android 11 and later answer to a new file at the top of shared storage. `open failed:` is a Java error of the
+     * host process, which a grant to the plugin does not change.
+     * zh-CN: 输出 [text] 是否以 Node.js 或 Bun 错误的形式报告了共享存储访问被拒绝: EACCES, 或 EPERM (Android 11 起在共享存储根目录新建文件时的错误).
+     * `open failed:` 是宿主进程的 Java 错误, 给插件授权改变不了它.
      */
-    fun isDenied(text: CharSequence): Boolean = "EACCES" in text && sharedStoragePath.containsMatchIn(text)
+    fun isDenied(text: CharSequence): Boolean = "open failed:" !in text && refusal.containsMatchIn(text) && sharedStoragePath.containsMatchIn(text)
 
     /**
      * All files access of the package from Android 11 on, the storage permission before. The system may keep the appop of
