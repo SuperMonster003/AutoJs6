@@ -5,7 +5,7 @@ Usage: py -3.12 -I -u tools/rhino/device_rhino_check.py -s SERIAL [-s SERIAL ...
 
 Meant for a Rhino jar update (Rhino-For-AutoJs6 AGENTS.md, section 5): the production script engine, block scoping and
 the Uint8Array Base64 / hex methods (RhinoConstScopingDeviceTest), class syntax and classes that extend Java classes
-(RhinoClassSyntaxDeviceTest), Unicode property escapes, ui XML bindings, Java reflection and class loading, images.resize
+(RhinoClassSyntaxDeviceTest), async functions on a real looper (RhinoAsyncDeviceTest), Unicode property escapes, ui XML bindings, Java reflection and class loading, images.resize
 arguments, the class file converters and the desugared java.nio.file (ClassFileDexerDeviceTest, JavaNioDesugarDeviceTest),
 the type names of the Java bridge (the two RuntimeJavaCallbacksNativeTest cases that need no fixture) and the script looper
 cases that need neither accessibility nor the overlay permission. Run it on API 24 as well, the release the Android
@@ -18,7 +18,7 @@ after, so the original package can be put back and compared. Without --install t
 With --callback-fixtures the callback.jar and fixture.dex of tools/api-coverage/build-java-callback-fixtures.py (its --output
 directory) are pushed to where the fixture cases of RuntimeJavaCallbacksNativeTest read them, after any install.
 
-With --inrt the cases of RhinoClassSyntaxDeviceTest run in the packaged path instead: the inrt debug APK built by
+With --inrt the cases of RhinoClassSyntaxDeviceTest and RhinoAsyncDeviceTest run in the packaged path instead: the inrt debug APK built by
 :app:assembleInrtDebug gets them as its project (assets/project), is signed with the key of the host (sign.properties,
 inrt declares a signature-level permission shared with the host), installed, started and uninstalled again; the results
 come back as logcat lines of the tag RhinoClassCase. An inrt app that was installed before is replaced and not put back.
@@ -41,6 +41,7 @@ APP_APK_DIR = ROOT / "app/build/outputs/apk/app/debug"
 TEST_APK = ROOT / "app/build/outputs/apk/androidTest/app/debug/app-app-debug-androidTest.apk"
 INRT_APK_DIR = ROOT / "app/build/outputs/apk/inrt/debug"
 CASES = ROOT / "app/src/androidTest/assets/rhino/class-syntax-cases.js"
+ASYNC_CASES = ROOT / "app/src/androidTest/assets/rhino/async-cases.js"
 UI_CASE = ROOT / "app/src/androidTest/assets/rhino/class-syntax-ui-case.js"
 BUILD_TOOLS = pathlib.Path(os.environ.get("ANDROID_HOME", "E:/.android/sdk")) / "build-tools/37.0.0"
 INRT_PACKAGE = "org.autojs.autojs6.inrt"
@@ -54,6 +55,7 @@ JAVA_CALLBACKS = "org.autojs.autojs.engine.RuntimeJavaCallbacksNativeTest"
 DEFAULT_CLASSES = [
     "org.autojs.autojs.engine.RhinoConstScopingDeviceTest",
     "org.autojs.autojs.engine.RhinoClassSyntaxDeviceTest",
+    "org.autojs.autojs.engine.RhinoAsyncDeviceTest",
     "org.autojs.autojs.engine.RhinoUnicodePropertyEscapeDeviceTest",
     "org.autojs.autojs.core.ui.widget.JsListViewDataBindingDeviceTest",
     "org.autojs.autojs.runtime.api.modules.images.ImagesResizeRhinoInstrumentationTest",
@@ -141,21 +143,25 @@ def read_signing_properties():
 def packaged_apk(apk, work):
     """The inrt APK with the cases as its project, aligned again and signed with the key of the host."""
     log = f"android.util.Log.i('{INRT_TAG}', "
-    main_js = '"ui rhino";\n' + CASES.read_text(encoding="utf-8") + "\n" + UI_CASE.read_text(encoding="utf-8") + f"""
+    sources = (CASES, ASYNC_CASES, UI_CASE)
+    main_js = '"ui rhino";\n' + "\n".join(path.read_text(encoding="utf-8") for path in sources) + f"""
 threads.start(function () {{
     var lines = [];
-    rhinoClassCases.runAll(function (line) {{ lines.push(line); }});
+    function report(line) {{ lines.push(line); }}
+    rhinoClassCases.runAll(report);
     function finish(report) {{
         // Written at the end: the log buffer of an API 24 AVD is 256 KB and turns over during the cases.
         lines.concat('viewSubclassInUiMode ' + report, 'DONE').forEach(function (line) {{ {log}line); }});
         ui.finish();
     }}
-    ui.run(function () {{
-        try {{
-            rhinoClassUiCase(finish);
-        }} catch (e) {{
-            finish('FAIL threw ' + e);
-        }}
+    rhinoAsyncCases.runAll(report, function () {{
+        ui.run(function () {{
+            try {{
+                rhinoClassUiCase(finish);
+            }} catch (e) {{
+                finish('FAIL threw ' + e);
+            }}
+        }});
     }});
 }});
 """
@@ -218,7 +224,7 @@ def run_inrt(serial):
             time.sleep(2)
         reports = [line for line in lines if line != "DONE"]
         failed = 0
-        expected = CASES.read_text(encoding="utf-8").count("\n    add('") + 1
+        expected = sum(path.read_text(encoding="utf-8").count("\n    add('") for path in (CASES, ASYNC_CASES)) + 1
         for line in reports:
             name, _, verdict = line.partition(" ")
             print(f"{'PASS' if verdict == 'PASS' else 'FAIL':5} inrt#{name}" + ("" if verdict == "PASS" else f"  {verdict[:300]}"))
