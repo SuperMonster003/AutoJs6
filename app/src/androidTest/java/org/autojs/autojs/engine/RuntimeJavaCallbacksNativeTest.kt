@@ -106,6 +106,16 @@ class RuntimeJavaCallbacksNativeTest {
         val end=System.currentTimeMillis()+3000;while(owned!!.exists() && System.currentTimeMillis()<end)Thread.sleep(20)
         assertFalse("Owned class cache remains",owned.exists())
     }
+    @Test fun rawDexRunsAndItsStagedCopyStaysIntact() {
+        val provider=AndroidNodeBridgeCapabilityProvider(context)
+        val source=File(context.getExternalFilesDir(null),"java-callback-fixtures/fixture.dex")
+        try {
+            val loader=JSONObject(ok(request(provider,"loadDex",JSONObject().put("paths",JSONArray().put(source.path)))))
+            val code=File(loader.getJSONArray("paths").getString(0));assertFalse(code.canWrite())
+            assertEquals("\"actual-dex-fixture\"",ok(request(provider,"callStatic",JSONObject().put("className","org.autojs.fixture.runtime.DexFixture").put("method","identity"))))
+            assertEquals(RuntimeWebMediaProof.sha256(source.readBytes()),RuntimeWebMediaProof.sha256(code.readBytes()))
+        } finally {provider.destroy()}
+    }
     @Test fun externalCallbackReentryKeepsCodeUntilTheOperationFinishes() {
         val objects=java.util.concurrent.ConcurrentHashMap<String,Any>()
         val handles=object:ControlledJavaInteropPolicy.Handles {

@@ -1,8 +1,8 @@
 # Android 7.x 上 Java 回调桥的 Class.getTypeName (2026-11-02)
 
-问题: `loadJar` 改走 D8 后复测 ([loadjar-d8-api24-20261101.md](loadjar-d8-api24-20261101.md)), `RuntimeJavaCallbacksNativeTest` 在 API 24 / 25 仍是 1 / 4, 剩余 3 项报 `NoSuchMethodError: Class.getTypeName()`. 该方法 API 26 才有, 所以 Node.js / Bun / Worker 的 `java.proxy`, `java.wrap`, `java.defineClass` 在 Android 7.x 上都用不了. 维护者拍板 rhino-class Q50 = A.
+问题: `loadJar` 改走 D8 后复测 ([loadjar-d8-api24-20261101.md](loadjar-d8-api24-20261101.md)), `RuntimeJavaCallbacksNativeTest` 在 API 24 / 25 仍是 1 / 4, 剩余 3 项报 `NoSuchMethodError: Class.getTypeName()`. 该方法 API 26 才有, 所以 Node.js / Worker 的 `java.proxy`, `java.wrap`, `java.defineClass` 在 Android 7.x 上都用不了 (Bun 插件最低 API 33, 不涉及). 维护者拍板 rhino-class Q50 = A.
 
-结论: 用等价函数替换两处调用后, API 24 / 25 回调用例全部通过, API 35 不变.
+结论: 用等价函数替换两处调用后, API 24 / 25 回调用例全部通过, API 35 不变. 插件进程路径的补测又发现 `java.loadDex` 在 7.x 上加载不了原始 DEX, 已一并修复, 见 "补测: 插件进程路径".
 
 ## 修法
 
@@ -50,7 +50,30 @@ JVM: `RuntimeJavaSubclassGeneratorTest` 7 / 7. 新增 2 例: 基元 (含 `void`)
 
 跳过项与上次相同: `ImagesResizeRhinoInstrumentationTest` 的既有 1 项; `legacyDxRefusesJava8ClassesOnTheApiLevelsThatKeepIt` 只在 API 26 以下运行. 上次是 42 / 41 过, 这次多的 3 项是新增的 2 项与上次全集之后才加入的 `orderedClasspathCompilesWithD8`.
 
-未覆盖: 真机未测 (API 31 不受影响); Node.js / Bun 插件进程经 `RuntimeJavaCallbacksDeviceTest` 的整条路径未在 API 24 / 25 跑, 本次验证的是宿主桥接层.
+这一节验证的是宿主桥接层, 插件进程路径见下节. 真机未测 (API 31 不受影响).
+
+## 补测: 插件进程路径
+
+维护者 2026-11-02 拍板 rhino-class Q52 = B: 补测真实插件进程经 `java.proxy`, `java.defineClass`, `callSuper`, `java.loadJar`, `java.loadDex` 的整条路径.
+
+| 插件 | 依据 | API 24 | API 25 |
+| --- | --- | --- | --- |
+| Bun Runtime | APK 与 `version.properties` 的 `minSdk` 都是 33; README 兼容性节写明 API 33 起, API 28 - 32 也不支持 | 不适用 | 不适用 |
+| Node.js Runtime | `minSdk` 24; ABI 只有 `arm64-v8a`, `armeabi-v7a`, `x86_64`, 没有 `x86` | 适用 | 适用, 但本机的 API 25 镜像只有 `x86`, 装不上 |
+
+本机没有 7.x 真机 (最低是 G8441, API 28), 所以 API 24 用 `default` x86_64 镜像跑 Node. 构建: 宿主 3e258c37f 加本节修复 (克隆). 插件: Node.js Runtime 2.0.0 debug (versionCode 340, md5 `bbb984d5`, 本地构建), Bun Runtime 0.21.0 debug (versionCode 296, md5 `2c76e65d`, 本地构建, 只装在 API 35). 都是 `x86_64` 分包.
+
+| 项目 | API 24 `default` x86_64 | API 25 `google_apis` x86 | API 35 `google_apis` x86_64 |
+| --- | --- | --- | --- |
+| `RuntimeJavaCallbacksDeviceTest` | 4 过, Bun 1 跳过 (修前 2 过 2 失败) | 未跑 (没有可装的 Node) | 5 / 5, 含 Bun |
+| `RuntimeJavaCallbacksNativeTest` (含夹具用例) | 7 / 7 | 7 / 7 | 7 / 7 |
+| `device_rhino_check.py` 默认集 | 45 过 1 跳过 | 45 过 1 跳过 | 44 过 2 跳过 |
+
+`RuntimeJavaCallbacksDeviceTest` 覆盖 Node 主线程, Worker, ESM 与嵌套 Worker, 快照与嵌套 `callSuper`. Bun 用例在 API 33 以下按 `bunRuntimeAvailable` 跳过, 之前没有这个判断, 跑到 Bun 就失败. `RuntimeJavaCallbacksPackagedDeviceTest` 不适用于这些 AVD: 打包 ABI 固定为 `arm64-v8a`, 模式里有 Bun.
+
+修前失败的两项报 `callStatic: java.lang.ClassNotFoundException: org.autojs.fixture.runtime.DexFixture`, 都停在 `java.loadDex('fixture.dex')` 之后. API 26 以下 `DexClassLoader` 的优化输出是 `<optimizedDirectory>/<文件名>.dex`, 而 `RuntimeJavaSession.loadFiles` 把 `code-N.dex` 放在优化目录本身, 输入和输出成了同一个文件. `AndroidClassLoader.loadDex` 早已用 `optimized` 子目录隔离 (a28d384eea), 桥接的这条路径漏了. 修法相同: 优化目录改为执行目录下的 `optimized`. API 26 起系统忽略这个参数. `RuntimeJavaCallbacksNativeTest.rawDexRunsAndItsStagedCopyStaysIntact` 在宿主层覆盖这一点, 需要夹具, 所以不在默认集.
+
+未覆盖: API 25 上的 Node 进程路径. API 25 的宿主层用例已全部通过, API 24 的 Node 进程路径已全部通过.
 
 ## 设备脚本
 

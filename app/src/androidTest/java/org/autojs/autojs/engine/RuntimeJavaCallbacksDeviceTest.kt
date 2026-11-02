@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.autojs.autojs.core.plugin.bun.BunHostCapabilityGrants as Grants
 import org.json.JSONObject
 import org.junit.Assert.*
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import java.io.File
 import java.util.UUID
@@ -38,7 +39,7 @@ class RuntimeJavaCallbacksDeviceTest {
         val result=harness.execute(if(mode=="bun")"bun" else "node",script,capabilities=listOf("java_interop"),workingDirectory=root.path)
         assertTrue(result.getBoolean("callbacks"));File(context.getExternalFilesDir(null),"runtime-java-callbacks-$mode.json").writeText(result.toString(2))
     }
-    @Test fun bunCallbacksSubclassJarAndDex()=exercise("bun")
+    @Test fun bunCallbacksSubclassJarAndDex() {assumeTrue(bunRuntimeAvailable);exercise("bun")}
     @Test fun nodeCallbacksSubclassJarAndDex()=exercise("node")
     @Test fun workerCallbacksSubclassJarAndDex()=exercise("worker")
     @Test fun esmAndNestedWorkersKeepCallbacksInTheirOwnerAndReleaseThemOnExit()=fixture {root->
@@ -65,7 +66,7 @@ class RuntimeJavaCallbacksDeviceTest {
 
     @Test fun snapshotsAvoidUserCodeAndNestedSuperCallbacksReturn()=fixture {root->
         val proofs=org.json.JSONArray()
-        for(mode in listOf("node","bun","worker")) {
+        for(mode in listOf("node","bun","worker").filter{it!="bun"||bunRuntimeAvailable}) {
             val program="""
                 let strings=0,hashes=0;
                 const type=await java.defineClass({methods:{

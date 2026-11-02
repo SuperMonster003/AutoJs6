@@ -171,7 +171,8 @@ internal class RuntimeJavaSession(
                 } else {validateDex(path);readonly(path,File(directory,"code-$index.dex"))}
             }
             check(!closed)
-            val loader=DexClassLoader(paths.joinToString(File.pathSeparator){it.path},directory.path,null,latestLoader)
+            // Before API 26 the output of code-N.dex is <optimizedDirectory>/code-N.dex, which must not be its own input.
+            val loader=DexClassLoader(paths.joinToString(File.pathSeparator){it.path},File(directory,"optimized").apply { check(mkdirs()) }.path,null,latestLoader)
             latestLoader=loader
             handles.register(loader,spec(loader)).put("__autojs6JavaLoader",true).put("paths",JSONArray(paths.map { it.path }))
         } catch(error:Throwable) { directory.deleteRecursively();throw error }
