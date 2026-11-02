@@ -59,21 +59,23 @@ JVM: `RuntimeJavaSubclassGeneratorTest` 7 / 7. 新增 2 例: 基元 (含 `void`)
 | 插件 | 依据 | API 24 | API 25 |
 | --- | --- | --- | --- |
 | Bun Runtime | APK 与 `version.properties` 的 `minSdk` 都是 33; README 兼容性节写明 API 33 起, API 28 - 32 也不支持 | 不适用 | 不适用 |
-| Node.js Runtime | `minSdk` 24; ABI 只有 `arm64-v8a`, `armeabi-v7a`, `x86_64`, 没有 `x86` | 适用 | 适用, 但本机的 API 25 镜像只有 `x86`, 装不上 |
+| Node.js Runtime | `minSdk` 24; ABI 只有 `arm64-v8a`, `armeabi-v7a`, `x86_64`, 没有 `x86` | 适用 | 适用 |
 
-本机没有 7.x 真机 (最低是 G8441, API 28), 所以 API 24 用 `default` x86_64 镜像跑 Node. 构建: 宿主 3e258c37f 加本节修复 (克隆). 插件: Node.js Runtime 2.0.0 debug (versionCode 340, md5 `bbb984d5`, 本地构建), Bun Runtime 0.21.0 debug (versionCode 296, md5 `2c76e65d`, 本地构建, 只装在 API 35). 都是 `x86_64` 分包.
+本机没有 7.x 真机 (最低是 G8441, API 28), 所以用 x86_64 AVD 跑 Node: API 24 用本机已有的 `default` 镜像, API 25 本机原来只有 x86 镜像, 装不上 Node, 经维护者同意下载了 `google_apis` x86_64 r18. 构建: 宿主 3e258c37f 加本节修复 (克隆). 插件: Node.js Runtime 2.0.0 debug (versionCode 340, md5 `bbb984d5`, 本地构建), Bun Runtime 0.21.0 debug (versionCode 296, md5 `2c76e65d`, 本地构建, 只装在 API 35). 都是 `x86_64` 分包.
 
-| 项目 | API 24 `default` x86_64 | API 25 `google_apis` x86 | API 35 `google_apis` x86_64 |
+| 项目 | API 24 `default` x86_64 | API 25 `google_apis` x86_64 | API 35 `google_apis` x86_64 |
 | --- | --- | --- | --- |
-| `RuntimeJavaCallbacksDeviceTest` | 4 过, Bun 1 跳过 (修前 2 过 2 失败) | 未跑 (没有可装的 Node) | 5 / 5, 含 Bun |
+| `RuntimeJavaCallbacksDeviceTest` | 4 过, Bun 1 跳过 (修前 2 过 2 失败) | 4 过, Bun 1 跳过 | 5 / 5, 含 Bun |
 | `RuntimeJavaCallbacksNativeTest` (含夹具用例) | 7 / 7 | 7 / 7 | 7 / 7 |
 | `device_rhino_check.py` 默认集 | 45 过 1 跳过 | 45 过 1 跳过 | 44 过 2 跳过 |
+
+API 25 `google_apis` x86 上, 同一构建的 `RuntimeJavaCallbacksNativeTest` 7 / 7, 默认集 45 过 1 跳过.
 
 `RuntimeJavaCallbacksDeviceTest` 覆盖 Node 主线程, Worker, ESM 与嵌套 Worker, 快照与嵌套 `callSuper`. Bun 用例在 API 33 以下按 `bunRuntimeAvailable` 跳过, 之前没有这个判断, 跑到 Bun 就失败. `RuntimeJavaCallbacksPackagedDeviceTest` 不适用于这些 AVD: 打包 ABI 固定为 `arm64-v8a`, 模式里有 Bun.
 
 修前失败的两项报 `callStatic: java.lang.ClassNotFoundException: org.autojs.fixture.runtime.DexFixture`, 都停在 `java.loadDex('fixture.dex')` 之后. API 26 以下 `DexClassLoader` 的优化输出是 `<optimizedDirectory>/<文件名>.dex`, 而 `RuntimeJavaSession.loadFiles` 把 `code-N.dex` 放在优化目录本身, 输入和输出成了同一个文件. `AndroidClassLoader.loadDex` 早已用 `optimized` 子目录隔离 (a28d384eea), 桥接的这条路径漏了. 修法相同: 优化目录改为执行目录下的 `optimized`. API 26 起系统忽略这个参数. `RuntimeJavaCallbacksNativeTest.rawDexRunsAndItsStagedCopyStaysIntact` 在宿主层覆盖这一点, 需要夹具, 所以不在默认集.
 
-未覆盖: API 25 上的 Node 进程路径. API 25 的宿主层用例已全部通过, API 24 的 Node 进程路径已全部通过.
+未覆盖: 7.x 真机, 以及 `arm64-v8a`, `armeabi-v7a` 的 Node 包在 7.x 上的运行. `RuntimeJavaCallbacksPackagedDeviceTest`.
 
 ## 设备脚本
 
