@@ -19,7 +19,7 @@ class RuntimeTerminalBridgeTest {
 
     @Test fun everyMethodIsSupportedAndNeedsTheTerminalCapabilityOnly() {
         val expected = setOf("state", "isAvailable", "open", "sessions", "session", "close", "closeAll", "show", "exec", "env", "npmRun",
-            "write", "waitFor", "transcript", "isAlive")
+            "write", "waitFor", "waitForStart", "waitForResult", "transcript", "isAlive")
         assertEquals(expected, RuntimeTerminalBridge.METHODS)
         for (method in expected) {
             assertTrue(method, NodeBridgeModules.supports("terminal", method))
@@ -34,6 +34,8 @@ class RuntimeTerminalBridgeTest {
     @Test fun arityIsCheckedAsAnInvalidArgument() {
         RuntimeTerminalBridge.checkArity("open", JSONArray())
         RuntimeTerminalBridge.checkArity("waitFor", JSONArray().put("s1").put("ready").put(1000).put(false))
+        RuntimeTerminalBridge.checkArity("waitForStart", JSONArray().put("s1").put("ready").put(1000).put(false))
+        RuntimeTerminalBridge.checkArity("waitForResult", JSONArray().put("token"))
         val error = assertThrows(TerminalPluginException::class.java) { RuntimeTerminalBridge.checkArity("write", JSONArray().put("s1")) }
         assertEquals(TerminalErrorCodes.INVALID_ARGUMENT, error.code)
         assertEquals(TerminalErrorCodes.INVALID_ARGUMENT, assertThrows(TerminalPluginException::class.java) { RuntimeTerminalBridge.checkArity("spawn", JSONArray()) }.code)

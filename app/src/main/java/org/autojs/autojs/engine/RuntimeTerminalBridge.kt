@@ -19,6 +19,8 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.Closeable
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -41,6 +43,9 @@ internal class RuntimeTerminalBridge(context: Context, cwd: String?) : Closeable
     private val service = TerminalService(context) { cwd?.takeIf { it.isNotBlank() } }
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val closed = AtomicBoolean(false)
+    private val lineWaits = ConcurrentHashMap<String, LineWait>()
+
+    private class LineWait(val wait: TerminalService.LineWait, val timeoutMillis: Long)
 
     fun dispatch(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
         if (closed.get()) {
@@ -67,6 +72,7 @@ internal class RuntimeTerminalBridge(context: Context, cwd: String?) : Closeable
 
     override fun close() {
         if (!closed.compareAndSet(false, true)) return
+        lineWaits.clear()
         service.close()
         scope.cancel()
     }
@@ -103,6 +109,19 @@ internal class RuntimeTerminalBridge(context: Context, cwd: String?) : Closeable
                 val timeout = TerminalScriptArguments.waitTimeout(element(args, 2))
                 JSONObject.quote(service.waitForLine(id, stripAnsi(args.opt(3)), matcher, timeout))
             }
+            "waitForStart" -> {
+                val id = TerminalScriptArguments.sessionId(element(args, 0))
+                val (regex, text) = pattern(args.opt(1))
+                val matcher = TerminalScriptArguments.lineMatcher(regex, text)
+                val timeout = TerminalScriptArguments.waitTimeout(element(args, 2))
+                val token = UUID.randomUUID().toString()
+                lineWaits[token] = LineWait(service.startLineWait(id, stripAnsi(args.opt(3)), matcher), timeout)
+                JSONObject.quote(token)
+            }
+            "waitForResult" -> {
+                val wait = lineWaits.remove(args.optString(0)) ?: throw TerminalScriptArguments.invalid("unknown or finished terminal wait")
+                JSONObject.quote(service.awaitLine(wait.wait, wait.timeoutMillis))
+            }
             "transcript" -> {
                 val id = TerminalScriptArguments.sessionId(element(args, 0))
                 JSONObject.quote(service.transcript(id, TerminalScriptArguments.transcriptMaxBytes(element(args, 1))).text)
@@ -131,13 +150,17 @@ internal class RuntimeTerminalBridge(context: Context, cwd: String?) : Closeable
         /**
          * Methods of the bridge module with their argument counts (api-coverage P3.3). `waitFor [id, pattern, timeoutMs?,
          * stripAnsi?]` takes the session's `stripAnsi` (Rhino keeps it on the session object; default true).
+         * `waitForStart` takes the same arguments and answers with a token once the subscription runs, so a runtime can send
+         * the input a wait is for after it; `waitForResult [token]` then answers as `waitFor` does (Q227 (a)). `waitFor`
+         * stays for the runtimes that call it.
          * zh-CN: 桥接模块的方法及其参数个数 (api-coverage P3.3). `waitFor [id, pattern, timeoutMs?, stripAnsi?]` 接收会话的 `stripAnsi`
-         * (Rhino 把它保存在会话对象上; 默认 true).
+         * (Rhino 把它保存在会话对象上; 默认 true). `waitForStart` 的参数相同, 在订阅运行后应答一个令牌, 运行时可以在此之后再发送等待所针对的输入;
+         * 之后 `waitForResult [token]` 的应答与 `waitFor` 相同 (Q227 (a)). `waitFor` 保留给调用它的运行时.
          */
         val ARITY: Map<String, IntRange> = linkedMapOf(
             "state" to 0..0, "isAvailable" to 0..0, "open" to 0..1, "sessions" to 0..0, "session" to 1..1, "close" to 1..1,
             "closeAll" to 0..0, "show" to 0..1, "exec" to 1..2, "env" to 0..0, "npmRun" to 1..3, "write" to 2..2,
-            "waitFor" to 2..4, "transcript" to 1..2, "isAlive" to 1..1,
+            "waitFor" to 2..4, "waitForStart" to 2..4, "waitForResult" to 1..1, "transcript" to 1..2, "isAlive" to 1..1,
         )
 
         val METHODS: Set<String> = ARITY.keys

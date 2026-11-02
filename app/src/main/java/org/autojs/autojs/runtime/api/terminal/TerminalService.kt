@@ -69,6 +69,9 @@ class TerminalService(context: Context, private val cwdProvider: () -> String?) 
         internal fun start() = pump.start()
     }
 
+    /** A wait for an output line whose subscription runs ([startLineWait]). zh-CN: 订阅已运行的输出行等待 ([startLineWait]). */
+    inner class LineWait internal constructor(internal val sessionId: String, internal val outcome: CompletableDeferred<String?>, internal val subscription: Subscription)
+
     /** The application context the plugin is bound with. zh-CN: 绑定插件所用的应用上下文. */
     val appContext: Context = context.applicationContext
 
@@ -330,7 +333,16 @@ class TerminalService(context: Context, private val cwdProvider: () -> String?) 
      * zh-CN: `waitFor`: [sessionId] 自此刻起的专属订阅里第一条满足 [matcher] 的输出行; [timeoutMillis] (`0` 表示不限) 后为 `TIMEOUT`, 会话先结束则为
      * `SESSION_CLOSED`.
      */
-    suspend fun waitForLine(sessionId: String, stripAnsi: Boolean, matcher: (String) -> Boolean, timeoutMillis: Long): String {
+    suspend fun waitForLine(sessionId: String, stripAnsi: Boolean, matcher: (String) -> Boolean, timeoutMillis: Long): String =
+        awaitLine(startLineWait(sessionId, stripAnsi, matcher), timeoutMillis)
+
+    /**
+     * The first half of [waitForLine], for callers whose next step must not run before the wait
+     * reads the output: returns once the subscription runs. [awaitLine] ends the wait; [close]
+     * ends the waits left over.
+     * zh-CN: [waitForLine] 的前半段, 供下一步必须晚于订阅生效的调用方使用: 订阅运行后才返回. [awaitLine] 结束等待; 遗留的等待由 [close] 结束.
+     */
+    suspend fun startLineWait(sessionId: String, stripAnsi: Boolean, matcher: (String) -> Boolean): LineWait {
         val outcome = CompletableDeferred<String?>()
         val reader = TerminalOutputReader(
             object : TerminalOutputReader.Sink {
@@ -346,22 +358,26 @@ class TerminalService(context: Context, private val cwdProvider: () -> String?) 
             },
             stripAnsi,
         )
-        val subscription = subscribe(sessionId, fromStart = false, reader)
+        return LineWait(sessionId, outcome, subscribe(sessionId, fromStart = false, reader))
+    }
+
+    /** The second half of [waitForLine]. zh-CN: [waitForLine] 的后半段. */
+    suspend fun awaitLine(wait: LineWait, timeoutMillis: Long): String {
         try {
             val settled = if (timeoutMillis <= 0L) {
-                outcome.await()
+                wait.outcome.await()
                 true
             } else {
                 withTimeoutOrNull(timeoutMillis) {
-                    outcome.await()
+                    wait.outcome.await()
                     true
                 } ?: false
             }
-            if (!settled) throw TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.TIMEOUT, "no output line matched within $timeoutMillis ms", sessionId))
-            return outcome.await()
-                ?: throw TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.SESSION_CLOSED, "terminal session $sessionId ended before a line matched", sessionId))
+            if (!settled) throw TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.TIMEOUT, "no output line matched within $timeoutMillis ms", wait.sessionId))
+            return wait.outcome.await()
+                ?: throw TerminalPluginException(TerminalErrorMapper.normalize(TerminalErrorCodes.SESSION_CLOSED, "terminal session ${wait.sessionId} ended before a line matched", wait.sessionId))
         } finally {
-            unsubscribe(subscription)
+            unsubscribe(wait.subscription)
         }
     }
 
