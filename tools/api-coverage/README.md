@@ -805,6 +805,15 @@ tests.
 limit by installing the real APK (`bun-limit`). The host's runtime device suites run
 below API 33 through `runtimeModes`, which leaves the Bun mode out.
 
+`device_p6_2_coloros.py` is the P6.2 sampling on ColorOS (OnePlus OPD2413). It looks at
+what happens around a call rather than at the API: authorizations granted and taken away,
+plugins, runtimes and the host stopped before or during a script, the host's process in
+the background with and without its foreground service, the accessibility service after
+the host died, the shared storage prompt, concurrent host calls. Each phase prints one
+line per item and writes `<state>/<phase>.json`, `summary` turns those into report tables.
+`prompt --step grant` and `capture` wait for answers on the phone. `background --a11y off`
+and `freeze` need a host that was stopped first: a host that was just in front stays up.
+
 `device_imgui_docs.py` runs every Rhino code block of the documentation imgui pages
 on a device (P5.2f-2 card B). A block passes when it finishes, its session stays open,
 the host overlay window comes and goes, and nothing reaches `console.error` up to just

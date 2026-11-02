@@ -1928,3 +1928,34 @@ Gradle 没有跑: 本卡只改声明注释, 版本号与文档, 机器上还有 
 | TS | 170b45b | 4.87.0, 注释, changelog |
 | Ace | ab0dc66 | 2.49.0 / 392, 捆绑声明 4.87.0, 注释, changelog |
 | 宿主 | (本节所在提交) | ROADMAP P5.3 与附录 C, 本节 |
+
+## 30. P6.2 ColorOS 抽样 (2026-11-02, 子会话 api-cov-p6-2-coloros)
+
+OnePlus OPD2413 (ColorOS V15.0.1, API 35) 上抽样新增能力的授权, provider 绑定与前台服务, 报告 [P6-2-COLOROS-2026-11-02.md](P6-2-COLOROS-2026-11-02.md), 脚本 `tools/api-coverage/device_p6_2_coloros.py`. 不重复 P3.5 / P4.5 的 78 项四形态与 P4.2b 的 Bun 拒绝轮.
+
+| 项 | 结果 |
+|---|---|
+| 授权 13 类 21 项, 五形态 | 全过, `shizuku.exec` 因服务未运行跳过 |
+| 收回授权 7 项 | 全部给出错误或 false, 不挂起 |
+| provider 绑定与重绑, 六类 provider 五形态 + 运行时 | 34 / 34: 宿主前台, 后台, 无悬浮窗启动宽限内 |
+| 脚本中途杀 provider / 运行时 / 宿主 | 全过 |
+| `PluginAutoWakeDeviceTest` / MCP 抽屉监听器重绑 | 5 项 / 4 项 |
+| 录屏 | 五形态, 服务都在前台 |
+| Q228 (b) 提示 | 走通, 系统页 `AppManageExternalStorageActivity` |
+| 后台 60 s, 五组 | 前台服务或绑定在时 20 / 20; 都没有时 4 ~ 5 / 20 |
+
+失败项判定:
+
+- ColorOS 限制 1 条: 宿主进程崩溃或被系统杀掉后, 无障碍服务不自动重绑 (Q240, 文档写明, 矩阵不加标注).
+- 后台冻结不是 ColorOS 限制: `use_freezer=true`, `freeze_debounce_timeout=10000`, AOSP API 35 模拟器同样停住 (Q241). 回到前台后 Rhino / Node 继续, Bun 场景宿主被系统杀掉.
+- 真缺陷 1 个: 无 su 设备上两个首次 root 检查同时进行时丢应答, Bun 并发 `getAccess` 从 10 轮 8 次超时到 0 次, 中位 358 ms.
+
+落点:
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | 803bf1e65 | `RootUtils` 串行, `RootUtilsRootShellTest` |
+| 宿主 | (本节所在提交) | 脚本, 报告, README, ROADMAP 勾选 P6.2, 附录 C Q240 / Q241, 本节 |
+| 文档 | eaf4d58 | `runtimeApis` "宿主在后台" 一节; 生成物留给下次生成 |
+
+Q242 ~ Q245 未用. 矩阵与 `pending-baseline.json` 不变. 版本没有 bump.
