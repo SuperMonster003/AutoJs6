@@ -1151,7 +1151,7 @@ Number.EPSILON	---	number '2.220446049250313e-16'
 Number.MAX_SAFE_INTEGER	---	number '9007199254740991'
 Number.MAX_VALUE	---	number '1.7976931348623157e+308'
 Number.MIN_SAFE_INTEGER	---	number '-9007199254740991'
-Number.MIN_VALUE	---	number '4.9e-324'
+Number.MIN_VALUE	---	number '5e-324'
 Number.NEGATIVE_INFINITY	---	number '-Infinity'
 Number.NaN	---	number 'NaN'
 Number.POSITIVE_INFINITY	---	number 'Infinity'
@@ -1587,6 +1587,21 @@ SetScreenMetrics	EW-	function name='SetScreenMetrics' length=2
 SetScreenMetrics.arity	--C	number '2'
 SetScreenMetrics.length	--C	number '2'
 SetScreenMetrics.name	--C	string 'SetScreenMetrics'
+SharedArrayBuffer	-WC	function name='SharedArrayBuffer' length=1
+SharedArrayBuffer.arity	---	number '1'
+SharedArrayBuffer.isView	-WC	function name='isView' length=1
+SharedArrayBuffer.isView.arity	--C	number '1'
+SharedArrayBuffer.isView.length	--C	number '1'
+SharedArrayBuffer.isView.name	--C	string 'isView'
+SharedArrayBuffer.length	--C	number '1'
+SharedArrayBuffer.name	--C	string 'SharedArrayBuffer'
+SharedArrayBuffer.prototype	---	object [object SharedArrayBuffer] proto=[object Object] ctor=Object Object.prototype
+SharedArrayBuffer.prototype.byteLength	-AG-C	accessor
+SharedArrayBuffer.prototype.constructor	-WC	function name='SharedArrayBuffer' length=1
+SharedArrayBuffer.prototype.grow	-WC	function name='grow' length=1
+SharedArrayBuffer.prototype.growable	-AG-C	accessor
+SharedArrayBuffer.prototype.maxByteLength	-AG-C	accessor
+SharedArrayBuffer.prototype.slice	-WC	function name='slice' length=2
 StopIteration	-WC	object [object StopIteration] proto=[object Object] ctor=Object Object.prototype
 String	-WC	function name='String' length=1
 String.arity	---	number '1'
@@ -1756,6 +1771,7 @@ Symbol(GeneratorPrototype).throw.arity	--C	number '1'
 Symbol(GeneratorPrototype).throw.length	--C	number '1'
 Symbol(GeneratorPrototype).throw.name	--C	string 'throw'
 Symbol.arity	--C	number '0'
+Symbol.asyncIterator	---	symbol 'Symbol(Symbol.asyncIterator)'
 Symbol.for	-WC	function name='for' length=1
 Symbol.for.arity	--C	number '1'
 Symbol.for.length	--C	number '1'

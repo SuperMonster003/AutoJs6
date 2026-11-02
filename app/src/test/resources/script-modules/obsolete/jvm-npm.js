@@ -106,7 +106,9 @@
                         };
                         moduleRequire.cache = require.cache;
                         moduleRequire.extensions = require.extensions;
-                        const wrapper = new Function('exports', 'require', 'module', '__filename', '__dirname', body);
+                        // Indirect eval and not `new Function`: the Function constructor puts the body on the third line of its source (ES2019), and
+                        // this file stands for a state whose line numbers came out as those of the module file.
+                        const wrapper = (0, eval)('(function (exports, require, module, __filename, __dirname) {' + body + '\n})');
                         wrapper.call(module.exports, module.exports, moduleRequire, module, file, dirname);
                         module.loaded = true;
                         return module.exports;
