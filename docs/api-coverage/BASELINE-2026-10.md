@@ -1593,3 +1593,54 @@ Redmi bek749scrwv4wo8h (arm64, API 33), 调试包: 宿主 6551 md5 0bf64799 (HEA
 ### 24.4 提交
 
 宿主 f14ed8d93 / 6d9fd7546 / 3c9c5b0bc / d584ca619; MATRIX.md 由 3e45564eb 带上标注节; Node 5587b94e; 文档 716dac1.
+
+## 25. P5.2f-2 卡 C: imgui 声明与 Q219 (b) (2026-11-02, 子会话 api-cov-imgui-dts)
+
+### 25.1 结论
+
+imgui 的 d.ts 与 Ace 补齐: 589 条查询路径 (587 个公开名称 + `imgui` + `$imgui`) 声明解析, Ace 默认组, 全组与静态索引都是 589 / 589, 暂缓名单 589 -> 0. 文档已由卡 B 补齐, 所以本卡在 18d849a63 删掉 `deferredNameGate.imgui` 并重生成 MATRIX.md; 卡 B 不用再动这几处. P5.2 不勾, 等卡 D.
+
+### 25.2 数字
+
+| 指标 | 前 | 后 |
+|---|---:|---:|
+| imgui 查询路径 failingPaths | 589 (暂缓) | 0 |
+| queriedPaths / surfaces failures | 2262 / 0 | 2262 / 0 |
+| deferredNameGate | imgui | 空 |
+| MATRIX dts none | 597 | 10 |
+| MATRIX ace none | 1002 | 415 |
+| MATRIX imgui 行 doc / d.ts / Ace | 0 / 0 / 0 | 332 / 587 / 587 (doc 为卡 B) |
+| Ace runtime-api-queries.json | 5482 | 5482 |
+| Ace 静态索引 autojs6_indices.js | 1852095 字节 | 2069806 字节 (+11.8 %) |
+| aj6-int-imgui.d.ts | - | 3243 行, 184 KB (LSP core 组 lib.autojs6.core.d.ts 现约 2.02 MB) |
+
+13 个返回对象 (Session, DrawList, FloatingButton, DataTable, LogWindow, Toast, StatsOverlay, Component, Texture, SelectionStorage, MultiSelectIO, Dialog, DialogPromise) 的 821 条 "生产者 + 成员" 路径都能从调用表达式解析到显式类型 (例如 `imgui.createWindow.().setFps`, `imgui.alert.().controller.close`), 卡 D 的 probe 可以直接用. 每个 Promise 还有一条 `Symbol.toStringTag`, 是探针脚本的假象, 不计.
+
+### 25.3 改写点
+
+由插件 `imgui.d.ts` 改写: `Session.capture` 返回宿主 `ImageWrapper` (去掉 `CapturedImage` 占位), 去掉内部的 `__pluginId` (Q123), `imgui` / `$imgui` 放进 `aj6-int-init.d.ts`. 注释里的 docs/ 路径在文件头说明属于插件仓库. autojs6-node / autojs6-bun 不加 (Q213 (b)).
+
+`tsc --strict` 覆盖: TS `docs/smoke/imgui-smoke.ts` (随 `npm test`), 插件 10 个示例 (`npm run test:imgui`, 工具 `tools/verify-imgui-examples.mjs`, 零诊断; 把 createWindow 与 ui.text 改成错名后报 18 条, 证明检查生效).
+
+### 25.4 Q219 (b)
+
+插件 0080f5e: ready 在脚本线程取监听器并记下事件, `Session.on` 把它投递给之后注册的监听器, 每个监听器一次, 总在 on 返回后运行, off 与会话关闭会取消. index.js 净增 22 行, 没动宿主与示例 (examples/ 没有用 ready).
+
+验证: 插件单测 77 全过 (新增 2 项, 其中一项在另一线程触发 surfaceCreated; 换回旧 index.js 这 2 项失败), `check_types.py` 过. 真机 Xiaomi 968e9f18 (API 35, 宿主 6551, 脚本 `tools/device_ready_check.py`) 7 项全过, 紧跟 createWindow 注册的监听器 calls=1, 与渲染回调同线程, `readyAtReturn=true`.
+
+没有 bump, 没有发版, 是否发 1.18.1 由维护者决定.
+
+### 25.5 与方案的出入
+
+- IMGUI-PLAN 与卡片写 Ace 查询清单 "约 +588", 实际不变. `runtime-api-queries.json` 只收 Node / Bun 的 bridged, local-shim, capability-gated 格, imgui 三列都是 not-portable. 那 588 个名称由 check.py 的 `queriedPaths` 覆盖, 而这些路径之前就在查询里, 只是暂缓, 所以 queriedPaths 也不变.
+- 静态索引与 source 不是卡片列的 `:app:generateAutoJs6LspDeclarations` 生成的, 要跑宿主 `tools/ace-completion/generate-editor-assets.mjs`, 否则 aceStatic 失败. 两者都跑了.
+- 约束: 常量组的内层成员 (`imgui.Col.Text`) 没有进静态索引, 模型不展开 `Readonly<Record<K, number>>`, 语义补全有. 名称门禁只查到 `imgui.Col`, 不受影响.
+- Ace 的 `aj6-int-speech.d.ts` 留在捆绑版本: TS d830b2b 属于 3-Macaw P9.3, 不随本卡导入.
+
+验收: 六个仓库 HEAD 副本 (宿主 9cb05d39c 加本卡文件, TS a4108be, 文档 dda3fac, Ace 2fd349f, Node 5587b94e, Bun c214d93) 上 `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` 退出 0, failures 为空; 工具单测 122 过; TS `npm test` 与 `sync-runtime-declarations.mjs --check --ace` 过; Ace `generate-runtime-api-queries.mjs --check` (指向该副本的矩阵) 与 `verify-runtime-api-coverage.mjs --fresh` 过. KSP 没有重跑: 复用 aj6-q218-head 的输出, 它与 aj6-p6-2-head 和共享签出的 sha1 都是 07e72243, 模块源码 11-01 20:50 之后没变.
+
+### 25.6 待决与提交
+
+新待决 Q236 (`Session.once` 不传 session), 见附录 C. Q237-Q239 未用.
+
+TS a4108be; Ace 2fd349f; 插件 0080f5e / 05b799d; 宿主 18d849a63 与本节.
