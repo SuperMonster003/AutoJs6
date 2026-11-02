@@ -150,22 +150,22 @@ P7.2 每完成一个仓库填一行, 不改已填的行.
 
 | 仓库 | 日期 | tag | 索引提交 | 备注 |
 |---|---|---|---|---|
-| AutoJs6 (private) | | | 不适用 | |
-| AutoJs6 (public) | | | 不适用 | |
-| AutoJs6-Documentation | | | 不适用 | |
-| AutoJs6-TypeScript-Declarations | | | 不适用 | npm: |
+| AutoJs6 (private) | 2026-11-02 | 暂停 | 不适用 | 暂停 (Q274: 宿主暂无 push 计划), 全部代码暂留本地 |
+| AutoJs6 (public) | 2026-11-02 | 暂停 | 不适用 | 暂停 (Q274: 宿主暂无 push 计划), 公开方式未定 |
+| AutoJs6-Documentation | 2026-11-02 | 无 (推送即上线, 无发版动作) | 不适用 | 15faca4 -> 78f6c85 (含维护者 16:02 的 9 语言翻译 78f6c85, 所以 B7 已不红). prepush 4 / 4. run 41413755515 Markdown integrity 绿, 41413755511 Deploy documentation site 绿. `auto-generate.py --check` 仍报 B6 的 6 个生成物落后 (docs/*.html, json/runtimeApis.json, offline-search-index.js); `pages.yml` 只部署 ./api, `markdown.yml` 不查它们, 所以不影响 CI 与上线内容; 这些生成物随下次 `auto-generate-for-autojs6.bat` 更新 |
+| AutoJs6-TypeScript-Declarations | 2026-11-02 | 暂不发 tag (版本 4.87.0) | 不适用 | npm: 待维护者 publish (Q273 (a), 子会话不发). aa2dfb3 -> 9d827fe -> 64d6142. prepush 4 / 4 (含维护者 15:53 的 9 语言翻译). 第一次 run 41414191891 红: `test:runtimes` 读同级 Bun 仓库 (dee185c 引入), TS 自身 CI 没有检出它, 本地 prepush 查不出. 修复 64d6142 只改 tools/verify-runtime-declarations.mjs: 同级仓库不在时跳过能力字面量比对, 宿主 `api-coverage.yml` 第 230 行仍带同级仓库跑. 第二次 run 41415340918 绿 |
 | AutoJs6-Plugin-Ace-Editor | | | | |
-| AutoJs6-Plugin-NodeJs-Runtime | | | | |
-| AutoJs6-Plugin-Bun-Runtime | | | | |
-| AutoJs6-Plugin-APK-Builder-Template | | | | |
+| AutoJs6-Plugin-NodeJs-Runtime | 2026-11-02 | 暂不发 (2.1.0, 维护者定只推不发) | 不适用 | 22fd1d34 -> 8b054d59 -> 97ac555d. prepush 6 / 6, 含 Q275 修复 8b054d59. 第一次 run 41415909163 `unit` 红在 JS tools core against Rhino values: Rhino 基准值来自 UTC+8 设备, `util.versionCodes` 是本地零点时间戳, runner 是 UTC. 修复 97ac555d 只给 test-js-tools.js 固定 TZ (本机 TZ=UTC 复现后验证, CI 35 个测试文件全过). 第二次 run 41417247208 Android build 绿 (unit / package / emulator), 10-11 以来首次; 41417247026 Generated Markdown 绿 |
+| AutoJs6-Plugin-Bun-Runtime | 2026-11-02 | 暂不发 (0.22.0, 维护者定只推不发) | 不适用 | bbcf440 -> f20963e -> a38fd37. prepush 6 / 6. 第一次 run 41415941853 红因同 Node, 修复 a38fd37 只给 js-tools.test.mjs 固定 TZ (CI 68 个测试文件在 TZ=UTC 下全过). 第二次 run 41417273829 Build integrity 绿, 41417274108 Markdown integrity 绿 |
+| AutoJs6-Plugin-APK-Builder-Template | 2026-11-02 | 暂不发 (随宿主 tag 的 Runtime Kit 重建, 无宿主 tag) | 不适用 | b9914ac -> 4625575. prepush 8 / 8. run 41417291475 Documentation, 41417291296 Repository and Runtime Kit source checks, 41417291287 Verify Generated Documentation 全绿 |
 | AutoJs6-Plugin-Offline-Docs | | | | |
-| AutoJs6-Plugin-Python-Runtime | | | | |
-| AutoJs6-Plugin-Java-Runtime | | | | |
-| AutoJs6-Plugin-Kotlin-Runtime | | | | |
-| AutoJs6-Plugin-Lua-Runtime | | | | |
+| AutoJs6-Plugin-Python-Runtime | 2026-11-02 | 暂不发 (只推不发) | 不适用 | 5514e82 -> 3c9641e. prepush 6 / 6. run 41417348562 Native alignment verification, 41417348409 Generated documentation, 41417348407 Plugin activation contract 全绿 |
+| AutoJs6-Plugin-Java-Runtime | 2026-11-02 | 暂不发 (只推不发) | 不适用 | 128ec3c -> 1689b85. prepush 6 / 6. run 41417362959 Offline verification, 41417362957 Generated documentation, 41417362949 Plugin activation contract 全绿 |
+| AutoJs6-Plugin-Kotlin-Runtime | 2026-11-02 | 暂不发 (只推不发) | 不适用 | 88a7ca5 -> 8068478. prepush 6 / 6. run 41417379933 Android CI, 41417379881 Generated documentation, 41417379888 Plugin activation contract 全绿 |
+| AutoJs6-Plugin-Lua-Runtime | 2026-11-02 | 暂不发 (只推不发) | 不适用 | db96216 -> 4d60f0a -> 2416460. prepush 7 / 7. 第一次 run 41417391641 红: 门禁数量 JVM_TEST_COUNT 还是 62, 9ced281 加了 2 项测试, 实际 64 项全过. 修复 2416460 只改 verification.properties. 第二次 run 41419094181 Lua Runtime Plugin CI, 41419094090 Generated documentation, 41419094285 Plugin activation contract 全绿 |
 | AutoJs6-Plugin-Three-Folio-EPUB | | | | |
 | AutoJs6-Plugin-Three-Stamp-Mail | | | | |
-| 宿主 `Script API coverage` 重跑 | | 不适用 | 不适用 | run id: |
+| 宿主 `Script API coverage` 重跑 | 2026-11-02 | 不适用 | 不适用 | 暂停 (Q274: 宿主暂无 push 计划), 无 run id; 这次远端门禁验收要等宿主推送后补做 |
 
 ## F. 本卡新待决
 
