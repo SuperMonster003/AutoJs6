@@ -1961,3 +1961,49 @@ OnePlus OPD2413 (ColorOS V15.0.1, API 35) 上抽样新增能力的授权, provid
 门禁: 宿主 9d25939d4, TS 170b45b, Ace ab0dc66, Node bd51cb89, Bun ad4eb91, 文档 eaf4d58, ImGui 65315bc 的 HEAD 副本 (KSP 1355737 字节): `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` 退出 0, failures 空, MATRIX 与 pending baseline current, pending 0 / 0 / 0, 运行时块 102 页 current.
 
 Q242 ~ Q245 未用. 矩阵与 `pending-baseline.json` 不变. 版本没有 bump.
+
+## 31. P6.3 终态报告 (2026-11-02, 子会话 api-cov-p6-3-final)
+
+报告 [FINAL-2026-11-02.md](FINAL-2026-11-02.md), 需求 1 与需求 2 的回答在它的第 1 节. 本节只记门禁与终态数字.
+
+### 31.1 门禁
+
+HEAD 副本 `E:/.cache/aj6-p6-3-final-head` (CI 布局 15 个仓库): 宿主 ce61c05d9, 文档 eaf4d58, TS 170b45b, Ace efb96ea, Node bd51cb89, Bun ad4eb91, ImGui 65315bc, Bundled 0e4bd8a, Macaw bba7fa3, Folio 34658be, Stamp 59b8b37, Python 3c9641e, Java 1689b85, Kotlin 8068478, Lua 4d60f0a. KSP 这次在副本内实跑, 没有复用共享签出: 1 分 54 秒, 503 个任务, `script-modules.json` 1355737 字节, md5 0e2c5170, 与共享签出相同.
+
+| 检查 | 结果 |
+|---|---|
+| 工具单测 | 125 项 OK, 跳过 3 |
+| `check.py --source ksp --matrix --strict-arity --strict-types --docs-support` (含 Ace) | 退出 0, 95 s, failures 空, pending 0 / 0 / 0, MATRIX.md 与 pending-baseline.json current, 缺理由 / 缺能力名 / 策略冲突 0, 运行时块 102 页 current, 未覆盖根 / 对象 0, 查询路径 2262 |
+| 16 个 `check-runtime-*`, 7 个 `check-bun-*`, `test-dts-types.mjs`, `language_runtimes.py` | 全部退出 0 |
+| Ace `generate-runtime-api-queries --check` | changed false, 查询 5482, 行 2054 |
+| Ace `verify-runtime-api-coverage --fresh` | 退出 0, 查询 6659 |
+| TS `sync-runtime-declarations --check --ace`, `verify-runtime-declarations --ace`, `verify-api-coverage` | 退出 0, 声明 95, changed 0 |
+| 不在工作流里的 14 个 `check-*.mjs` | 全部退出 0 |
+| 文档 `auto-generate.py --check` | 退出 1, 6 个生成物落后 eaf4d58 (不是覆盖门禁, 发布前生成) |
+
+工作流 32 步与其余 14 个脚本都没有失败. 本卡没有改代码, 规则与基线.
+
+### 31.2 终态数字
+
+| 指标 | 数值 |
+|---|---:|
+| 矩阵行 (导出 / 原型 / 返回对象成员) | 3891 (2026 / 205 / 1660) |
+| 返回对象 / 模块根 | 64 / 70 |
+| doc none / mention / heading | 9 / 564 / 3318 |
+| dts none / name / arity / typed | 10 / 2634 / 314 / 933 |
+| ace none / semantic / static | 415 / 1255 / 2221 |
+| Node main bridged / local-shim / not-portable / pending | 1685 / 369 / 1837 / 0 |
+| Node Worker 同上 | 1685 / 366 / 1840 / 0 |
+| Bun capability-gated / local-shim / not-portable / pending | 1674 / 377 / 1840 / 0 |
+| 参数个数 match / fail / wider / narrower / vararg / unknown / no-dts | 1201 / 0 / 0 / 29 / 60 / 599 / 1 |
+| 类型比对 typed / differs / unmapped / no-dts | 1057 / 0 / 257 / 4 |
+
+doc none 9 行与 dts none 10 行都是 D-15 的内部名称, ace none 里 10 行同样是这些名称, 另外 405 行是只在 Java 声明组补全的返回对象成员 (3.3 节).
+
+### 31.3 待决与提交
+
+新待决 Q266: doc 列的 signature / example 两档没有实现, D3 的 "签名 + 至少一个示例" 没有门禁; 启发式抽查的数字在 FINAL 第 1 节. Q267 ~ Q270 未用. Q240, Q241 在附录 C 改为已决.
+
+| 仓库 | 提交 | 内容 |
+|---|---|---|
+| 宿主 | (本节所在提交) | FINAL-2026-11-02.md, ROADMAP 勾选 P6.3 与附录 C, 本节 |
