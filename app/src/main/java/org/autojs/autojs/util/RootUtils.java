@@ -118,7 +118,9 @@ public class RootUtils {
         return false;
     }
 
-    private static boolean getRootStateWithRootShell() {
+    // RootShell answers all callers from one shared shell: two first uses at once lose an answer until the caller times out.
+    // zh-CN: RootShell 的所有调用方共用一个 shell: 同时发生的两次首次使用会丢失一个应答, 调用方只能等到超时.
+    private static synchronized boolean getRootStateWithRootShell() {
         try {
             return RootShell.isRootAvailable();
         } catch (Exception e) {
