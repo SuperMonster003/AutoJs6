@@ -128,9 +128,8 @@ RELATED_AUTOJS_PROJECT_DATES = {'hyb1996_auto_js': {'repo': 'https://github.com/
  'auto_js_pro_9': {'created': '2021/03/28', 'recent_active': '2023/02/09'},
  'supermonster003_autojs6': {'repo': 'https://github.com/SuperMonster003/AutoJs6',
                              'created': '2021/12/01',
-                             'recent_active_cached': '2026/03/16',
                              'created_commit_cached': '99a1d8490fac5b6d55f6f183db59ad833a2064ed',
-                             'recent_active_commit_cached': 'ed3eb10e88db5a8425fd94bdddefa4176e5e1c94'},
+                             'recent_active_from_changelog': True},
  'blackcd318_autojs4': {'repo': 'https://github.com/blackcd318/autojs4',
                         'created': '2021/12/15',
                         'recent_active': '2023/07/31',
@@ -610,6 +609,13 @@ def describe_related_project(project_key: str, repo_url: str) -> str:
     return f'{project_key} (static data)'
 
 
+def resolve_latest_changelog_release() -> tuple[str, str]:
+    """Return the version name and released date of the newest version in the default-language changelog."""
+    with open(os.path.join(changelog_root_dir, f'lang_{language_code_default}.json'), 'r', encoding='utf-8') as f:
+        version_name, version_data = next(iter(json.load(f)['$data'].items()))
+    return version_name, version_data['released_date']
+
+
 def build_related_autojs_project_data() -> dict:
     changed = False
     rendered_data = {}
@@ -649,7 +655,12 @@ def build_related_autojs_project_data() -> dict:
         fixed_recent_active_date = date_data.get('recent_active', '')
         recent_active_commit = date_data.get('recent_active_commit', '')
         recent_active_commit_url = date_data.get('recent_active_commit_url', '')
-        if fixed_recent_active_date:
+        if date_data.get('recent_active_from_changelog'):
+            # The project's own row follows the released date of the newest changelog version and links to that release.
+            # zh-CN: 本项目自身的行跟随更新日志最新版本的发布日期, 并链接到该版本的发布页.
+            version_name, recent_active_date = resolve_latest_changelog_release()
+            recent_active_commit_url = f"{repo_url.rstrip('/')}/releases/tag/{version_name}"
+        elif fixed_recent_active_date:
             recent_active_date = fixed_recent_active_date
             if not recent_active_commit and not recent_active_commit_url:
                 recent_active_commit, cache_changed = resolve_cached_commit_for_date(date_data, 'recent_active_commit_cached', repo_url, recent_active_date)
