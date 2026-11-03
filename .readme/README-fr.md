@@ -880,7 +880,10 @@ Certains contributeurs ne figurant pas correctement dans [GitHub Contributors](h
         - Run prepush_check.py, push master, then check Android CI and Markdown integrity
         - Create the GitHub release with tag vX.Y.Z on the release commit: title "X.Y.Z @ YYYY/MM/DD", notes from the zh-Hans changelog of that version
           with the dependency entries folded into one CHANGELOG.md link [ same as the latest release history in README ], assets from app/app/releases
-        - The tag runs .github/workflows/release-runtime-kit.yml, which uploads autojs6-runtime-kit-*.zip to the same release
-          and dispatches the APK Builder Template plugin repository; check that run
+        - The tag runs .github/workflows/release-runtime-kit.yml, which uploads autojs6-runtime-kit-*.zip to the same tag release
+          of SuperMonster003/AutoJs6-Runtime-Kits [ never to the AutoJs6 release, users mistook the zip files for the app ]
+          and dispatches the APK Builder Template plugin repository; check both runs and that the AutoJs6 release holds only APKs
+        - The upload token is AUTOJS6_RUNTIME_KIT_REPO_TOKEN, else AUTOJS6_PLUGIN_REPO_TOKEN [ Contents: write on AutoJs6-Runtime-Kits ];
+          to republish the template for an older tag, run its build-from-runtime-kit.yml instead of rerunning this tag workflow
         - Close the issues that the release notes or comments promised to close after the release
 )

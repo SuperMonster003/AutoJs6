@@ -57,16 +57,24 @@ It does the following:
 
 1. Builds `:app:generateRuntimeKit`.
 2. Uploads `autojs6-runtime-kit-*.zip` as a workflow artifact.
-3. Uploads the same zip to the AutoJs6 GitHub Release.
-4. Sends `repository_dispatch` to `SuperMonster003/AutoJs6-Plugin-APK-Builder-Template`.
+3. Uploads the same zip files to the same-tag Release of `SuperMonster003/AutoJs6-Runtime-Kits`, creating that Release when needed and removing older kit files from it.
+   The AutoJs6 Release itself carries only the host APKs: users kept downloading the kits there by mistake (moved on 2026-11-03).
+   The kit repository must not be an `AutoJs6-Plugin-*` repository, because the official plugin index treats every Release there as a plugin version.
+4. Sends `repository_dispatch` to `SuperMonster003/AutoJs6-Plugin-APK-Builder-Template` with `tag`, `source_repo` and `runtime_kit_repo`.
 
-Required secret in the main repository:
+Secrets in the main repository:
 
 ```text
 AUTOJS6_PLUGIN_REPO_TOKEN
+AUTOJS6_RUNTIME_KIT_REPO_TOKEN (optional)
 ```
 
-The token must have `Contents: write` permission on `SuperMonster003/AutoJs6-Plugin-APK-Builder-Template`, which is required by GitHub's repository dispatch endpoint.
+`AUTOJS6_PLUGIN_REPO_TOKEN` must have `Contents: write` permission on `SuperMonster003/AutoJs6-Plugin-APK-Builder-Template`, which is required by GitHub's repository dispatch endpoint.
+The kit upload uses `AUTOJS6_RUNTIME_KIT_REPO_TOKEN` when it is set and `AUTOJS6_PLUGIN_REPO_TOKEN` otherwise; that token needs `Contents: write` on `SuperMonster003/AutoJs6-Runtime-Kits`.
+In `SuperMonster003/AutoJs6` a missing token fails the run instead of skipping the upload or the dispatch.
+
+Do not rerun the `v6.8.0` tag run: the workflow file at that tag still uploads the kits to the AutoJs6 Release.
+The `v6.8.0` kits already live in `SuperMonster003/AutoJs6-Runtime-Kits`; run the plugin repository's `build-from-runtime-kit.yml` to republish the plugin.
 
 ## Plugin Repository Build
 
@@ -136,10 +144,10 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
             echo "tag=${{ github.event.client_payload.tag }}" >> "$GITHUB_OUTPUT"
-            echo "source_repo=${{ github.event.client_payload.source_repo }}" >> "$GITHUB_OUTPUT"
+            echo "runtime_kit_repo=${{ github.event.client_payload.runtime_kit_repo }}" >> "$GITHUB_OUTPUT"
           else
             echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
-            echo "source_repo=SuperMonster003/AutoJs6" >> "$GITHUB_OUTPUT"
+            echo "runtime_kit_repo=SuperMonster003/AutoJs6-Runtime-Kits" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Download Runtime Kit
@@ -148,7 +156,7 @@ jobs:
         run: |
           mkdir -p runtime-kit
           gh release download "${{ steps.vars.outputs.tag }}" \
-            --repo "${{ steps.vars.outputs.source_repo }}" \
+            --repo "${{ steps.vars.outputs.runtime_kit_repo }}" \
             --pattern "autojs6-runtime-kit-*.zip" \
             --dir runtime-kit
           unzip runtime-kit/autojs6-runtime-kit-*.zip -d runtime-kit

@@ -25,12 +25,16 @@ on:
         default: false
 
 permissions:
-  contents: write
+  contents: read
   actions: read
 
 jobs:
   build-runtime-kit:
     runs-on: ubuntu-latest
+    env:
+      # AutoJs6 Releases carry only the host APKs, because users kept downloading the kits by mistake.
+      # Not an AutoJs6-Plugin-* repository: the official plugin index treats every Release there as a plugin version.
+      RUNTIME_KIT_REPO: SuperMonster003/AutoJs6-Runtime-Kits
 
     steps:
       - name: Checkout AutoJs6
@@ -86,14 +90,47 @@ jobs:
           name: autojs6-runtime-kit
           path: app/build/runtime-kit/autojs6-runtime-kit-*.zip
 
-      - name: Upload Runtime Kit release asset
+      - name: Publish Runtime Kit to the Runtime Kit repository
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.AUTOJS6_RUNTIME_KIT_REPO_TOKEN || secrets.AUTOJS6_PLUGIN_REPO_TOKEN }}
           TARGET_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
+          set -euo pipefail
+          shopt -s nullglob
+          if [ -z "$GH_TOKEN" ]; then
+            if [ "$GITHUB_REPOSITORY" = "SuperMonster003/AutoJs6" ]; then
+              echo "AUTOJS6_RUNTIME_KIT_REPO_TOKEN or AUTOJS6_PLUGIN_REPO_TOKEN must be configured." >&2
+              exit 1
+            fi
+            echo "No Runtime Kit repository token is configured; skipping the Runtime Kit Release."
+            exit 0
+          fi
           tag="$TARGET_TAG"
-          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --title "$tag" --notes "AutoJs6 Runtime Kit $tag"
-          gh release upload "$tag" app/build/runtime-kit/autojs6-runtime-kit-*.zip --clobber
+          archives=(app/build/runtime-kit/autojs6-runtime-kit-*.zip)
+          test "${#archives[@]}" -gt 0
+          notes="Runtime Kit archives built from $GITHUB_REPOSITORY $tag ($GITHUB_SHA).
+
+          These zip files are build inputs of SuperMonster003/AutoJs6-Plugin-APK-Builder-Template and cannot be installed on a device.
+          To install AutoJs6, download an APK from https://github.com/$GITHUB_REPOSITORY/releases/tag/$tag"
+          if gh release view "$tag" --repo "$RUNTIME_KIT_REPO" >/dev/null 2>&1; then
+            gh release edit "$tag" --repo "$RUNTIME_KIT_REPO" --notes "$notes"
+          else
+            gh release create "$tag" --repo "$RUNTIME_KIT_REPO" --title "$tag Runtime Kit" --notes "$notes"
+          fi
+          gh release upload "$tag" "${archives[@]}" --repo "$RUNTIME_KIT_REPO" --clobber
+
+          # A rerun after a version change would otherwise leave two kits of one variant, which the template rejects.
+          uploaded_names="$(for file in "${archives[@]}"; do basename "$file"; done)"
+          while IFS= read -r asset_name; do
+            case "$asset_name" in
+              autojs6-runtime-kit-*) ;;
+              *) continue ;;
+            esac
+            if ! grep -Fxq -- "$asset_name" <<< "$uploaded_names"; then
+              echo "Removing stale Runtime Kit asset $asset_name."
+              gh release delete-asset "$tag" "$asset_name" --repo "$RUNTIME_KIT_REPO" --yes
+            fi
+          done < <(gh release view "$tag" --repo "$RUNTIME_KIT_REPO" --json assets --jq '.assets[].name')
 
       - name: Trigger APK Builder plugin repository
         env:
@@ -102,6 +139,10 @@ jobs:
           TARGET_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
           if [ -z "$GH_TOKEN" ]; then
+            if [ "$GITHUB_REPOSITORY" = "SuperMonster003/AutoJs6" ]; then
+              echo "AUTOJS6_PLUGIN_REPO_TOKEN must be configured." >&2
+              exit 1
+            fi
             echo "AUTOJS6_PLUGIN_REPO_TOKEN is not configured; skipping repository_dispatch."
             exit 0
           fi
@@ -110,4 +151,5 @@ jobs:
             "repos/$PLUGIN_REPO/dispatches" \
             -f event_type=autojs6_runtime_kit_released \
             -f client_payload[tag]="$tag" \
-            -f client_payload[source_repo]="$GITHUB_REPOSITORY"
+            -f client_payload[source_repo]="$GITHUB_REPOSITORY" \
+            -f client_payload[runtime_kit_repo]="$RUNTIME_KIT_REPO"
