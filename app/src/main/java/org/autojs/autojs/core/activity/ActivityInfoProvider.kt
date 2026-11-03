@@ -100,7 +100,18 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val window = service.getWindow(event.windowId)
             if (window?.isFocused != false) {
-                setLatestComponent(event.packageName, event.className, window != null)
+                // A late event of a window that has already disappeared must not replace the cached foreground
+                // component, unless the active root confirms that window (SuperMonster003/AutoJs6#570).
+                // zh-CN: 已消失窗口的迟到事件不得覆盖缓存的前台组件, 除非活动根节点确认了该窗口.
+                val activeRoot = if (window == null) runCatching { service.rootInActiveWindow }.getOrNull() else null
+                val cacheAccepted = shouldAcceptWindowStateChange(
+                    eventWindowId = event.windowId,
+                    eventPackage = event.packageName,
+                    eventWindowFocused = window?.isFocused,
+                    activeRootWindowId = activeRoot?.windowId,
+                    activeRootPackage = activeRoot?.packageName,
+                )
+                setLatestComponent(event.packageName, event.className, window != null, cacheAccepted)
                 return false
             }
         }
@@ -191,14 +202,17 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
             ?: mLatestExternalPackage
     }
 
-    private fun setLatestComponent(latestPackage: CharSequence?, latestClass: CharSequence?, windowKnown: Boolean) {
+    private fun setLatestComponent(latestPackage: CharSequence?, latestClass: CharSequence?, windowKnown: Boolean, cacheAccepted: Boolean) {
         if (latestPackage == null)
             return
         val latestPackageStr = latestPackage.toString()
         val latestClassStr = (latestClass ?: "").toString()
         if (isPackageExists(latestPackageStr)) {
-            mLatestPackage = latestPackage.toString()
-            mLatestActivity = latestClassStr
+            if (cacheAccepted) {
+                mLatestPackage = latestPackageStr
+                mLatestActivity = latestClassStr
+                setLatestExternalComponent(latestPackageStr, latestClassStr)
+            }
             accessibilityIdentity = accessibilityIdentity.observe(latestPackageStr, latestClassStr, { pkg, name ->
                 try {
                     val component = ComponentName(pkg, name)
@@ -207,7 +221,6 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
                     true
                 } catch (_: PackageManager.NameNotFoundException) { false }
             }, windowKnown)
-            setLatestExternalComponent(latestPackageStr, latestClassStr)
         }
         Log.d(LOG_TAG, "setLatestComponent: $latestPackage/$latestClassStr $mLatestPackage/$mLatestActivity")
     }
@@ -253,6 +266,28 @@ class ActivityInfoProvider(private val context: Context) : AccessibilityDelegate
 
         private const val LOG_TAG = "ActivityInfoProvider"
     }
+}
+
+/**
+ * Whether a window-state event may update the cached foreground component: a focused event window is accepted and
+ * an unfocused one rejected; a missing window (closed before the event arrived) only when the active root window
+ * has the same window ID and package.
+ *
+ * zh-CN: 窗口状态事件能否更新缓存的前台组件: 事件窗口存在且聚焦时接纳, 存在但未聚焦时拒绝; 窗口已不存在 (事件到达前已关闭)
+ * 时, 仅当活动根窗口的窗口 ID 与包名都一致才接纳.
+ */
+internal fun shouldAcceptWindowStateChange(
+    eventWindowId: Int,
+    eventPackage: CharSequence?,
+    eventWindowFocused: Boolean?,
+    activeRootWindowId: Int?,
+    activeRootPackage: CharSequence?,
+): Boolean = when (eventWindowFocused) {
+    true -> true
+    false -> false
+    null -> eventPackage != null &&
+        eventWindowId == activeRootWindowId &&
+        eventPackage.toString() == activeRootPackage?.toString()
 }
 
 private fun AccessibilityService.getWindow(windowId: Int): AccessibilityWindowInfo? {
