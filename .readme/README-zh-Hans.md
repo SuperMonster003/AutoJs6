@@ -158,7 +158,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * 主题色适配 [ 分组 / 定位 / 搜索 / 历史记录 / 亮度及对比度自动适配 / ... ]
 * 夜间模式适配 [ 设置页面 / 文档页面 / 布局分析页面 / 浮动窗口 / ... ]
 * [VSCode 插件](http://vscext-project.autojs6.com) 支持客户端 (LAN) 及服务端 (LAN/ADB) 连接方式
-* [Rhino](https://github.com/mozilla/rhino/) 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升级至 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (更新于 2026 年 7 月 13 日)
+* [Rhino](https://github.com/mozilla/rhino/) 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升级至 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (更新于 2026 年 10 月 15 日)
     * Unicode [码位](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) 转义支持 [辅助平面](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2) 字符
        ```js
        '\u{1D160}'; /* 表示 "𝅘𝅥𝅮", 传统方式: '\uD834\uDD60'. */
@@ -608,13 +608,13 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 
 #### Android Studio 准备
 
-下载 `Android Studio Quail 4 | 2026.1.4` 版本 (按需选择其一):
+下载 `Android Studio Rabbit 1 | 2026.2.1` 版本 (按需选择其一):
 
-- [android-studio-quail4-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.7/android-studio-quail4-windows.exe) (1.38 GiB)
-- [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
-- [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
+- [android-studio-rabbit1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.2.1.8/android-studio-rabbit1-windows.exe) (1.41 GiB)
+- [android-studio-rabbit1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-windows.zip) (1.42 GiB)
+- [android-studio-rabbit1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-linux.tar.gz) (1.46 GiB)
 
-> 注: 上述版本发布时间为 2026 年 9 月 1 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
+> 注: 上述版本发布时间为 2026 年 10 月 1 日. 如需下载其他版本, 或上述链接已失效, 可访问 [Android Studio 发行版本归档](https://developer.android.com/studio/archive?hl=en) 页面.
 
 安装或解压上述文件, 运行 Android Studio 软件 (如 `"D:\android-studio\bin\studio64.exe"`).
 

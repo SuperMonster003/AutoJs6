@@ -158,7 +158,7 @@ AutoJs4 также служит эталоном поведения для AutoJ
 * Адаптация темы [ Группировка / Локация / Поиск / История / Автоматическая адаптация яркости и контрастности / ... ]
 * Поддержка ночного режима [ страница настроек / страница документации / страница анализа макета / плавающее окно / ... ]
 * Плагин [VSCode](http://vscext-project.autojs6.com) поддерживает варианты подключения клиента (LAN) и сервера (LAN/ADB)
-* Движок [Rhino](https://github.com/mozilla/rhino/) обновлен с версии [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) до версии [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (обновлено 13 July 2026 года)
+* Движок [Rhino](https://github.com/mozilla/rhino/) обновлен с версии [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) до версии [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (обновлено 15 October 2026 года)
     * Поддержка Unicode для [экранирования кодовых точек](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) и символов [в дополнительных плоскостях](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2)
        ```js
        '\u{1D160}'; /* означает "𝅘𝅥𝅮", традиционный метод: '\uD834\uDD60'. */
@@ -608,13 +608,13 @@ AutoJs4 также служит эталоном поведения для AutoJ
 
 #### Подготовка Android Studio
 
-Скачайте версию `Android Studio Quail 4 | 2026.1.4` (выберите одну из них по необходимости):
+Скачайте версию `Android Studio Rabbit 1 | 2026.2.1` (выберите одну из них по необходимости):
 
-- [android-studio-quail4-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.7/android-studio-quail4-windows.exe) (1.38 GiB)
-- [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
-- [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
+- [android-studio-rabbit1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.2.1.8/android-studio-rabbit1-windows.exe) (1.41 GiB)
+- [android-studio-rabbit1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-windows.zip) (1.42 GiB)
+- [android-studio-rabbit1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-linux.tar.gz) (1.46 GiB)
 
-> Примечание: Указанная версия была выпущена 1 September 2026 года. Для загрузки других версий или если указанная ссылка недействительна, посетите страницу [архива версий Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Примечание: Указанная версия была выпущена 1 October 2026 года. Для загрузки других версий или если указанная ссылка недействительна, посетите страницу [архива версий Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Установите или распакуйте указанные файлы, запустите программное обеспечение Android Studio (например, `"D:\android-studio\bin\studio64.exe"`).
 

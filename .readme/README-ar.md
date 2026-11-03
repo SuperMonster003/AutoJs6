@@ -158,7 +158,7 @@
 * تكييف ألوان الموضوع [ التجميع / الموقع / البحث / السجل / التكييف التلقائي للسطوع والتباين / ... ]
 * دعم وضع الليل [ صفحة الإعدادات / صفحة الوثائق / صفحة تحليل التخطيط / النافذة العائمة / ... ]
 * دعم الاتصال بـ [المكون الإضافي لـ VSCode](http://vscext-project.autojs6.com) بطرق الاتصال عبر الشبكة المحلية (LAN) و ADB
-* تم ترقية محرك [Rhino](https://github.com/mozilla/rhino/) من [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) إلى [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (تم التحديث في 13 July 2026)
+* تم ترقية محرك [Rhino](https://github.com/mozilla/rhino/) من [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) إلى [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (تم التحديث في 15 October 2026)
     * دعم هروب نقطة الرمز Unicode [للأحرف متعددة المستويات](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2)
        ```js
        '\u{1D160}'; /* تمثل "𝅘𝅥𝅮", طريقة تقليدية: '\uD834\uDD60'. */
@@ -608,13 +608,13 @@
 
 #### تحضير Android Studio
 
-قم بتنزيل إصدار `Android Studio Quail 4 | 2026.1.4` (حدد أحدها حسب الحاجة):
+قم بتنزيل إصدار `Android Studio Rabbit 1 | 2026.2.1` (حدد أحدها حسب الحاجة):
 
-- [android-studio-quail4-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.7/android-studio-quail4-windows.exe) (1.38 GiB)
-- [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
-- [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
+- [android-studio-rabbit1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.2.1.8/android-studio-rabbit1-windows.exe) (1.41 GiB)
+- [android-studio-rabbit1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-windows.zip) (1.42 GiB)
+- [android-studio-rabbit1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-linux.tar.gz) (1.46 GiB)
 
-> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 1 September 2026. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
+> ملاحظة: تاريخ الإصدار بالنسخة المذكورة أعلاه هو 1 October 2026. إذا كنت بحاجة إلى تنزيل إصدار آخر، أو إذا كان الرابط المذكور غير صالح، يمكنك زيارة [أرشيف إصدارات Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 قم بتثبيت أو فك ضغط الملف المذكور سابقًا، ثم قم بتشغيل برنامج Android Studio (مثل `"D:\android-studio\bin\studio64.exe"`).
 

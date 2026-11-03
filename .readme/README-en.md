@@ -158,7 +158,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * Theme color adaptation [ Grouping / Location / Search / History / Automatic Adaptation of Brightness and Contrast / ... ]
 * Night mode adaptation [ Settings page / Documentation page / Layout analysis page / Floating window / ... ]
 * [VSCode plugin](http://vscext-project.autojs6.com) supports both client (LAN) and server (LAN/ADB) connection methods
-* [Rhino](https://github.com/mozilla/rhino/) engine upgraded from [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) to [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (Updated on Jul 13, 2026)
+* [Rhino](https://github.com/mozilla/rhino/) engine upgraded from [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) to [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (Updated on Oct 15, 2026)
     * Unicode [code point](https://developer.mozilla.org/en-US/docs/Glossary/Code_point) escape support for [supplementary plane](https://en.wikipedia.org/wiki/Plane_(Unicode)#Supplementary_Multilingual_Plane) characters
        ```js
        '\u{1D160}'; /* stands for "𝅘𝅥𝅮", traditional method: '\uD834\uDD60'. */
@@ -608,13 +608,13 @@ This section introduces the compilation and build methods of the AutoJs6 open-so
 
 #### Android Studio Preparation
 
-Download `Android Studio Quail 4 | 2026.1.4` version (choose one as needed):
+Download `Android Studio Rabbit 1 | 2026.2.1` version (choose one as needed):
 
-- [android-studio-quail4-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.7/android-studio-quail4-windows.exe) (1.38 GiB)
-- [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
-- [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
+- [android-studio-rabbit1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.2.1.8/android-studio-rabbit1-windows.exe) (1.41 GiB)
+- [android-studio-rabbit1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-windows.zip) (1.42 GiB)
+- [android-studio-rabbit1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-linux.tar.gz) (1.46 GiB)
 
-> Note: The release date for the above version is Sep 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
+> Note: The release date for the above version is Oct 1, 2026. To download other versions, or if the above link is invalid, you can visit the [Android Studio release archive](https://developer.android.com/studio/archive?hl=en) page.
 
 Install or extract the above file, then run the Android Studio software (e.g., `"D:\android-studio\bin\studio64.exe"`).
 

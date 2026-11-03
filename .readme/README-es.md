@@ -158,7 +158,7 @@ En comparación con la versión final de Auto.js `4.1.1 Alpha2`, AutoJs6 ha real
 * Adaptation des couleurs du thème [ Groupement / Localisation / Recherche / Historique / Adaptation automatique de la luminosité et du contraste / ... ]
 * Soporte para modo nocturno en varias páginas [ página de configuración / página de documentación / página de análisis de diseño / ventana flotante / ... ]
 * El [complemento de VSCode](http://vscext-project.autojs6.com) soporta conexiones cliente (LAN) y servidor (LAN/ADB)
-* El motor [Rhino](https://github.com/mozilla/rhino/) se ha actualizado de [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) a [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (actualizado el 13 de July de 2026)
+* El motor [Rhino](https://github.com/mozilla/rhino/) se ha actualizado de [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) a [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (actualizado el 15 de October de 2026)
     * Soporte para secuencias de escape de [puntos de código](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) Unicode [ plano suplementario](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2)
        ```js
        '\u{1D160}'; /* significa "𝅘𝅥𝅮", método tradicional: '\uD834\uDD60'. */
@@ -608,13 +608,13 @@ Esta sección toma como ejemplo Android Studio para presentar los métodos de co
 
 #### Preparación de Android Studio
 
-Descarga la versión `Android Studio Quail 4 | 2026.1.4` (elige una según tus necesidades):
+Descarga la versión `Android Studio Rabbit 1 | 2026.2.1` (elige una según tus necesidades):
 
-- [android-studio-quail4-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.7/android-studio-quail4-windows.exe) (1.38 GiB)
-- [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
-- [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
+- [android-studio-rabbit1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.2.1.8/android-studio-rabbit1-windows.exe) (1.41 GiB)
+- [android-studio-rabbit1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-windows.zip) (1.42 GiB)
+- [android-studio-rabbit1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-linux.tar.gz) (1.46 GiB)
 
-> Nota: La fecha de lanzamiento de la versión anterior es el 1 de September de 2026. Para descargar otras versiones, o si los enlaces anteriores ya no funcionan, puedes visitar la página del [Archivo de versiones de Android Studio](https://developer.android.com/studio/archive?hl=en).
+> Nota: La fecha de lanzamiento de la versión anterior es el 1 de October de 2026. Para descargar otras versiones, o si los enlaces anteriores ya no funcionan, puedes visitar la página del [Archivo de versiones de Android Studio](https://developer.android.com/studio/archive?hl=en).
 
 Instala o descomprime los archivos mencionados anteriormente y ejecuta el software Android Studio (por ejemplo, `"D:\android-studio\bin\studio64.exe"`).
 

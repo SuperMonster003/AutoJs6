@@ -158,7 +158,7 @@ Auto.js 최종 오픈 소스 버전 `4.1.1 Alpha2` 와 비교하여 AutoJs6는 �
 * 테마 색상 적응 [ 그룹화 / 위치 / 검색 / 기록 / 밝기 및 대비 자동 적응 / ...]
 * 야경 모드 지원 [ 설정 페이지 / 문서 페이지 / 레이아웃 분석 페이지 / 플로팅 창 / ... ]
 * [VSCode 플러그인](http://vscext-project.autojs6.com) 지원 클라이언트 (LAN) 및 서버 (LAN/ADB) 연결 방식
-* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026 년 7 월 13 일 업데이트됨)
+* [Rhino](https://github.com/mozilla/rhino/) 엔진을 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 에서 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) 로 업그레이드 (2026 년 10 월 15 일 업데이트됨)
     * 유니코드 [코드 포인트](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) 이스케이프 지원 [보조 평면](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2) 문자
        ```js
        '\u{1D160}'; /* 의 의미 "𝅘𝅥𝅮", 전통적인 방법: '\uD834\uDD60'. */
@@ -608,13 +608,13 @@ AutoJs6 오픈 소스 프로젝트를 디버깅하거나 개발하려면 [Androi
 
 #### Android Studio 준비
 
-`Android Studio Quail 4 | 2026.1.4` 버전을 다운로드하십시오 (필요에 따라 선택):
+`Android Studio Rabbit 1 | 2026.2.1` 버전을 다운로드하십시오 (필요에 따라 선택):
 
-- [android-studio-quail4-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.7/android-studio-quail4-windows.exe) (1.38 GiB)
-- [android-studio-quail4-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-windows.zip) (1.39 GiB)
-- [android-studio-quail4-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.7/android-studio-quail4-linux.tar.gz) (1.43 GiB)
+- [android-studio-rabbit1-windows.exe](https://edgedl.me.gvt1.com/android/studio/install/2026.2.1.8/android-studio-rabbit1-windows.exe) (1.41 GiB)
+- [android-studio-rabbit1-windows.zip](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-windows.zip) (1.42 GiB)
+- [android-studio-rabbit1-linux.tar.gz](https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.2.1.8/android-studio-rabbit1-linux.tar.gz) (1.46 GiB)
 
-> 메모: 상기 버전 출시 날짜는 2026 년 9 월 1 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
+> 메모: 상기 버전 출시 날짜는 2026 년 10 월 1 일입니다. 다른 버전을 다운로드하거나 상기 링크가 만료되었을 경우, [Android Studio 릴리스 아카이브](https://developer.android.com/studio/archive?hl=en) 페이지를 방문하십시오.
 
 위의 파일을 설치하거나 압축을 풀고 Android Studio 소프트웨어를 실행합니다 (예: `"D:\android-studio\bin\studio64.exe"`).
 
