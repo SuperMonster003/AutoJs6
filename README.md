@@ -307,10 +307,12 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` 无障碍服务在连续执行 back 等操作时可能意外中断的问题 _[`issue #527`](http://issues.autojs6.com/527)_
 * `修复` automator 全局操作首次调用时可能出现空指针异常, 以及手势纵坐标缩放错误的问题
 * `修复` 通知观察器将系统通知误报为消息浮动框并遗漏通知事件的问题
+* `修复` currentPackage/currentActivity 可能返回已关闭窗口 (如系统界面或桌面) 的包名及 Activity 的问题 (by [DeanTMaxim](https://github.com/DeanTMaxim)) _[`issue #570`](http://issues.autojs6.com/570)_ _[`pr #571`](http://pr.autojs6.com/571)_
 * `修复` images 部分方法可能提前回收图像, 泄漏原生内存或因错误参数导致应用崩溃的问题
 * `修复` images.findImage/matchTemplate/matchFeatures 的匹配结果, 坐标精度及排序异常, 以及 images.invert/clip 等方法的处理结果错误
 * `修复` colors.isSimilar/images.detectColor 的 hs 算法结果错误, 以及 colors.rgb/rgba 无法正确处理小数或百分比分量的问题
 * `修复` 通过外部 URI, 后台或 Tasker 运行脚本时丢失原始路径, 扩展名或无法运行的问题 _[`issue #545`](http://issues.autojs6.com/545)_ _[`issue #501`](http://issues.autojs6.com/501)_
+* `修复` 缺少 /sdcard 链接的设备 (如 Fire OS) 上通过意图以 /sdcard 路径启动脚本时找不到文件的问题 (by [djbclark](https://github.com/djbclark)) _[`pr #558`](http://pr.autojs6.com/558)_
 * `修复` auto 文件通过文件管理器, 定时任务或外部意图运行时被当作 JavaScript 脚本执行的问题
 * `修复` 脚本项目未按 project.json 指定入口运行, 以及带 BOM 的脚本未按实际编码读取的问题
 * `修复` 外部 URI 导入可能因文件名处理不当写入目标目录之外或覆盖同名文件的问题
@@ -318,6 +320,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` 版本历史及回收站恢复时可能丢失原有内容, 文件移动后版本历史未跟随, 以及多用户环境下无法访问的问题
 * `修复` 代码编辑器在页面重建后可能丢失光标, 选区或未保存内容, 以及软键盘遮挡内容区域的问题
 * `修复` 主页抽屉在窄屏下控件裁切, 以及主页关闭或多指触摸时可能导致应用崩溃的问题
+* `修复` 主页抽屉 "前台时保持屏幕常亮" 的已存设置值无效时可能导致主页崩溃的问题 (by [djbclark](https://github.com/djbclark)) _[`pr #557`](http://pr.autojs6.com/557)_
 * `修复` 浮动按钮菜单显示的最近应用包名及 Activity 信息异常 _[`issue #529`](http://issues.autojs6.com/529)_
 * `修复` 浮动按钮 "运行脚本" 对话框最小化后可能无法还原的问题 (试修) _[`issue #500`](http://issues.autojs6.com/500)_
 * `修复` 插件中心刷新时可能丢失已安装插件, 显示空白列表或安装错误变体 (如 x86 设备误选 x86_64 安装包) 的问题
@@ -815,6 +818,8 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 
 | <span style="word-break:keep-all;white-space:nowrap">贡献人员</span> | <span style="word-break:keep-all;white-space:nowrap">提交数</span> | <span style="word-break:keep-all;white-space:nowrap">最近提交</span> |
 |:------:|:------:|:------:|
+| <span style="word-break:keep-all;white-space:nowrap">[DeanTMaxim](https://github.com/DeanTMaxim) `(DeanT.Maxim)`</span> | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3ADeanTMaxim)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/08/21`</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[djbclark](https://github.com/djbclark) `(Daniel JB Clark)`</span> | <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Adjbclark)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/07/14`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[M17764017422](https://github.com/M17764017422)</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3AM17764017422)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/16`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[iamsanjaymalakar](https://github.com/iamsanjaymalakar) `(Sanjay Malakar)`</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aiamsanjaymalakar)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/09`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[Willie169](https://github.com/Willie169)</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3AWillie169)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/03`</span> |
@@ -828,7 +833,7 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 | <span style="word-break:keep-all;white-space:nowrap">[kojoe&#x2011;code](https://github.com/kojoe-code) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Akojoe-code)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
 
-数据更新于 2026 年 3 月 18 日.
+数据更新于 2026 年 11 月 3 日.
 
 数据条目按 `最近提交` 降序排序.
 

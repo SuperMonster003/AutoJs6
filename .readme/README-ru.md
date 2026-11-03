@@ -307,10 +307,12 @@ AutoJs4 также служит эталоном поведения для AutoJ
 * `Исправление` Служба специальных возможностей могла неожиданно прерываться при последовательном выполнении операций, таких как back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Исправление` Глобальные действия automator могли выбрасывать NullPointerException при первом вызове, а вертикальные координаты жестов масштабировались неправильно
 * `Исправление` Наблюдатель уведомлений принимал системные уведомления за всплывающие сообщения и пропускал события уведомлений
+* `Исправление` currentPackage/currentActivity могли возвращать пакет и Activity уже закрытого окна (например, системного интерфейса или лаунчера) (by [DeanTMaxim](https://github.com/DeanTMaxim)) _[`issue #570`](http://issues.autojs6.com/570)_ _[`pr #571`](http://pr.autojs6.com/571)_
 * `Исправление` Некоторые методы images могли преждевременно освобождать изображения, допускать утечку нативной памяти или приводить к сбою приложения при неверных аргументах
 * `Исправление` Некорректные результаты совпадений, точность координат и сортировка в images.findImage/matchTemplate/matchFeatures, а также неверные результаты images.invert/clip и подобных методов
 * `Исправление` Алгоритм hs в colors.isSimilar/images.detectColor возвращал неверные результаты, а colors.rgb/rgba неправильно обрабатывали дробные и процентные компоненты
 * `Исправление` При запуске скриптов через внешние URI, в фоне или из Tasker терялись исходный путь или расширение, либо скрипт не запускался _[`issue #545`](http://issues.autojs6.com/545)_ _[`issue #501`](http://issues.autojs6.com/501)_
+* `Исправление` Скрипты, запускаемые через интенты по путям /sdcard, не находились на устройствах без ссылки /sdcard (например, Fire OS) (by [djbclark](https://github.com/djbclark)) _[`pr #558`](http://pr.autojs6.com/558)_
 * `Исправление` Файлы auto, запущенные из файлового менеджера, запланированных задач или внешних интентов, выполнялись как скрипты JavaScript
 * `Исправление` Проекты скриптов запускались не с точки входа, указанной в project.json, а скрипты с BOM читались не в своей фактической кодировке
 * `Исправление` Импорт из внешних URI мог записывать файлы за пределы целевой папки или перезаписывать одноименные файлы из-за неправильной обработки имен файлов
@@ -318,6 +320,7 @@ AutoJs4 также служит эталоном поведения для AutoJ
 * `Исправление` При восстановлении из истории версий или корзины могло теряться существующее содержимое, история версий не следовала за перемещенными файлами, а в многопользовательской среде обе функции были недоступны
 * `Исправление` Редактор кода мог терять курсор, выделение или несохраненное содержимое после пересоздания страницы, а экранная клавиатура закрывала область содержимого
 * `Исправление` Элементы боковой панели обрезались на узких экранах, а приложение могло аварийно завершаться при закрытии главной страницы или касании несколькими пальцами
+* `Исправление` Недопустимое сохраненное значение "Не выключать экран, когда он находится на переднем плане" в боковой панели могло приводить к сбою главной страницы (by [djbclark](https://github.com/djbclark)) _[`pr #557`](http://pr.autojs6.com/557)_
 * `Исправление` Неверные имя пакета и сведения об Activity недавнего приложения в меню плавающей кнопки _[`issue #529`](http://issues.autojs6.com/529)_
 * `Исправление` Диалог "Запустить скрипт" плавающей кнопки мог не восстанавливаться после сворачивания (пробное исправление) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Исправление` При обновлении Центр плагинов мог терять установленные плагины, показывать пустой список или устанавливать неверный вариант (например, выбирать пакеты x86_64 на устройствах x86)
@@ -815,6 +818,8 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 
 | <span style="word-break:keep-all;white-space:nowrap">Участники</span> | <span style="word-break:keep-all;white-space:nowrap">Количество коммитов</span> | <span style="word-break:keep-all;white-space:nowrap">Последние коммиты</span> |
 |:------:|:------:|:------:|
+| <span style="word-break:keep-all;white-space:nowrap">[DeanTMaxim](https://github.com/DeanTMaxim) `(DeanT.Maxim)`</span> | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3ADeanTMaxim)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/08/21`</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[djbclark](https://github.com/djbclark) `(Daniel JB Clark)`</span> | <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Adjbclark)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/07/14`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[M17764017422](https://github.com/M17764017422)</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3AM17764017422)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/16`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[iamsanjaymalakar](https://github.com/iamsanjaymalakar) `(Sanjay Malakar)`</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aiamsanjaymalakar)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/09`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[Willie169](https://github.com/Willie169)</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3AWillie169)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/03`</span> |
@@ -828,7 +833,7 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 | <span style="word-break:keep-all;white-space:nowrap">[kojoe&#x2011;code](https://github.com/kojoe-code) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Akojoe-code)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
 
-Данные обновлены на 18 March 2026 года.
+Данные обновлены на 3 November 2026 года.
 
 Данные отсортированы по `последним отправкам` в порядке убывания.
 

@@ -307,10 +307,12 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` back などの操作を連続して実行するとアクセシビリティサービスが予期せず中断される場合がある問題 _[`issue #527`](http://issues.autojs6.com/527)_
 * `修正` automator のグローバル操作の初回呼び出しで NullPointerException が発生する場合がある問題, およびジェスチャーの縦座標のスケーリングが正しくない問題
 * `修正` 通知オブザーバーがシステム通知をトーストとして報告し, 通知イベントを取りこぼす問題
+* `修正` currentPackage/currentActivity が既に閉じたウィンドウ (システム UI やランチャーなど) のパッケージ名と Activity を返す場合がある問題 (by [DeanTMaxim](https://github.com/DeanTMaxim)) _[`issue #570`](http://issues.autojs6.com/570)_ _[`pr #571`](http://pr.autojs6.com/571)_
 * `修正` images の一部のメソッドが画像を早期に回収する, ネイティブメモリをリークする, 不正な引数でアプリをクラッシュさせる場合がある問題
 * `修正` images.findImage/matchTemplate/matchFeatures の一致結果, 座標精度, 並び順が正しくない問題, および images.invert/clip などのメソッドの処理結果が誤っている問題
 * `修正` colors.isSimilar/images.detectColor の hs アルゴリズムの結果が誤っている問題, および colors.rgb/rgba が小数やパーセントの成分を正しく処理できない問題
 * `修正` 外部 URI, バックグラウンド, Tasker からスクリプトを実行すると元のパスや拡張子が失われる, または実行できない問題 _[`issue #545`](http://issues.autojs6.com/545)_ _[`issue #501`](http://issues.autojs6.com/501)_
+* `修正` /sdcard のリンクがないデバイス (Fire OS など) で, インテントから /sdcard パスで起動したスクリプトが見つからない問題 (by [djbclark](https://github.com/djbclark)) _[`pr #558`](http://pr.autojs6.com/558)_
 * `修正` ファイルマネージャー, 定期タスク, 外部インテントから実行した auto ファイルが JavaScript スクリプトとして実行される問題
 * `修正` スクリプトプロジェクトが project.json で指定したエントリーで実行されない問題, および BOM 付きのスクリプトが実際のエンコーディングで読み込まれない問題
 * `修正` 外部 URI からのインポートで, ファイル名の処理が不適切なため対象フォルダーの外に書き込む, または同名のファイルを上書きする場合がある問題
@@ -318,6 +320,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * `修正` バージョン履歴やごみ箱からの復元で既存の内容が失われる場合がある, ファイルの移動後にバージョン履歴が追従しない, マルチユーザー環境でアクセスできない問題
 * `修正` ページの再作成後にコードエディターがカーソル, 選択範囲, 未保存の内容を失う場合がある問題, およびソフトキーボードがコンテンツ領域を覆う問題
 * `修正` 狭い画面でホームドロワーのコントロールが切れる問題, およびホーム画面を閉じたときやマルチタッチ時にアプリがクラッシュする場合がある問題
+* `修正` ホームドロワーの "フォアグラウンドの時に画面を表示し続ける" の保存値が無効な場合にホーム画面がクラッシュする場合がある問題 (by [djbclark](https://github.com/djbclark)) _[`pr #557`](http://pr.autojs6.com/557)_
 * `修正` 浮動ボタンメニューに表示される最近のアプリのパッケージ名と Activity 情報が正しくない問題 _[`issue #529`](http://issues.autojs6.com/529)_
 * `修正` 浮動ボタンの "スクリプト実行" ダイアログを最小化すると復元できない場合がある問題 (試験的修正) _[`issue #500`](http://issues.autojs6.com/500)_
 * `修正` プラグインセンターの更新時にインストール済みのプラグインが消える, 空のリストが表示される, 誤ったバリアントをインストールする (x86 デバイスで x86_64 パッケージを選ぶなど) 場合がある問題
@@ -815,6 +818,8 @@ AutoJs6 プロジェクト開発に参加したすべての貢献者に感謝し
 
 | <span style="word-break:keep-all;white-space:nowrap">貢献者</span> | <span style="word-break:keep-all;white-space:nowrap">コミット数</span> | <span style="word-break:keep-all;white-space:nowrap">最近の提出</span> |
 |:------:|:------:|:------:|
+| <span style="word-break:keep-all;white-space:nowrap">[DeanTMaxim](https://github.com/DeanTMaxim) `(DeanT.Maxim)`</span> | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3ADeanTMaxim)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/08/21`</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[djbclark](https://github.com/djbclark) `(Daniel JB Clark)`</span> | <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Adjbclark)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/07/14`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[M17764017422](https://github.com/M17764017422)</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3AM17764017422)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/16`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[iamsanjaymalakar](https://github.com/iamsanjaymalakar) `(Sanjay Malakar)`</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aiamsanjaymalakar)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/09`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[Willie169](https://github.com/Willie169)</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3AWillie169)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/03`</span> |
@@ -828,7 +833,7 @@ AutoJs6 プロジェクト開発に参加したすべての貢献者に感謝し
 | <span style="word-break:keep-all;white-space:nowrap">[kojoe&#x2011;code](https://github.com/kojoe-code) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Akojoe-code)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
 
-データは 2026 年 3 月 18 日 に更新されました.
+データは 2026 年 11 月 3 日 に更新されました.
 
 データ項目は `最近の提出` の降順で並べ替えられます.
 

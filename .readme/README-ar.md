@@ -307,10 +307,12 @@
 * `تصليح` احتمال انقطاع خدمة إمكانية الوصول بشكل غير متوقع عند تنفيذ عمليات متتالية مثل back _[`issue #527`](http://issues.autojs6.com/527)_
 * `تصليح` احتمال رمي إجراءات automator العامة NullPointerException عند الاستدعاء الأول, وخطأ تحجيم الإحداثيات الرأسية للإيماءات
 * `تصليح` إبلاغ مراقب الإشعارات عن إشعارات النظام كرسائل منبثقة وتفويته أحداث الإشعارات
+* `تصليح` احتمال أن تعيد currentPackage/currentActivity الحزمة وActivity لنافذة أغلقت بالفعل (مثل واجهة النظام أو المشغل) (by [DeanTMaxim](https://github.com/DeanTMaxim)) _[`issue #570`](http://issues.autojs6.com/570)_ _[`pr #571`](http://pr.autojs6.com/571)_
 * `تصليح` احتمال أن تعيد بعض طرق images تدوير الصور مبكرا أو تسرب الذاكرة الأصلية أو تتسبب في انهيار التطبيق بوسائط غير صالحة
 * `تصليح` نتائج مطابقة ودقة إحداثيات وترتيب غير صحيحة في images.findImage/matchTemplate/matchFeatures, ونتائج خاطئة في images.invert/clip والطرق المشابهة
 * `تصليح` إعادة خوارزمية hs في colors.isSimilar/images.detectColor نتائج خاطئة, وعدم معالجة colors.rgb/rgba للمكونات العشرية أو المئوية بشكل صحيح
 * `تصليح` فقدان المسار أو الامتداد الأصلي أو تعذر التشغيل عند تشغيل البرامج النصية عبر معرفات URI خارجية أو في الخلفية أو من Tasker _[`issue #545`](http://issues.autojs6.com/545)_ _[`issue #501`](http://issues.autojs6.com/501)_
+* `تصليح` تعذر العثور على البرامج النصية التي تشغل عبر النوايا بمسارات /sdcard على الأجهزة التي تفتقد رابط /sdcard (مثل Fire OS) (by [djbclark](https://github.com/djbclark)) _[`pr #558`](http://pr.autojs6.com/558)_
 * `تصليح` تنفيذ ملفات auto التي تشغل من مدير الملفات أو المهام المجدولة أو النوايا الخارجية كبرامج JavaScript النصية
 * `تصليح` عدم تشغيل مشاريع البرامج النصية من نقطة الدخول المحددة في project.json, وعدم قراءة البرامج النصية التي تحتوي على BOM بترميزها الفعلي
 * `تصليح` احتمال أن يكتب الاستيراد من معرفات URI خارجية خارج المجلد الهدف أو يستبدل ملفات تحمل الاسم نفسه بسبب المعالجة غير السليمة لأسماء الملفات
@@ -318,6 +320,7 @@
 * `تصليح` احتمال فقدان المحتوى الحالي عند الاستعادة من سجل الإصدارات أو سلة المحذوفات, وعدم انتقال سجل الإصدارات مع الملفات المنقولة, وتعذر الوصول إلى كليهما في البيئات متعددة المستخدمين
 * `تصليح` احتمال فقدان محرر الشفرة للمؤشر أو التحديد أو المحتوى غير المحفوظ بعد إعادة إنشاء الصفحة, وتغطية لوحة المفاتيح على الشاشة لمنطقة المحتوى
 * `تصليح` اقتصاص عناصر التحكم في درج الصفحة الرئيسية على الشاشات الضيقة, واحتمال انهيار التطبيق عند إغلاق الصفحة الرئيسية أو عند اللمس بعدة أصابع
+* `تصليح` احتمال انهيار الصفحة الرئيسية عندما تكون القيمة المحفوظة لخيار "حافظ على الشاشة قيد التشغيل عندما تكون في المقدمة" في درج الصفحة الرئيسية غير صالحة (by [djbclark](https://github.com/djbclark)) _[`pr #557`](http://pr.autojs6.com/557)_
 * `تصليح` عرض اسم حزمة ومعلومات Activity غير صحيحة للتطبيق الأخير في قائمة الزر العائم _[`issue #529`](http://issues.autojs6.com/529)_
 * `تصليح` احتمال تعذر استعادة حوار "تشغيل برنامج نصي" في الزر العائم بعد تصغيره (إصلاح تجريبي) _[`issue #500`](http://issues.autojs6.com/500)_
 * `تصليح` احتمال فقدان مركز الإضافات للإضافات المثبتة أو عرض قائمة فارغة أو تثبيت متغير خاطئ عند التحديث (مثل اختيار حزم x86_64 على أجهزة x86)
@@ -815,6 +818,8 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 
 | <span style="word-break:keep-all;white-space:nowrap">المساهمون</span> | <span style="word-break:keep-all;white-space:nowrap">عدد الإرساليات</span> | <span style="word-break:keep-all;white-space:nowrap">أحدث الإرساليات</span> |
 |:------:|:------:|:------:|
+| <span style="word-break:keep-all;white-space:nowrap">[DeanTMaxim](https://github.com/DeanTMaxim) `(DeanT.Maxim)`</span> | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3ADeanTMaxim)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/08/21`</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[djbclark](https://github.com/djbclark) `(Daniel JB Clark)`</span> | <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Adjbclark)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/07/14`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[M17764017422](https://github.com/M17764017422)</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3AM17764017422)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/16`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[iamsanjaymalakar](https://github.com/iamsanjaymalakar) `(Sanjay Malakar)`</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aiamsanjaymalakar)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/09`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[Willie169](https://github.com/Willie169)</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3AWillie169)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/03`</span> |
@@ -828,7 +833,7 @@ autojs6-v6.6.2-arm64-v8a-0f2a9d74.apk
 | <span style="word-break:keep-all;white-space:nowrap">[kojoe&#x2011;code](https://github.com/kojoe-code) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Akojoe-code)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
 
-تم تحديث البيانات في 18 March 2026.
+تم تحديث البيانات في 3 November 2026.
 
 تم تصنيف سجلات البيانات بترتيب تنازلي حسب `أحدث الإرساليات`.
 

@@ -123,10 +123,12 @@
 * `수정` back 등 작업을 연속으로 수행할 때 접근성 서비스가 예기치 않게 중단될 수 있는 문제 _[`issue #527`](http://issues.autojs6.com/527)_
 * `수정` automator 전역 작업을 처음 호출할 때 NullPointerException이 발생할 수 있는 문제 및 제스처의 세로 좌표가 잘못 배율 조정되는 문제
 * `수정` 알림 관찰자가 시스템 알림을 토스트로 잘못 보고하고 알림 이벤트를 놓치는 문제
+* `수정` currentPackage/currentActivity가 이미 닫힌 창 (시스템 UI나 런처 등)의 패키지 이름과 Activity를 반환할 수 있는 문제 (by [DeanTMaxim](https://github.com/DeanTMaxim)) _[`issue #570`](http://issues.autojs6.com/570)_ _[`pr #571`](http://pr.autojs6.com/571)_
 * `수정` images의 일부 메서드가 이미지를 너무 일찍 회수하거나 네이티브 메모리를 누수하거나 잘못된 인수로 앱을 충돌시킬 수 있는 문제
 * `수정` images.findImage/matchTemplate/matchFeatures의 일치 결과, 좌표 정밀도 및 정렬 오류와 images.invert/clip 등 메서드의 처리 결과 오류
 * `수정` colors.isSimilar/images.detectColor의 hs 알고리즘 결과가 잘못된 문제 및 colors.rgb/rgba가 소수나 백분율 성분을 올바르게 처리하지 못하는 문제
 * `수정` 외부 URI, 백그라운드 또는 Tasker에서 스크립트를 실행하면 원래 경로나 확장자가 사라지거나 실행되지 않는 문제 _[`issue #545`](http://issues.autojs6.com/545)_ _[`issue #501`](http://issues.autojs6.com/501)_
+* `수정` /sdcard 링크가 없는 기기 (Fire OS 등)에서 인텐트로 /sdcard 경로의 스크립트를 실행하면 파일을 찾지 못하는 문제 (by [djbclark](https://github.com/djbclark)) _[`pr #558`](http://pr.autojs6.com/558)_
 * `수정` 파일 관리자, 예약 작업 또는 외부 인텐트에서 실행한 auto 파일이 JavaScript 스크립트로 실행되는 문제
 * `수정` 스크립트 프로젝트가 project.json에 지정된 진입점으로 실행되지 않는 문제 및 BOM이 있는 스크립트를 실제 인코딩으로 읽지 않는 문제
 * `수정` 외부 URI 가져오기에서 파일 이름 처리가 부적절하여 대상 폴더 밖에 쓰거나 같은 이름의 파일을 덮어쓸 수 있는 문제
@@ -134,6 +136,7 @@
 * `수정` 버전 기록이나 휴지통에서 복원할 때 기존 내용이 사라질 수 있고, 파일 이동 후 버전 기록이 따라가지 않으며, 다중 사용자 환경에서 접근할 수 없는 문제
 * `수정` 페이지가 다시 생성된 후 코드 편집기가 커서, 선택 영역 또는 저장하지 않은 내용을 잃을 수 있는 문제 및 소프트 키보드가 콘텐츠 영역을 가리는 문제
 * `수정` 좁은 화면에서 홈 서랍 컨트롤이 잘리는 문제 및 홈 페이지를 닫거나 멀티 터치할 때 앱이 충돌할 수 있는 문제
+* `수정` 홈 서랍의 "포그라운드에 있을 때 화면을 켜두세요"에 저장된 값이 유효하지 않으면 홈 페이지가 충돌할 수 있는 문제 (by [djbclark](https://github.com/djbclark)) _[`pr #557`](http://pr.autojs6.com/557)_
 * `수정` 부동 버튼 메뉴에 표시되는 최근 앱의 패키지 이름과 Activity 정보 오류 _[`issue #529`](http://issues.autojs6.com/529)_
 * `수정` 부동 버튼의 "스크립트 실행" 대화상자를 최소화한 후 복원하지 못할 수 있는 문제 (시험 수정) _[`issue #500`](http://issues.autojs6.com/500)_
 * `수정` 플러그인 센터를 새로 고칠 때 설치된 플러그인이 사라지거나, 빈 목록이 표시되거나, 잘못된 변형을 설치할 수 있는 문제 (x86 기기에서 x86_64 패키지를 선택하는 등)

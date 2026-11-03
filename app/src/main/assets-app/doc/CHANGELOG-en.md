@@ -123,10 +123,12 @@
 * `Fix` Issue where the accessibility service could be interrupted unexpectedly when performing consecutive operations such as back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Fix` Issue where automator global actions could throw a NullPointerException on the first call, and the vertical coordinates of gestures were scaled incorrectly
 * `Fix` Issue where the notification observer reported system notifications as toasts and missed notification events
+* `Fix` Issue where currentPackage/currentActivity could return the package and Activity of a window that had already closed (such as the system UI or the launcher) (by [DeanTMaxim](https://github.com/DeanTMaxim)) _[`issue #570`](http://issues.autojs6.com/570)_ _[`pr #571`](http://pr.autojs6.com/571)_
 * `Fix` Issue where some images methods could recycle images too early, leak native memory or crash the app with invalid arguments
 * `Fix` Incorrect match results, coordinate precision and sorting of images.findImage/matchTemplate/matchFeatures, and incorrect results of images.invert/clip and similar methods
 * `Fix` Issue where the hs algorithm of colors.isSimilar/images.detectColor returned wrong results, and colors.rgb/rgba could not handle decimal or percentage components
 * `Fix` Issue where running scripts through external URIs, in the background or from Tasker lost the original path or extension, or failed to run _[`issue #545`](http://issues.autojs6.com/545)_ _[`issue #501`](http://issues.autojs6.com/501)_
+* `Fix` Issue where scripts launched through intents with /sdcard paths could not be found on devices without the /sdcard link (such as Fire OS) (by [djbclark](https://github.com/djbclark)) _[`pr #558`](http://pr.autojs6.com/558)_
 * `Fix` Issue where auto files run from the file manager, scheduled tasks or external intents were executed as JavaScript scripts
 * `Fix` Issue where script projects did not run the entry specified in project.json, and scripts with a BOM were not read with their actual encoding
 * `Fix` Issue where importing from external URIs could write outside the target folder or overwrite files with the same name due to improper file name handling
@@ -134,6 +136,7 @@
 * `Fix` Issue where restoring from version history or the trash could lose existing content, version history did not follow moved files, and both could not be accessed in multi-user environments
 * `Fix` Issue where the code editor could lose the cursor, selection or unsaved content after the page was recreated, and the soft keyboard covered the content area
 * `Fix` Issue where home drawer controls were clipped on narrow screens, and the app could crash when the home page closed or on multi-finger touches
+* `Fix` Issue where an invalid stored value of "Keep screen on when in foreground" in the home drawer could crash the home page (by [djbclark](https://github.com/djbclark)) _[`pr #557`](http://pr.autojs6.com/557)_
 * `Fix` Incorrect recent app package name and Activity information shown in the floating button menu _[`issue #529`](http://issues.autojs6.com/529)_
 * `Fix` Issue where the floating button "Run script" dialog might not be restored after being minimized (attempted fix) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Fix` Issue where the Plugin Center could lose installed plugins, show a blank list or install the wrong variant when refreshing (such as choosing x86_64 packages on x86 devices)

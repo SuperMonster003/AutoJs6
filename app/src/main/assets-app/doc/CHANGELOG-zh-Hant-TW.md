@@ -123,10 +123,12 @@
 * `修復` 無障礙服務在連續執行 back 等操作時可能意外中斷的問題 _[`issue #527`](http://issues.autojs6.com/527)_
 * `修復` automator 全域操作首次呼叫時可能出現空指標異常, 以及手勢縱座標縮放錯誤的問題
 * `修復` 通知觀察器將系統通知誤報為訊息浮動框並遺漏通知事件的問題
+* `修復` currentPackage/currentActivity 可能返回已關閉視窗 (如系統介面或桌面) 的包名及 Activity 的問題 (by [DeanTMaxim](https://github.com/DeanTMaxim)) _[`issue #570`](http://issues.autojs6.com/570)_ _[`pr #571`](http://pr.autojs6.com/571)_
 * `修復` images 部分方法可能提前回收影像, 洩漏原生記憶體或因錯誤引數導致應用崩潰的問題
 * `修復` images.findImage/matchTemplate/matchFeatures 的匹配結果, 座標精度及排序異常, 以及 images.invert/clip 等方法的處理結果錯誤
 * `修復` colors.isSimilar/images.detectColor 的 hs 演算法結果錯誤, 以及 colors.rgb/rgba 無法正確處理小數或百分比分量的問題
 * `修復` 透過外部 URI, 後臺或 Tasker 執行指令碼時丟失原始路徑, 副檔名或無法執行的問題 _[`issue #545`](http://issues.autojs6.com/545)_ _[`issue #501`](http://issues.autojs6.com/501)_
+* `修復` 缺少 /sdcard 連結的裝置 (如 Fire OS) 上透過意圖以 /sdcard 路徑啟動指令碼時找不到檔案的問題 (by [djbclark](https://github.com/djbclark)) _[`pr #558`](http://pr.autojs6.com/558)_
 * `修復` auto 檔案透過檔案管理器, 定時任務或外部意圖執行時被當作 JavaScript 指令碼執行的問題
 * `修復` 指令碼專案未按 project.json 指定入口執行, 以及帶 BOM 的指令碼未按實際編碼讀取的問題
 * `修復` 外部 URI 匯入可能因檔案名處理不當寫入目標目錄之外或覆蓋同名檔案的問題
@@ -134,6 +136,7 @@
 * `修復` 版本歷史及回收站還原時可能丟失原有內容, 檔案移動後版本歷史未跟隨, 以及多使用者環境下無法存取的問題
 * `修復` 程式碼編輯器在頁面重建後可能丟失游標, 選區或未儲存內容, 以及軟鍵盤遮擋內容區域的問題
 * `修復` 主頁抽屜在窄屏下控制元件裁切, 以及主頁關閉或多指觸控時可能導致應用崩潰的問題
+* `修復` 主頁抽屜 "前臺時保持螢幕常亮" 的已存設定值無效時可能導致主頁崩潰的問題 (by [djbclark](https://github.com/djbclark)) _[`pr #557`](http://pr.autojs6.com/557)_
 * `修復` 浮動按鈕選單顯示的最近應用包名及 Activity 資訊異常 _[`issue #529`](http://issues.autojs6.com/529)_
 * `修復` 浮動按鈕 "執行指令碼" 對話方塊最小化後可能無法還原的問題 (試修) _[`issue #500`](http://issues.autojs6.com/500)_
 * `修復` 外掛中心重新整理時可能丟失已安裝外掛, 顯示空白列表或安裝錯誤變體 (如 x86 裝置誤選 x86_64 安裝包) 的問題

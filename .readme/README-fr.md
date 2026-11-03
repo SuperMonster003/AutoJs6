@@ -307,10 +307,12 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` Le service d'accessibilité pouvait être interrompu de manière inattendue lors d'opérations consécutives comme back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Correction` Les actions globales d'automator pouvaient lever une NullPointerException au premier appel, et les coordonnées verticales des gestes étaient mal mises à l'échelle
 * `Correction` L'observateur de notifications signalait les notifications système comme des toasts et manquait des événements de notification
+* `Correction` currentPackage/currentActivity pouvaient renvoyer le paquet et l'Activity d'une fenêtre déjà fermée (comme l'interface système ou le lanceur) (by [DeanTMaxim](https://github.com/DeanTMaxim)) _[`issue #570`](http://issues.autojs6.com/570)_ _[`pr #571`](http://pr.autojs6.com/571)_
 * `Correction` Certaines méthodes de images pouvaient recycler les images trop tôt, provoquer des fuites de mémoire native ou faire planter l'application avec des arguments non valides
 * `Correction` Résultats de correspondance, précision des coordonnées et tri incorrects de images.findImage/matchTemplate/matchFeatures, et résultats erronés de images.invert/clip et méthodes similaires
 * `Correction` L'algorithme hs de colors.isSimilar/images.detectColor renvoyait des résultats erronés, et colors.rgb/rgba ne traitaient pas correctement les composantes décimales ou en pourcentage
 * `Correction` L'exécution de scripts via des URI externes, en arrière-plan ou depuis Tasker perdait le chemin ou l'extension d'origine, ou échouait _[`issue #545`](http://issues.autojs6.com/545)_ _[`issue #501`](http://issues.autojs6.com/501)_
+* `Correction` Les scripts lancés par des intents avec des chemins /sdcard étaient introuvables sur les appareils sans lien /sdcard (comme Fire OS) (by [djbclark](https://github.com/djbclark)) _[`pr #558`](http://pr.autojs6.com/558)_
 * `Correction` Les fichiers auto lancés depuis le gestionnaire de fichiers, les tâches planifiées ou des intents externes étaient exécutés comme des scripts JavaScript
 * `Correction` Les projets de script ne s'exécutaient pas depuis l'entrée indiquée dans project.json, et les scripts avec BOM n'étaient pas lus avec leur encodage réel
 * `Correction` L'importation depuis des URI externes pouvait écrire hors du dossier cible ou écraser des fichiers de même nom à cause d'un traitement incorrect des noms de fichiers
@@ -318,6 +320,7 @@ Par rapport à la version finale open source de Auto.js `4.1.1 Alpha2`, AutoJs6 
 * `Correction` La restauration depuis l'historique des versions ou la corbeille pouvait perdre le contenu existant, l'historique des versions ne suivait pas les fichiers déplacés, et les deux étaient inaccessibles dans les environnements multi-utilisateurs
 * `Correction` L'éditeur de code pouvait perdre le curseur, la sélection ou le contenu non enregistré après la recréation de la page, et le clavier virtuel masquait la zone de contenu
 * `Correction` Les contrôles du tiroir d'accueil étaient tronqués sur les écrans étroits, et l'application pouvait planter à la fermeture de l'accueil ou lors de touchers à plusieurs doigts
+* `Correction` Une valeur enregistrée non valide de "Garder l'écran allumé lorsqu'il est au premier plan" dans le tiroir d'accueil pouvait faire planter l'accueil (by [djbclark](https://github.com/djbclark)) _[`pr #557`](http://pr.autojs6.com/557)_
 * `Correction` Nom de paquet et informations d'Activity incorrects pour l'application récente dans le menu du bouton flottant _[`issue #529`](http://issues.autojs6.com/529)_
 * `Correction` Le dialogue "Exécuter un script" du bouton flottant pouvait ne pas être restauré après réduction (correction expérimentale) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Correction` Lors de l'actualisation, le centre de plugins pouvait perdre des plugins installés, afficher une liste vide ou installer une mauvaise variante (comme choisir des paquets x86_64 sur des appareils x86)
@@ -815,6 +818,8 @@ Merci à chaque contributeur participant au développement du projet AutoJs6.
 
 | <span style="word-break:keep-all;white-space:nowrap">Contributeurs</span> | <span style="word-break:keep-all;white-space:nowrap">Nombre de commits</span> | <span style="word-break:keep-all;white-space:nowrap">Soumissions récentes</span> |
 |:------:|:------:|:------:|
+| <span style="word-break:keep-all;white-space:nowrap">[DeanTMaxim](https://github.com/DeanTMaxim) `(DeanT.Maxim)`</span> | <span style="word-break:keep-all;white-space:nowrap">[2](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3ADeanTMaxim)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/08/21`</span> |
+| <span style="word-break:keep-all;white-space:nowrap">[djbclark](https://github.com/djbclark) `(Daniel JB Clark)`</span> | <span style="word-break:keep-all;white-space:nowrap">[3](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+author%3Adjbclark)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/07/14`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[M17764017422](https://github.com/M17764017422)</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3AM17764017422)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/16`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[iamsanjaymalakar](https://github.com/iamsanjaymalakar) `(Sanjay Malakar)`</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aiamsanjaymalakar)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/09`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[Willie169](https://github.com/Willie169)</span> | <span style="word-break:keep-all;white-space:nowrap">[1](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3AWillie169)</span> | <span style="word-break:keep-all;white-space:nowrap">`2026/03/03`</span> |
@@ -828,7 +833,7 @@ Merci à chaque contributeur participant au développement du projet AutoJs6.
 | <span style="word-break:keep-all;white-space:nowrap">[kojoe&#x2011;code](https://github.com/kojoe-code) `(抠脚本人)`</span> | <span style="word-break:keep-all;white-space:nowrap">[12](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Akojoe-code)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/07/12`</span> |
 | <span style="word-break:keep-all;white-space:nowrap">[aiselp](https://github.com/aiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">[6](https://github.com/SuperMonster003/AutoJs6/pulls?q=is%3Apr+is%3Amerged+author%3Aaiselp)</span> | <span style="word-break:keep-all;white-space:nowrap">`2023/06/14`</span> |
 
-Données mises à jour le 18 March 2026.
+Données mises à jour le 3 November 2026.
 
 Les entrées de données sont triées par `soumissions récentes` en ordre décroissant.
 

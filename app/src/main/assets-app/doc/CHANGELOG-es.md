@@ -123,10 +123,12 @@
 * `Corrección` El servicio de accesibilidad podía interrumpirse inesperadamente al realizar operaciones consecutivas como back _[`issue #527`](http://issues.autojs6.com/527)_
 * `Corrección` Las acciones globales de automator podían lanzar NullPointerException en la primera llamada, y las coordenadas verticales de los gestos se escalaban incorrectamente
 * `Corrección` El observador de notificaciones notificaba las notificaciones del sistema como mensajes emergentes y omitía eventos de notificación
+* `Corrección` currentPackage/currentActivity podían devolver el paquete y la Activity de una ventana ya cerrada (como la interfaz del sistema o el lanzador) (by [DeanTMaxim](https://github.com/DeanTMaxim)) _[`issue #570`](http://issues.autojs6.com/570)_ _[`pr #571`](http://pr.autojs6.com/571)_
 * `Corrección` Algunos métodos de images podían liberar imágenes antes de tiempo, perder memoria nativa o cerrar la aplicación con argumentos no válidos
 * `Corrección` Resultados de coincidencia, precisión de coordenadas y ordenación incorrectos en images.findImage/matchTemplate/matchFeatures, y resultados erróneos de images.invert/clip y métodos similares
 * `Corrección` El algoritmo hs de colors.isSimilar/images.detectColor devolvía resultados erróneos, y colors.rgb/rgba no procesaban correctamente componentes decimales o porcentuales
 * `Corrección` Al ejecutar scripts mediante URI externos, en segundo plano o desde Tasker se perdía la ruta o la extensión original, o el script no se ejecutaba _[`issue #545`](http://issues.autojs6.com/545)_ _[`issue #501`](http://issues.autojs6.com/501)_
+* `Corrección` Los scripts iniciados mediante intents con rutas /sdcard no se encontraban en dispositivos sin el enlace /sdcard (como Fire OS) (by [djbclark](https://github.com/djbclark)) _[`pr #558`](http://pr.autojs6.com/558)_
 * `Corrección` Los archivos auto ejecutados desde el gestor de archivos, tareas programadas o intents externos se ejecutaban como scripts de JavaScript
 * `Corrección` Los proyectos de script no se ejecutaban desde la entrada indicada en project.json, y los scripts con BOM no se leían con su codificación real
 * `Corrección` La importación desde URI externos podía escribir fuera de la carpeta de destino o sobrescribir archivos con el mismo nombre por un tratamiento incorrecto del nombre de archivo
@@ -134,6 +136,7 @@
 * `Corrección` Al restaurar desde el historial de versiones o la papelera podía perderse el contenido existente, el historial de versiones no seguía a los archivos movidos y ninguno de los dos era accesible en entornos multiusuario
 * `Corrección` El editor de código podía perder el cursor, la selección o el contenido no guardado al recrearse la página, y el teclado en pantalla tapaba el área de contenido
 * `Corrección` Los controles del panel lateral se recortaban en pantallas estrechas, y la aplicación podía cerrarse al cerrar la página principal o con gestos de varios dedos
+* `Corrección` Un valor guardado no válido de "Mantener la pantalla encendida en primer plano" en el panel lateral podía cerrar la página principal (by [djbclark](https://github.com/djbclark)) _[`pr #557`](http://pr.autojs6.com/557)_
 * `Corrección` El menú del botón flotante mostraba un nombre de paquete y una información de Activity incorrectos para la aplicación reciente _[`issue #529`](http://issues.autojs6.com/529)_
 * `Corrección` El diálogo "Ejecutar script" del botón flotante podía no restaurarse después de minimizarlo (corrección tentativa) _[`issue #500`](http://issues.autojs6.com/500)_
 * `Corrección` Al actualizar, el Centro de complementos podía perder complementos instalados, mostrar una lista vacía o instalar una variante incorrecta (como elegir paquetes x86_64 en dispositivos x86)
