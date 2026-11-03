@@ -45,10 +45,13 @@ jobs:
       # Skips the emulator cannot avoid (ci_gate.py): S7b needs the maintainer to turn the accessibility service on and
       # S13 a speech plugin; ND13 / BN5 / QJ5 / LU5 / PY5 run on ColorOS only. S12 and ND6 must pass with their plugins.
       GATE_ALLOW_SKIP: ${{ inputs.suite == 'bridge' && 'ND13,BN5,QJ5,LU5,PY5' || 'S7b,S13' }}
-      # S4b / S4d / S4e need OpenCV and S12 loads 3-ImGui, neither shipped with the host APK; official plugins are trusted
-      # by their signing certificate and enabled by default, so installing them is enough.
+      # S4b / S4d / S4e need OpenCV, S4g runs ocr.detect with the ML Kit OCR plugin and S12 loads 3-ImGui, none shipped
+      # with the host APK; official plugins are trusted by their signing certificate and enabled by default, so installing
+      # them is enough.
       OPENCV_PLUGIN_TAG: v1.1.4
       OPENCV_PLUGIN_SHA256: 83bd7ee1bea18f19c6576292767be446d5b7e66ac386ec87636e534866001ded
+      MLKIT_OCR_PLUGIN_TAG: v1.0.3
+      MLKIT_OCR_PLUGIN_SHA256: 66f899a8c023d6f18e8c912ef3245f042a2674c167ecd2a97b313dd64e21e8ba
       IMGUI_PLUGIN_TAG: v1.9.3
       IMGUI_PLUGIN_SHA256: d1918c197c1d87e57b0d9af573593670a56608473df265be6a5744efb363d893
       # The bridge suite: the five runtime plugins and 3-Block Compose (ND6), latest releases as of 2026-10-23. Bun
@@ -106,6 +109,7 @@ jobs:
             fetch AutoJs6-Plugin-Three-Block-Compose three-block-compose "$BLOCK_COMPOSE_PLUGIN_TAG" "$BLOCK_COMPOSE_PLUGIN_SHA256" ""
           else
             fetch AutoJs6-Plugin-OpenCV opencv "$OPENCV_PLUGIN_TAG" "$OPENCV_PLUGIN_SHA256"
+            fetch AutoJs6-Plugin-MLKit-OCR mlkit-ocr "$MLKIT_OCR_PLUGIN_TAG" "$MLKIT_OCR_PLUGIN_SHA256"
             fetch AutoJs6-Plugin-ImGui imgui "$IMGUI_PLUGIN_TAG" "$IMGUI_PLUGIN_SHA256"
           fi
 
