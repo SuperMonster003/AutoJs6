@@ -699,7 +699,9 @@ open class DrawerFragment : Fragment() {
                     val oldSubtitle = mKeepScreenOnWhenInForegroundItem.subtitle
                     val aimSubtitle = if (ViewUtils.isKeepScreenOnWhenInForegroundDisabled) null else {
                         val i = resources.getStringArray(R.array.keys_keep_screen_on_when_in_foreground).indexOf(AppearanceKeys.keepScreenOnWhenInForegroundKey)
-                        resources.getStringArray(R.array.values_keep_screen_on_when_in_foreground)[i]
+                        // A stored key outside the candidates (written without the candidate check) has no label.
+                        // zh-CN: 不在候选项中的已存键 (未经候选项检查写入) 没有对应标签.
+                        resources.getStringArray(R.array.values_keep_screen_on_when_in_foreground).getOrNull(i)
                     }
                     if (mKeepScreenOnWhenInForegroundItem.subtitle != aimSubtitle) {
                         mKeepScreenOnWhenInForegroundItem.subtitle = aimSubtitle
