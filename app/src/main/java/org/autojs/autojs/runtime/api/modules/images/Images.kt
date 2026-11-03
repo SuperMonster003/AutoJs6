@@ -225,7 +225,8 @@ class Images(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         fun captureScreen(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Any = ensureArgumentsAtMost(args, 1) {
             val (path) = it
             val rtImages = scriptRuntime.images
-            if (isBackgroundThread() && rtImages.screenCapturer == null) {
+            // Also when the system stopped the projection (e.g. its token was rejected), so consent is asked again.
+            if (isBackgroundThread() && !rtImages.hasActiveScreenCapturer()) {
                 requestScreenCapture(scriptRuntime, arrayOf())
             }
             when {

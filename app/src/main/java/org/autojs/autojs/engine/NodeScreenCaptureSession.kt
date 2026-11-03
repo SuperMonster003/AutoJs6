@@ -59,7 +59,7 @@ internal class NodeScreenCaptureSession(
                     return@synchronized callback(Result.failure(IllegalArgumentException("Capture dimensions must both be omitted or in 1..8192.")))
                 }
                 pending = callback
-                val request = ScreenCaptureRequester(true)
+                val request = ScreenCaptureRequester()
                 requester = request
                 val deadline = Runnable {
                     synchronized(lock) {

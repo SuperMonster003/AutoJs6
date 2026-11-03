@@ -8,7 +8,8 @@ internal class ScreenMetricsCache(
     private val measure: () -> Sides,
     private val rotation: () -> Int,
 ) {
-    data class Sides(val short: Int, val long: Int) {
+    /** [naturalLandscape]: the display is landscape at ROTATION_0 (some tablets), so 90 or 270 degrees turn it to portrait. */
+    data class Sides(val short: Int, val long: Int, val naturalLandscape: Boolean = false) {
         init {
             require(short > 0 && long >= short) { "Screen dimensions must be positive and ordered" }
         }
@@ -38,7 +39,8 @@ internal class ScreenMetricsCache(
     fun dimensions(): Dimensions {
         val sides = snapshot()
         val turn = rotation()
-        return if (turn == ROTATION_90 || turn == ROTATION_270) {
+        val turned = turn == ROTATION_90 || turn == ROTATION_270
+        return if (turned != sides.naturalLandscape) {
             Dimensions(sides.long, sides.short, turn)
         } else {
             Dimensions(sides.short, sides.long, turn)

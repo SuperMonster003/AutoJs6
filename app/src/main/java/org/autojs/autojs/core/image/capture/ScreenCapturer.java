@@ -48,9 +48,10 @@ public class ScreenCapturer {
     // zh-CN: 使用更小的等待切片以更快收敛.
     private static final long IMAGE_AVAILABLE_WAIT_SLICE_MS = 60;
 
-    // Trigger self-healing earlier in the capture window.
-    // zh-CN: 在 capture 窗口的更早阶段触发自愈.
-    private static final long EARLY_HEALING_AT_MS = 600;
+    // A still screen composes no new frame. Past this wait without one, refresh the display once so that it composes
+    // the current content, instead of spending the whole budget.
+    // zh-CN: 静止画面不会合成新帧. 等待超过此时长仍无新帧时, 刷新一次 display 使其合成当前内容, 而不是耗尽全部预算.
+    private static final long EARLY_HEALING_AT_MS = 250;
 
     // Use a dedicated thread for ImageReader callbacks to avoid deadlock when capture() blocks.
     // zh-CN: 使用独立线程处理 ImageReader 回调, 避免 capture() 阻塞时与回调线程相同导致的 "自锁式等待".
@@ -159,12 +160,13 @@ public class ScreenCapturer {
     }
 
     private void refreshDetectedOrientation() {
-        // Prefer rotation over (w/h) for orientation detection.
-        // zh-CN: 使用 rotation 而不是 (w/h) 判断方向.
-        int rotation = ScreenMetrics.getRotation();
-        mDetectedOrientation = (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270)
-                ? ORIENTATION_LANDSCAPE
-                : ORIENTATION_PORTRAIT;
+        // Use rotation from the natural orientation of the display instead of (w/h) of a window.
+        // zh-CN: 依据显示相对其自然方向的 rotation 判断方向, 而不是窗口的 (w/h).
+        mDetectedOrientation = ScreenMetrics.isDisplayLandscape() ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+    }
+
+    private int getTargetOrientation() {
+        return mOrientation == ORIENTATION_AUTO ? mDetectedOrientation : mOrientation;
     }
 
     private int getExpectedWidthByDetectedOrientation() {
@@ -439,18 +441,23 @@ public class ScreenCapturer {
         // Retry a few times to skip transitional frames after resizing/switching,
         // but respect the total timeout budget.
         // zh-CN: 在 resize/切换后重试少量次数以跳过过渡帧, 但必须遵守总超时预算.
+        boolean healed = false;
         for (int i = 0; i < 5; i++) {
             long now = SystemClock.uptimeMillis();
             if (now >= deadline) break;
 
-            // Early self-healing in AUTO mode to avoid spending the whole budget waiting on a bad pipeline.
-            // zh-CN: AUTO 模式下尽早自愈, 避免把整个预算都耗在一个已失效的管线 (如 BufferQueue abandoned) 上.
-            if (mOrientation == ORIENTATION_AUTO && (now - start) >= EARLY_HEALING_AT_MS) {
+            // Heal early, in every orientation mode: a still screen or a bad pipeline (e.g. BufferQueue abandoned)
+            // gives no frame. The first wait stops at the healing point, otherwise it would take the whole budget.
+            // Refreshing reuses the VirtualDisplay: Android 14+ rejects a second one on the same projection.
+            // zh-CN: 在所有方向模式下尽早自愈: 静止画面或已失效的管线 (如 BufferQueue abandoned) 都不会给出新帧.
+            // 首次等待止于自愈时间点, 否则会耗尽全部预算. 刷新时复用 VirtualDisplay: Android 14+ 拒绝在同一投影上创建第二个.
+            if (!healed && (now - start) >= EARLY_HEALING_AT_MS) {
+                healed = true;
                 refreshDetectedOrientation();
-                refreshVirtualDisplay(mDetectedOrientation, false);
+                refreshVirtualDisplay(getTargetOrientation(), false);
             }
 
-            Image acquireLatestImage = acquireLatestImage(deadline);
+            Image acquireLatestImage = acquireLatestImage(healed ? deadline : Math.min(deadline, start + EARLY_HEALING_AT_MS));
             if (acquireLatestImage == null) continue;
 
             if (mOrientation == ORIENTATION_AUTO) {
@@ -473,11 +480,9 @@ public class ScreenCapturer {
         }
 
         // If timed out, refresh the existing display once to recover from "no-frame" bad state.
-        if (mOrientation == ORIENTATION_AUTO) {
-            refreshDetectedOrientation();
-            refreshVirtualDisplay(mDetectedOrientation, false);
-            mShouldRefreshVirtualDisplayOnNextCapture = false;
-        }
+        refreshDetectedOrientation();
+        refreshVirtualDisplay(getTargetOrientation(), false);
+        mShouldRefreshVirtualDisplayOnNextCapture = false;
 
         // Do not return stale cached image when no valid frame is available.
         // zh-CN: 当无法获取到有效帧时, 不要返回旧缓存帧.
@@ -505,7 +510,7 @@ public class ScreenCapturer {
         mRecordingInput = null;
         if (mReleased) return;
         refreshDetectedOrientation();
-        refreshVirtualDisplay(mOrientation == ORIENTATION_AUTO ? mDetectedOrientation : mOrientation, false);
+        refreshVirtualDisplay(getTargetOrientation(), false);
         mShouldRefreshVirtualDisplayOnNextCapture = false;
     }
 
@@ -517,8 +522,7 @@ public class ScreenCapturer {
         if (mOrientation == ORIENTATION_NONE) return new android.graphics.Point(mOptions.width, mOptions.height);
         int orientation = mOrientation;
         if (orientation == ORIENTATION_AUTO) {
-            int rotation = ScreenMetrics.getRotation();
-            orientation = rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270 ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+            orientation = ScreenMetrics.isDisplayLandscape() ? ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
         }
         return new android.graphics.Point(ScreenMetrics.getOrientationAwareScreenWidth(orientation), ScreenMetrics.getOrientationAwareScreenHeight(orientation));
     }

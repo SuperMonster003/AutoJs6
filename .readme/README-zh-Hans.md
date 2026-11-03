@@ -465,6 +465,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` 通知观察器将系统通知误报为消息浮动框并遗漏通知事件的问题
 * `修复` Android 14+ 申请屏幕捕获权限时可能因前台服务启动异常导致应用崩溃的问题 _[`issue #516`](http://issues.autojs6.com/516)_
 * `修复` 多线程或跨文件重复调用 OCR 时可能反复申请屏幕捕获权限的问题 _[`issue #551`](http://issues.autojs6.com/551)_
+* `修复` Android 14+ 未指定截图方向时, 屏幕旋转或画面静止约 1 秒后 images.captureScreen 方法抛出 SecurityException 异常的问题
 * `修复` OCR 插件选择失败时错误提示与实际引擎及安装状态不一致的问题
 * `修复` Paddle OCR 插件服务断开后无法恢复或未运行时无法自动唤醒的问题 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_ _[`issue #517`](http://issues.autojs6.com/517)_
 * `修复` 部分系统 (如 ColorOS) 上插件未运行时无法连接, 需在插件中心手动激活的问题 (AutoJs6 位于前台或拥有 "显示在其他应用上层" 权限时自动唤醒插件)
@@ -574,6 +575,7 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `修复` cXy/cYx 的 false 模式未强制使用绝对坐标, 横屏宽高比换算倒置及单独设置基数后部分调用异常的问题
 * `修复` setScaleBases 的第二个参数无效或基数已设置时, 提前修改另一方向并占用其设置机会的问题
 * `修复` 界面重建与脚本读取屏幕尺寸并发时, device.width/height 及坐标换算读取到零尺寸的问题
+* `修复` 自然方向为横屏的设备 (如部分平板) 上 device.width/height 宽高互换, 未指定方向的屏幕截图方向错误并带黑边的问题
 * `修复` device.keepAwake/keepScreenOn/keepScreenDim 未指定超时时持有的唤醒锁在脚本结束后仍未释放的问题
 * `修复` Node.js pinyin/pinyin4j 仅转换少量内置字典文字的问题, 现使用已安装的拼音插件
 * `修复` Node.js 控制台窗口和样式控制方法调用后没有实际效果的问题
@@ -650,6 +652,8 @@ AutoJs4 同时是 AutoJs6 的行为基准: 除少数特定情况外, 能在 Auto
 * `优化` images.matchFeatures 方法支持图像或路径参数及更多匹配选项, 并补充特征与结果信息
 * `优化` 多点找色, 模板匹配及特征匹配提升执行效率与结果准确性
 * `优化` 屏幕截图支持暂时无可用帧时重试, 并减少截图资源释放对并发图像操作的影响
+* `优化` images.captureScreen 方法在画面静止无新帧时提前刷新取帧, 指定截图方向或尺寸时不再反复等待超时
+* `优化` images.requestScreenCapture 方法只申请共享整个屏幕, 避免 Android 14+ 选择单个应用后截图内容与屏幕坐标不对应
 * `优化` mediainfo 模块支持 snapshot/capabilities 方法及媒体流计数, 并减少文件详情查询耗时
 * `优化` KeyCode 方法提升参数兼容性并支持使用 Shizuku 权限发送键码指令 _[`issue #492`](http://issues.autojs6.com/492)_
 * `优化` shell 函数支持 adb 选项, 用于经 Shizuku 执行命令 (兼容 Auto.js Pro); arguments 中的 adb 键不再转为 --adb 参数, 需要该参数时写作 "--adb"

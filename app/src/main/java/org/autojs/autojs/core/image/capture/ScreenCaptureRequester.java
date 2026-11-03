@@ -36,7 +36,6 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
     private static final int REQUEST_CODE_MEDIA_PROJECTION = 17777;
 
     private final Handler mHandler;
-    private final boolean mDefaultDisplay;
 
     @NonNull
     private WeakReference<Activity> mActivityRef = new WeakReference<>(null);
@@ -48,13 +47,8 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
     private boolean mServiceUser;
 
     public ScreenCaptureRequester() {
-        this(false);
-    }
-
-    public ScreenCaptureRequester(boolean defaultDisplay) {
         super();
         mHandler = new Handler(Looper.getMainLooper());
-        mDefaultDisplay = defaultDisplay;
     }
 
     public interface Callback {
@@ -184,7 +178,10 @@ public class ScreenCaptureRequester extends SimpleActivityLifecycleCallbacks imp
         mActivityRef = new WeakReference<>(activity);
         try {
             MediaProjectionManager manager = (MediaProjectionManager) activity.getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-            Intent intent = mDefaultDisplay && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+            // Ask for the entire default display: on Android 14+ the dialog may otherwise offer sharing a single app,
+            // whose frames do not map to screen coordinates and stop while that app is hidden.
+            // zh-CN: 申请整个默认显示: 否则 Android 14+ 的对话框可能提供仅共享单个应用, 其画面与屏幕坐标不对应, 且该应用不可见时停止更新.
+            Intent intent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
                     ? manager.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay())
                     : manager.createScreenCaptureIntent();
             activity.startActivityForResult(intent, REQUEST_CODE_MEDIA_PROJECTION);

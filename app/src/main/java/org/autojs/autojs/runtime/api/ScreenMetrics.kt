@@ -11,6 +11,8 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.view.Display
 import android.view.Surface.ROTATION_0
+import android.view.Surface.ROTATION_270
+import android.view.Surface.ROTATION_90
 import android.view.WindowManager
 import org.autojs.autojs.app.GlobalAppContext
 import java.lang.ref.WeakReference
@@ -129,6 +131,8 @@ class ScreenMetrics {
         private val stableSides = ScreenMetricsCache(::measureStableSides) { rotation }
 
         private fun measureStableSides(): ScreenMetricsCache.Sides {
+            val naturalLandscape = isNaturalLandscape()
+
             // Prefer WindowMetrics on Android R+.
             // zh-CN: 在 Android R+ 优先使用 WindowMetrics.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -136,7 +140,7 @@ class ScreenMetrics {
                 val w = bounds.width().absoluteValue
                 val h = bounds.height().absoluteValue
                 if (w > 0 && h > 0) {
-                    return ScreenMetricsCache.Sides(minOf(w, h), maxOf(w, h))
+                    return ScreenMetricsCache.Sides(minOf(w, h), maxOf(w, h), naturalLandscape)
                 }
             }
 
@@ -149,11 +153,33 @@ class ScreenMetrics {
                 val w = metricsLegacy.widthPixels
                 val h = metricsLegacy.heightPixels
                 if (w > 0 && h > 0) {
-                    return ScreenMetricsCache.Sides(minOf(w, h), maxOf(w, h))
+                    return ScreenMetricsCache.Sides(minOf(w, h), maxOf(w, h), naturalLandscape)
                 }
             }
             throw IllegalStateException("Cannot determine positive screen dimensions")
         }
+
+        // Whether the default display is landscape at ROTATION_0 (some tablets, TV boxes and head units), from its
+        // current size and rotation, read again if it turns in between; the size of its mode is the fallback.
+        // zh-CN: 默认显示在 ROTATION_0 时是否为横屏 (部分平板, 电视盒子及车机), 依据其当前尺寸与旋转方向判断, 两次读取之间发生旋转时重新读取; 以显示模式的尺寸作为后备.
+        private fun isNaturalLandscape(): Boolean {
+            val display = mDisplayManager?.getDisplay(Display.DEFAULT_DISPLAY) ?: return false
+            val size = Point()
+            repeat(3) {
+                val turn = display.rotation
+                @Suppress("DEPRECATION")
+                display.getRealSize(size)
+                if (display.rotation == turn && size.x > 0 && size.y > 0 && size.x != size.y) {
+                    return (size.x > size.y) != (turn == ROTATION_90 || turn == ROTATION_270)
+                }
+            }
+            return display.mode.let { it.physicalWidth > it.physicalHeight }
+        }
+
+        /** Whether the default display is landscape now: its rotation from its natural orientation, see [isNaturalLandscape]. */
+        @JvmStatic
+        val isDisplayLandscape: Boolean
+            get() = stableSides.dimensions().let { it.width > it.height }
 
         @JvmStatic
         val deviceScreenWidth: Int

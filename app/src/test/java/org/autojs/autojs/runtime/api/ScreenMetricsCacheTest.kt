@@ -50,6 +50,20 @@ class ScreenMetricsCacheTest {
     }
 
     @Test
+    fun naturallyLandscapeDisplayIsLandscapeAtRotationZero() {
+        var turn = 0
+        val cache = ScreenMetricsCache({ ScreenMetricsCache.Sides(1600, 2560, naturalLandscape = true) }, { turn })
+        for (rotation in listOf(0, 1, 2, 3)) {
+            turn = rotation
+            assertEquals(ScreenMetricsCache.Dimensions(
+                if (rotation % 2 == 0) 2560 else 1600,
+                if (rotation % 2 == 0) 1600 else 2560,
+                rotation,
+            ), cache.dimensions())
+        }
+    }
+
+    @Test
     fun invalidMeasurementIsNotPublishedAndCanBeRetried() {
         var width = 0
         val cache = ScreenMetricsCache({ ScreenMetricsCache.Sides(width, 1280) }, { 0 })
