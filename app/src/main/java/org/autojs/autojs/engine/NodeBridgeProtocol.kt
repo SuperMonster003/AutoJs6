@@ -751,6 +751,7 @@ object NodeBridgeModules {
         "listDocs",
         "readDoc",
         "pluginCapabilities",
+        "startRemoteServer",
         "startService",
         "sendBroadcast",
         "getInstalledApps",
@@ -5612,6 +5613,10 @@ class AndroidNodeBridgeCapabilityProvider(
     }
 
     private fun dispatchApp(request: NodeBridgeRequest, callback: (NodeBridgeResponse) -> Unit) {
+        if (request.method == "startRemoteServer") {
+            NodeBridgeRemoteServer.start(appContext, request, callback)
+            return
+        }
         if (request.method in NodeBridgeSamplesBridge.METHODS) {
             // Sample and offline documentation asset reads stay off the main thread (MCP roadmap P1.3 / P3.5, D20).
             callback(samplesBridge.dispatch(request))

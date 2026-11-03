@@ -126,6 +126,7 @@ data class HostCapabilityGrant(
             addAll(methodsOf("console", "tail"))
             addAll(methodsOf("files", "list", "stat", "read", "write", "mkdir", "rename", "delete"))
             addAll(methodsOf("app", "launchPackage", "launchApp", "isInstalled", "editFile", "currentWindow", "listSamples", "readSample", "listDocs", "readDoc", "pluginCapabilities"))
+            addAll(methodsOf("app", "startRemoteServer"))
             addAll(methodsOf("package_manager", "list", "verify", "listApps"))
             addAll(methodsOf("clipboard", "getText", "setText", "hasText"))
             addAll(methodsOf("device", "info", "isScreenOn", "wakeUp", "isIgnoringBatteryOptimizations"))
@@ -159,6 +160,7 @@ data class HostCapabilityGrant(
             NodeBridgePermissionManifest.APP_LAUNCH,
             NodeBridgePermissionManifest.APP_QUERY,
             NodeBridgePermissionManifest.APP_ACTIVITY,
+            NodeBridgePermissionManifest.APP_REMOTE_SERVER,
             NodeBridgePermissionManifest.CLIPBOARD,
             NodeBridgePermissionManifest.DEVICE,
             NodeBridgePermissionManifest.DEVICE_POWER,

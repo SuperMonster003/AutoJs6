@@ -11,18 +11,21 @@ import java.io.IOException
 import java.net.ServerSocket
 import java.net.Socket
 
-class JsonSocketServer(service: DevPluginService?, port: Int) : JsonSocket(service) {
+class JsonSocketServer @JvmOverloads constructor(service: DevPluginService?, port: Int, openListener: Boolean = true) : JsonSocket(service) {
 
     private var mSocket: Socket? = null
 
     init {
-        try {
-            setStateConnecting()
-            if (!isServerSocketSetUp) {
-                serverSocket = ServerSocket(port)
+        if (openListener) {
+            try {
+                setStateConnecting()
+                if (!isServerSocketSetUp) {
+                    serverSocket = ServerSocket(port)
+                }
+            } catch (e: IOException) {
+                setStateDisconnected()
+                throw e
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
     }
 

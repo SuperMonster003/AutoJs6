@@ -120,6 +120,19 @@ class DevPluginService(val context: Context) {
     // zh-CN: 防止服务端重复启动.
     private val mEnableLocalServerStarted = AtomicBoolean(false)
 
+    private val remoteServerStarter = RemoteServerStarter(
+        isRunning = { isServerSocketConnected },
+        source = { enableLocalServer() },
+        onStarted = { isServerSocketNormallyClosed = false },
+        onFailure = {
+            disconnectJsonSocketServer()
+            isServerSocketNormallyClosed = true
+        },
+    )
+
+    /** Starts server mode without a UI owner; the application keeps it until the user stops it. */
+    internal fun startLocalServer() = remoteServerStarter.start()
+
     fun disconnectJsonSocketClient() {
         // Explicit user action: silence the reconnector before the state change reaches it.
         // zh-CN: 用户显式操作: 在状态变化到达重连器之前先使其静默.
@@ -313,7 +326,7 @@ class DevPluginService(val context: Context) {
             .create<JsonSocketServer> { emitter ->
 
                 if (!LocalNetworkPermission.isGranted(context)) {
-                    emitter.onError(IOException(context.getString(R.string.error_local_network_permission_required)))
+                    emitter.onError(SecurityException(context.getString(R.string.error_local_network_permission_required)))
                     return@create
                 }
 
@@ -325,17 +338,17 @@ class DevPluginService(val context: Context) {
                     return@create
                 }
 
-                JsonSocketServer(this, Port.AJ_SERVER).also {
-                    // Listening started.
-                    // zh-CN: 监听已启动.
-                    this.jsonSocketServer = it
-                    it.setStateConnected()
-                    serverStartedAt = System.currentTimeMillis()
-                    if (ConnectionKeys.SERVER_MODE_LAN_DISCOVERY.get()) discovery.register(Port.AJ_SERVER)
-                    emitter.onNext(it)
-                }
-
                 try {
+                    JsonSocketServer(this, Port.AJ_SERVER).also {
+                        // Publish success only after the socket is open and visible to state readers.
+                        // zh-CN: 仅在监听 socket 已打开且状态查询可见后发布启动成功.
+                        this.jsonSocketServer = it
+                        mServerSocket = JsonSocketServer.serverSocket
+                        it.setStateConnected()
+                        serverStartedAt = System.currentTimeMillis()
+                        if (ConnectionKeys.SERVER_MODE_LAN_DISCOVERY.get()) discovery.register(Port.AJ_SERVER)
+                        emitter.onNext(it)
+                    }
                     while (true) {
                         val ss = JsonSocketServer.serverSocket
                         mServerSocket = ss
@@ -345,7 +358,7 @@ class DevPluginService(val context: Context) {
                             val acceptedSocket = ss.accept()
                             // Create a dedicated connection instance per client.
                             // zh-CN: 为每个客户端创建独立连接实例.
-                            val conn = JsonSocketServer(this, Port.AJ_SERVER).apply {
+                            val conn = JsonSocketServer(this, Port.AJ_SERVER, openListener = false).apply {
                                 setSocket(acceptedSocket)
                                 subscribeMessage()
                                 monitorMessage()
@@ -353,6 +366,13 @@ class DevPluginService(val context: Context) {
                             }
 
                             mServerConnections.add(conn)
+                            // Stop may race with accept. A peer must never reopen the listener or survive its stop.
+                            // zh-CN: 停止可能与 accept 并发. 客户端连接不得重新打开监听, 也不得在停止后遗留.
+                            if (ss.isClosed || JsonSocketServer.serverSocket !== ss) {
+                                mServerConnections.remove(conn)
+                                conn.close()
+                                break
+                            }
                             serverConnectionCount.onNext(mServerConnections.size)
 
                             emitter.onNext(conn)

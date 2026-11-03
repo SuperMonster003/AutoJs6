@@ -1,11 +1,20 @@
 package org.autojs.autojs.core.plugin.hostbroker
 
 import org.autojs.autojs.core.plugin.mcp.McpCapabilityGrant
+import org.autojs.autojs.engine.NodeBridgePermissionManifest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HostCapabilityGrantTest {
+    @Test fun remoteServerStartupHasAnExplicitHostCapability() {
+        assertEquals(listOf("app.remote_server"), NodeBridgePermissionManifest.requiredCapabilitiesFor("app", "startRemoteServer"))
+        assertTrue("app.remote_server" in NodeBridgePermissionManifest.definedCapabilities)
+        assertEquals(HostCapabilityGrant.Decision.Allowed,
+            HostCapabilityGrant.DEFAULT.evaluate("app", "startRemoteServer", listOf("app.remote_server"), 10))
+        val restricted = HostCapabilityGrant(setOf("app.startRemoteServer"), setOf("app", "app.activity"))
+        assertTrue(restricted.evaluate("app", "startRemoteServer", listOf("app.remote_server"), 10) is HostCapabilityGrant.Decision.Denied)
+    }
     @Test fun mcpAliasRetainsTheSameDefaultGrant() {
         assertTrue(McpCapabilityGrant.DEFAULT === HostCapabilityGrant.DEFAULT)
         assertEquals(HostCapabilityGrant.Decision.Allowed,

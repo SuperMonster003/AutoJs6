@@ -16,6 +16,7 @@ object NodeBridgePermissionManifest {
     const val APP_SETTINGS = "app.settings"
     const val APP_ACTIVITY = "app.activity"
     const val APP_QUERY = "app.query"
+    const val APP_REMOTE_SERVER = "app.remote_server"
     const val DIALOGS = "dialogs"
     const val ENGINES = "engines"
     const val ENGINES_EXEC = "engines.exec"
@@ -144,6 +145,7 @@ object NodeBridgePermissionManifest {
         APP_SETTINGS,
         APP_ACTIVITY,
         APP_QUERY,
+        APP_REMOTE_SERVER,
         DIALOGS,
         ENGINES,
         ENGINES_EXEC,
@@ -533,6 +535,7 @@ object NodeBridgePermissionManifest {
         val required = when (module) {
             NodeBridgeModules.TOAST -> listOf(TOAST)
             NodeBridgeModules.APP -> when (method) {
+                "startRemoteServer" -> listOf(APP_REMOTE_SERVER)
                 "launchPackage", "launchApp" -> listOf(APP_LAUNCH)
                 "openAppSetting" -> listOf(APP_SETTINGS)
                 "startActivity", "startService", "sendBroadcast" -> listOf(APP_ACTIVITY)
@@ -717,6 +720,7 @@ object NodeBridgePermissionManifest {
             required == MEDIA_LIBRARY ||
             required == MEDIA_LIBRARY_MUTATE ||
             required == APP_QUERY ||
+            required == APP_REMOTE_SERVER ||
             required == PACKAGE_MANAGER_MUTATE ||
             // MCP roadmap P1.3: writing and deleting workspace files are never implied by "files".
             required == FILES_WRITE ||

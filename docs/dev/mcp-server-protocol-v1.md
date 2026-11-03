@@ -225,7 +225,7 @@ The default grant (`McpCapabilityGrant.DEFAULT`) allows the roadmap A.6 method
 set: `accessibility.{isEnabled, ensureEnabled, dump, explain, screenshot, findOne, findAll, findByText, click, longClick, setText, scrollForward, scrollBackward, swipe, gesture, back, home, recentApps, readScreenText, captureScreenImage}`,
 `engines.{execScript, execScriptFile, list, stop, stopAll}`, `console.tail`,
 `files.{list, stat, read, write, mkdir, rename, delete}`,
-`app.{launchPackage, launchApp, isInstalled, editFile, currentWindow, listSamples, readSample, listDocs, readDoc, pluginCapabilities}`,
+`app.{launchPackage, launchApp, isInstalled, editFile, currentWindow, listSamples, readSample, listDocs, readDoc, pluginCapabilities, startRemoteServer}`,
 `package_manager.{list, verify, listApps}`, `clipboard.{getText, setText, hasText}`,
 `device.{info, isScreenOn, wakeUp, isIgnoringBatteryOptimizations}`,
 `media_projection.{requestScreenCapture, stop}`,
@@ -238,7 +238,7 @@ set: `accessibility.{isEnabled, ensureEnabled, dump, explain, screenshot, findOn
 `ui_press_key` (roadmap P3.2; `keys.takeScreenshot` and `keys.splitScreen` stay
 outside), with the tokens `accessibility`, `accessibility.gesture`, `keys`,
 `engines`, `engines.exec`, `screen_capture`, `image`, `app`, `app.launch`,
-`app.query`, `app.activity`, `clipboard`, `device`, `device.power`, `shell`,
+`app.query`, `app.activity`, `app.remote_server`, `clipboard`, `device`, `device.power`, `shell`,
 `toast`, `package_manager`, `files`, `files.write`, `files.delete`, `files.shared_read`, `console`,
 `ocr`, `barcode`, `pinyin`, `pinyin4j`, `media`, `media.metadata`, `agent`, `agent.exec`, `plugin_tools` and `plugin_tools.user_granted`. The plugin-family
 methods (MCP roadmap P11 D28) are only usable while the corresponding plugin is installed and
@@ -250,6 +250,17 @@ the manifest the client confirmed as `expectedManifest`. Writes (`image.saveImag
 (`image.toBytes`) stay outside the grant: tools return handles and paths, never pixels.
 A `keys.*` call without a running accessibility service fails with the
 `unavailable` category, as the `accessibility` module does.
+
+`app.startRemoteServer()` starts the host's existing server mode (TCP 7347, for the AutoJs6 VS Code
+extension) and requires the explicit `app.remote_server` token; neither `app` nor `app.activity`
+implies it. It takes no arguments and returns `schema: autojs6-bridge-remote-server-v1`, `enabled`,
+`alreadyRunning`, `port`, and `connectedClients`. Success means the socket has opened, not that a
+computer has connected. Repeated calls preserve the listener and its clients. The listener belongs
+to the host application and survives the MCP request / session; the drawer's Server mode switch
+stops it. Android 17+ local network permission is checked for the host itself; a missing permission
+returns `permission-denied` with guidance and does not open a permission UI from the remote call.
+Bind failures propagate as `provider-failed`; startup replies are bounded to 10 s. The plugin's
+`device_start_remote_server` is grant-gated, so older hosts hide it without a contract AAR change.
 
 `accessibility.swipe` with identical end points (`x1 == x2`, `y1 == y2`) is dispatched as a
 press of `durationMs` (a single-point stroke); the MCP plugin's coordinate `ui_click` /
