@@ -6,513 +6,197 @@
 
 # v6.8.0
 
-###### 2026/10/24 - Some features moved to plugins; upgrade with care
+###### 2026/11/03 - Some features moved to plugins; upgrade with care
 
 * `Hint` Some built-in features are now provided by independent plugins (such as OCR, barcode recognition, OpenCV, OpenCC, Pinyin, MediaInfo, the terminal and offline project documentation); install and enable the corresponding plugins in the Plugin Center before use
+* `Hint` Promise and some syntax behaviors of the Rhino engine now follow the ECMAScript specification (for example, Promise callbacks run as microtasks and reassigning a const variable throws a TypeError); scripts relying on the old behavior may need adjustments
+* `Hint` The console element and floating console now display logs from the current script; global logs are available through the globalconsole element or the log page
 * `Hint` The target SDK of packaged apps changes from 29 to 37; shared storage and local network access require permissions according to system requirements
 * `Hint` When packaged apps use images or other features that depend on OpenCV, select the OpenCV plugin when packaging
-* `Hint` The console element and floating console now display logs from the current script; global logs are available through the globalconsole element or the log page
-* `Hint` File logging now uses a built-in implementation, retaining documented configuration options and common PatternLayout formats; other Log4j APIs are no longer available
-* `Hint` Node.js pinyin/pinyin4j and console window controls now call the host asynchronously; scripts must await their results
-* `Feature` Rhino supports ES2015+ class syntax, including fields, static blocks, private names and inheritance from built-in types such as Error/Array/Map (see Project documentation > [Class syntax](https://docs.autojs6.com/#/classSyntax))
-* `Feature` Classes in Rhino scripts can extend Java classes and interfaces (such as class Worker extends java.lang.Thread), with super calls to Java superclass methods, protected members and multiple interfaces (extends JavaAdapter(Base, I1, I2)); View subclass instances support widget methods such as attr/on; final classes cannot be extended and final methods cannot be overridden (see Project documentation > [Class syntax](https://docs.autojs6.com/#/classSyntax))
-* `Feature` ai.agent task controls, events and registered-script context/results for Node.js, Bun and Workers, with explicit authorization for packaged applications
-* `Feature` Flow within/scope with inherited search roots, compass navigation and typed result projections, plus press/swipe/gesture/gestures overloads for Node.js, Bun and Workers
-* `Feature` Flow asynchronous chains and condition/stability waits for Node.js, Bun and Workers, with branch cancellation, step retries and host UI snapshots; Flow advanced clicks, scrolling, text entry, list collection and real event waits for Node.js, Bun and Workers, with subscription readiness, snapshot validation and cancellation
-* `Feature` Node.js/Bun/Worker: Mail account connections, message operations, attachments and mailbox watches, with cancellation and Worker cleanup
-* `Feature` Desktop shortcuts support automatic archiving of new and pre-existing pinned shortcuts, backup export/import and batch restoration; unreadable icons can be chosen individually or filled with defaults in bulk without replacing saved icons; missing shortcuts after unfreezing are shown on the shortcut backup page without home page prompts, and recognized manual removals are not selected by default; copies of the same script keep separate original IDs (existing shortcut discovery requires Android 7.1+, automatic detection requires Android 8+) (entry: Settings > Configuration > Shortcut backup)
-* `Feature` "Manage AutoJs6 settings" page, for exporting/importing application settings by category (zip files), restoring category defaults and undoing the last import or reset; imports can create missing working directories or download missing editor fonts, leaving unprocessed settings unchanged; the "Credentials and authorization" category is encrypted, with a credentials password allowing import on other devices, otherwise import is restricted to the same device; shortcuts and color libraries can be exported as data categories, with individual entries selectable through "Refine...", and imported shortcuts can subsequently be restored to the home screen; undoing an import also removes shortcuts and color libraries added by it; automatic backups include periodic backups (daily/weekly/monthly, off by default), backups after changes (5 minutes after settings stop changing, off by default) and backups after operations (after import, reset or undo, on by default), stored in backups/settings in the working directory, retaining the latest 7 of each kind without credentials, with notifications on periodic or change-triggered backup failures; the setup wizard includes a settings import wizard for importing previously exported settings on first launch (entry: Settings > Configuration > Manage AutoJs6 settings/Setup wizard)
-* `Feature` Setup wizard, for running the permission wizard and plugin installation wizard in sequence, with an entry in the home page welcome prompt after first launch (entry: Settings > Configuration > Setup wizard)
-* `Feature` Permission wizard, for selecting permissions from the home drawer and requesting them in sequence, with built-in "Standard"/"Minimal"/"All" profiles and custom profiles; granted permissions can be hidden through the menu (entry: Setup wizard/the button in the home drawer's "Permissions" group heading)
-* `Feature` Plugin installation wizard, for selecting official plugins by category and installing them in batches, with built-in "Standard"/"Minimal"/"All" profiles and support for saving, renaming and deleting custom profiles (entry: Setup wizard/the floating button menu on the home Plugins tab/the Plugin Center's "+" menu)
-* `Feature` Plugin installation wizard supports installing while downloading, silent installation through the 3-Setup Installer plugin with Shizuku/Root/Dhizuku authorization, and checking permission to install unknown apps before downloading when using the system installer
-* `Feature` "Show launcher icon" switch in plugin settings (enabled by default), with a shared setting in the plugin installation wizard for icons of plugins newly installed in the current batch (changing app components requires Root or Shizuku)
-* `Feature` Accessibility service manager, supporting starting/stopping services, clearing caches, self-checks, event monitoring and copying diagnostic information (entry: Accessibility service item in the home drawer)
-* `Feature` Process exit records and copying diagnostic information in Developer options (Android 11+) (entry: long-press the app icon on the About app and developer page)
-* `Feature` "Allow Inspector for Node.js scripts" switch in Developer options (disabled by default), for breakpoint debugging and CPU/heap profiling with the Node.js Runtime plugin
-* `Feature` "Memory diagnostics" page in Developer options, for inspecting the Java heap, native heap, process PSS, live script engines, finished but uncollected script runtimes, unreleased images and script threads (refreshed every 2 seconds), with rechecks after forced GC, hprof heap dump export and copying diagnostic text (entry: Developer options > Memory diagnostics > Open memory diagnostics)
-* `Feature` The global console can warn when a script runtime remains uncollected 10 seconds after the script finishes and direct users to "Memory diagnostics"; debug builds include LeakCanary monitoring status (on by default) (entry: Developer options > Memory diagnostics > Warn in console when a finished script is not collected)
-* `Feature` Debug builds include LeakCanary by default to monitor engines, runtimes, threads and floating windows of finished scripts and identify uncollected objects; the "Memory diagnostics" category in Developer options includes a "LeakCanary" switch (shown only in debug builds) (can be excluded with the autojs.leakcanary.enabled Gradle property)
-* `Feature` memory module, for reading AutoJs6 process memory diagnostics in scripts (from the same source as the "Memory diagnostics" page): snapshot takes a memory snapshot, collect forces collection and rechecks, retained lists finished but uncollected script runtimes, dumpHeap exports an hprof heap dump, and watch hands an object to LeakCanary for monitoring (debug builds only); in release builds, dumpHeap requires "Allow scripts to export hprof" in Developer options (off by default) (see Sample code > Tools > Memory diagnostics) (see Project documentation > [Memory](https://docs.autojs6.com/#/memory)) _[`issue #452`](http://issues.autojs6.com/452)_
-* `Feature` Code generation model management page, supporting local import, on-demand downloads, management and comparison of multiple versions, and updates to official models (entry: Settings > Accessibility service > Code generation models)
-* `Feature` MCP Server plugin, for accessing AutoJs6 script, file and device operations through MCP clients (entry: home drawer/Plugin Center)
-* `Feature` 3-Shell Terminal plugin, providing terminal capabilities (entry: home drawer, project toolbar, file manager directory menu)
-* `Feature` 3-Macaw Speech plugin, for offline speech recognition, keyword detection and speech synthesis, with registration as a system TTS engine and speech models downloaded on demand (entry: Plugin Center/Plugin installation wizard)
-* `Feature` Paddle OCR PP-OCRv3 Paddle Lite plugin, for continued PP-OCRv3 text recognition using Paddle Lite (Paddle OCR PP-OCRv3 switches to ONNX Runtime from plugin version 2.0.0); both plugins can be installed together, and scripts can select it with `variant: "v3-paddle-lite"` (entry: Plugin Center/Plugin installation wizard)
-* `Feature` useCls option for the Paddle engine in the ocr module, for running text orientation classification between detection and recognition to recognize text lines rotated by 180 degrees (off by default; requires Paddle OCR PP-OCRv3 plugin 2.0.0 or later, also applies to packaged apps)
-* `Feature` Node.js Runtime plugin, for running Node.js files and projects (supports the "nodejs" mode directive and .node.js/.cjs/.mjs files)
-* `Feature` Python Runtime plugin, for running Python files and projects, with module entry points, execution timeouts and preset standard input
-* `Feature` Lua Runtime plugin, for running Lua scripts
+* `Feature` Setup wizard, for completing permission requests and plugin installation in sequence on first use, with an entry in the home page welcome prompt after first launch (entry: Settings > Configuration > Setup wizard)
+* `Feature` Plugin installation wizard, for selecting official plugins by category and installing them in batches, with silent installation through the 3-Setup Installer plugin when Shizuku/Root/Dhizuku authorization is available (entry: Setup wizard/the floating button menu on the home Plugins tab/the Plugin Center's "+" menu)
+* `Feature` Permission wizard, for selecting required permissions and requesting them in sequence, with built-in "Standard"/"Minimal"/"All" profiles and custom profiles (entry: Setup wizard/the "Permissions" group title button in the home drawer)
+* `Feature` Rhino engine supports class syntax, including fields, static blocks, private members and inheritance from built-in types such as Error/Array/Map, as well as extending Java classes and interfaces (see Project documentation > [Class syntax](https://docs.autojs6.com/#/classSyntax))
+* `Feature` Rhino engine supports async/await, including async functions, async arrow functions, async methods, async generators and for await (see Project documentation > [async/await and continuation](https://docs.autojs6.com/#/asyncAwait))
+* `Feature` Node.js Runtime and Bun Runtime plugins, for running Node.js and Bun scripts and projects, with access to most AutoJs6 scripting capabilities such as automation, images, UI and files
+* `Feature` Python Runtime, Lua Runtime and QuickJS Runtime plugins, for running Python, Lua and QuickJS (JavaScript) scripts
 * `Feature` Java Runtime and Kotlin Runtime plugins, for compiling and running Java/Kotlin source code (Java requires Android 7+, Kotlin requires Android 8+)
-* `Feature` QuickJS Runtime plugin, for running JavaScript files and ES modules (supports the "quickjs"/"qjs" mode directives and .quickjs.js/.quickjs.mjs files)
-* `Feature` Bun Runtime plugin, for running JavaScript/TypeScript files and projects (supports the "bun" mode directive and .bun.js/.bun.ts/.bun.tsx files)
-* `Feature` TypeScript Engine plugin, for compiling TypeScript files and projects for Rhino/Node.js, with type checking and Source Map support
-* `Feature` ai module, for accessing local or online models through AI Provider plugins (such as 3-Stone AI), with streaming output, persistent sessions and structured JSON results (see Sample code > ai)
-* `Feature` ai.agent script API, for starting, querying, responding to, confirming and cancelling 3-Stove Agent tasks, with detached background tasks (requires the 3-Stove Agent plugin) (see Sample code > agent)
-* `Feature` plan option for ai.agent.run/create, for having 3-Stove Agent propose a step-by-step plan before execution in plan mode
-* `Feature` Scripts can be registered for 3-Stove Agent to call through project.json or an @agent header comment, with argument validation, stopping on timeout and returning structured results
-* `Feature` plugins.tools module, for listing and invoking tools declared by plugins, synchronously or asynchronously; arguments are validated against each tool's declared format, image arguments accept the current screen, file paths or ImageWrapper, directory arguments pass files in a directory (such as models) to the plugin, and tool-generated files or directories (such as extracted archives) are written to the specified path (requires a plugin that provides tools) (see Project documentation > [Plugins](https://docs.autojs6.com/#/plugins))
-* `Feature` Plugin tool contract, for plugins to declare their tools (names, descriptions, argument formats and risk levels), which AutoJs6 collects, validates and invokes for scripts and plugins such as MCP Server; third-party plugins implementing only this contract also appear in the Plugin Center (only plugins enabled and authorized in the Plugin Center are included)
-* `Feature` compose module, for building interfaces with Jetpack Compose, providing node factories, long-lived node handles, reactive state/render/ref and theme control (requires the 3-Block Compose plugin) (see Sample code > 3-Block Compose)
-* `Feature` "Open in 3-Block Compose designer" in the editor menu: saves the current file and opens it in the visual designer of the 3-Block Compose plugin (1.2.0 or later); returning to the editor automatically reloads content saved by the designer (asks first if there are unsaved changes) (see Sample code > 3-Block Compose)
-* `Feature` ui-mode layout preview service, which lets the 3-Block Compose designer preview XML layouts on its canvas with the host's real layout inflater, embedded on Android 11 and later and as a snapshot on older versions (requires 3-Block Compose plugin 1.6.0 or later)
-* `Feature` Interactive preview in the 3-Block Compose designer (Android 13 or later) runs ui-mode scripts inside the canvas: script dialogs appear within the canvas, and ui.statusBarColor / navigationBarColor / backgroundColor appear as simulated status/navigation bars and background; scripts occupying the main thread too long stop after the configured duration (5 seconds by default) and report their line; ui.emitter receives pause / resume / back_pressed events when the designer goes to the background, returns to the foreground or the back button above the canvas is pressed, with unhandled back presses ending execution; TSX scripts run after compilation by the TypeScript Engine plugin, and compilation/runtime errors report TSX source line numbers (requires 3-Block Compose plugin 1.7.0 or later; lifecycle events, duration settings and TSX scripts require 1.9.0 or later)
-* `Feature` Folder projects from the 3-Block Compose designer (including XML layouts) can be run or imported directly in AutoJs6: running extracts them to a cache directory and executes them as a project, with automatic cleanup afterward; importing extracts them to a same-named folder in the script directory, offering overwrite or a new folder if one already exists (requires 3-Block Compose plugin 1.8.0 or later)
-* `Feature` The code editor's "Preview" toolbar switch previews ui-mode script layouts inside the editor (lower half in portrait, right half in landscape): layouts are arranged at full-screen dimensions and scaled to fit, refresh automatically after typing stops, and navigate to the corresponding source when a widget is clicked; layout errors explain the cause in the panel while keeping the last preview; only the layout is previewed, scripts are not executed, and the switch state is remembered per file; with 3-Block Compose plugin 1.2.0 or later installed, an "Open in 3-Block Compose designer" button appears at the panel's upper right
-* `Feature` compose.mount/floaty methods, for mounting UI pages or creating floating windows (floating windows support both UI and non-UI scripts), with automatic cleanup of owned sessions when the script stops
-* `Feature` compose.dialog method, for creating updatable and closable dialog and modal bottom sheet sessions in UI or ordinary scripts
-* `Feature` XML <compose> container and compose.attach method, for embedding Compose sessions in UI pages or floating windows; compose.AndroidView can host existing Android Views
-* `Feature` TSX layouts support Compose components such as <compose.Column> and <compose:Text>, node factory references, slots and reactive callbacks (requires the TypeScript Engine plugin)
-* `Feature` ui.inflate supports compiled XML TSX layouts and their onClick callback bindings
-* `Feature` flow module and waitAsync global method, for asynchronous waiting and chained operations, with branches, loops, timeouts, retries and cancellation (see Project documentation > [Flow](https://docs.autojs6.com/#/flow))
-* `Feature` terminal global object, for managing terminal sessions, visible execution and output listeners, with output waiting and exit codes (requires the 3-Shell Terminal plugin) (see Sample code > Terminal)
-* `Feature` imgui global object, for building floating windows and full-screen immediate-mode interfaces with Dear ImGui, available directly when the plugin is enabled and loaded on the first member call; the existing plugins.load("io.github.supermonster003.autojs6.plugin.imgui") syntax returns the same object (requires the ImGui plugin)
-* `Feature` shell.spawn/shizuku.spawn methods, for running commands as processes and reading output in real time, with line-by-line reading, output/errorOutput/exit events, stdin writes, timed waits and process termination (including child processes), with automatic termination when the script finishes (the adb option and shizuku.spawn require Shizuku, the root option requires Root)
-* `Feature` The Shell constructor accepts an options object { cmd, root, adb, pty, env, cwd } (compatible with Auto.js Pro); Shell instances created this way use pipes and provide getInputStream/getErrorStream/getOutputStream/waitFor/exitCode/exitAndReadOutput/raw/execForResult methods, can run through Shizuku (the adb option), and separate each command's output using exit-code markers in execAndWaitFor
-* `Feature` shell.spawn and Shell instances constructed with options support pty, for running commands in a pseudoterminal so programs that buffer pipe output, such as getevent/awk, output line by line (stderr is merged into stdout)
-* `Feature` $shell.setDefaultOptions/checkAccess/isRootAvailable methods (compatible with Auto.js Pro), for setting default root/adb options for shell functions and related calls in the current script and checking Root/Shizuku permissions
-* `Feature` installer module, for installing, updating and uninstalling apps, with options for silent Shizuku/Root/Dhizuku operations and notification installation (requires the 3-Setup Installer plugin) (see Project documentation > [Installer](https://docs.autojs6.com/#/installer))
-* `Feature` mail module, for sending, receiving and querying mail, downloading attachments and managing folders, with synchronous and asynchronous calls (requires the 3-Stamp Mail plugin) (see Project documentation > [Mail](https://docs.autojs6.com/#/mail))
-* `Feature` mail.watch method, for monitoring new mail with reconnection support
-* `Feature` epub module, for reading ebook metadata, tables of contents, chapter text and covers, with resource export and full-text search (requires the 3-Folio EPUB plugin) (see Project documentation > [Ebooks](https://docs.autojs6.com/#/epub))
-* `Feature` epub.read method, for opening the ebook reader and controlling reading position, bookmarks and reading preferences
-* `Feature` epub.annotations/annotationsAsync methods, for reading highlights and notes, with annotation change listeners in reader sessions
-* `Feature` files.batchRename method, for batch renaming files and folders using find and replace, regular expressions, counters, date variables, photo metadata (EXIF / XMP) and Chinese-to-Pinyin conversion, with plan previews, name-only trials without file access, naming presets, conflict policies, progress callbacks, undo and history queries/cleanup (requires the Batch Rename plugin; photo metadata, Chinese-to-Pinyin conversion and naming presets require 1.1.0 or later) (see Project documentation > [Files](https://docs.autojs6.com/#/files))
-* `Feature` gallery module, for selecting, viewing, editing and converting images through the 3-Maple Image plugin; file reads and writes are restricted to paths accessible to the script itself (requires 3-Maple Image plugin 3.4.0 or later) (see Project documentation > [Gallery](https://docs.autojs6.com/#/gallery))
-* `Feature` speech module, for offline speech recognition, voice activity detection, keyword detection and speech synthesis, with microphone dictation sessions, keyword sessions (optionally starting dictation automatically after detection), WAV file or PCM data recognition, WAV synthesis, text reading through the plugin engine and speech model management; file reads and writes are restricted to paths accessible to the script itself; microphone sessions started while AutoJs6 is in the foreground continue recording in the background or with the screen off (requires the 3-Macaw Speech plugin) (see Sample code > 3-Macaw Speech)
-* `Feature` speech.speaker module, for speaker recognition: enroll voices, verify whether a recording is from a particular person or identify the closest match among enrolled speakers; voiceprints remain inside the plugin, and scripts receive only names and similarity scores (requires 3-Macaw Speech plugin 1.3.0 or later) (see Sample code > 3-Macaw Speech)
-* `Feature` speech.diarize/detectLanguage/tag methods, for offline audio file analysis: determine who spoke when (speaker diarization, optionally named using enrolled voiceprints), identify spoken languages and recognize sound categories (speech, music, barking, rain, etc.), all with progress callbacks and Async forms (requires 3-Macaw Speech plugin 1.3.0 or later) (see Sample code > 3-Macaw Speech)
-* `Feature` yolo module, for loading models and detecting objects through YOLO plugins (see Project documentation > [YOLO](https://docs.autojs6.com/#/yolo))
-* `Feature` tts module, for text-to-speech (see Project documentation > [Text-to-speech](https://docs.autojs6.com/#/tts))
-* `Feature` settings module, for reading and changing app settings (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (see Project documentation > [Settings](https://docs.autojs6.com/#/settings))
-* `Feature` settings.export/categories methods, for exporting application settings by category to zip files in scripts (the same format as the "Manage AutoJs6 settings" page, without credentials) and listing categories and entry counts (see Project documentation > [Settings](https://docs.autojs6.com/#/settings))
-* `Feature` work_manager module, for managing scheduled and broadcast tasks (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (see Project documentation > [Work Manager](https://docs.autojs6.com/#/workManager))
-* `Feature` power_manager module, for querying and requesting exemption from battery optimization (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (see Project documentation > [Power Manager](https://docs.autojs6.com/#/powerManager))
-* `Feature` DatabaseCallback in the sqlite module supports onDowngrade for handling requested versions below the existing database version; without an implementation, downgrades do nothing and preserve existing tables and data instead of throwing an exception (see Project documentation > [SQLite](https://docs.autojs6.com/#/sqlite))
-* `Feature` pangu global object, for adjusting and checking spacing in mixed Chinese and Western text (see Project documentation > [Text spacing](https://docs.autojs6.com/#/pangu))
-* `Feature` device.pageSize property (getter), for obtaining the system memory page size
-* `Feature` device.getMarketName method, for obtaining the device's market name _[`issue #513`](http://issues.autojs6.com/513)_
+* `Feature` TypeScript Engine plugin, for compiling and running TypeScript files and projects, with type checking and TSX layouts in UI mode; scheduled tasks, shortcuts and the log page can also run TypeScript
+* `Feature` ai module, for calling local or online models through AI provider plugins (such as 3-Stone AI), with streaming output, persistent sessions and structured JSON results (see Sample code > ai)
+* `Feature` ai.agent script API, for starting and controlling 3-Stove Agent tasks (including plan mode and background tasks); scripts can also be registered for the agent to call (requires the 3-Stove Agent plugin) (see Sample code > agent)
+* `Feature` MCP Server plugin, for accessing AutoJs6 script, file and device operations through MCP clients (entry: home drawer/Plugin Center)
+* `Feature` compose module, for building interfaces, floating windows and dialogs with Jetpack Compose; the code editor can open interfaces in the 3-Block Compose visual designer for editing (requires the 3-Block Compose plugin) (see Sample code > 3-Block Compose)
+* `Feature` speech module, for offline speech recognition, wake word detection, speech synthesis, speaker recognition and audio analysis (requires the 3-Macaw Speech plugin) (see Sample code > 3-Macaw Speech)
+* `Feature` 3-Shell Terminal plugin, for using a terminal in the app; scripts can manage terminal sessions through the terminal global object (entry: home drawer/project toolbar/file manager folder menu) (see Sample code > Terminal)
+* `Feature` installer module, for installing, updating and uninstalling apps, with silent operations through Shizuku/Root/Dhizuku (requires the 3-Setup Installer plugin) (see Project documentation > [Installer](https://docs.autojs6.com/#/installer))
+* `Feature` mail module, for sending, receiving and searching emails, downloading attachments and watching for new emails (requires the 3-Stamp Mail plugin) (see Project documentation > [Mail](https://docs.autojs6.com/#/mail))
+* `Feature` epub module, for reading e-book contents and opening the reader (requires the 3-Folio EPUB plugin) (see Project documentation > [EPUB](https://docs.autojs6.com/#/epub))
+* `Feature` gallery module, for picking, viewing, editing and converting images (requires the 3-Maple Image plugin) (see Project documentation > [Gallery](https://docs.autojs6.com/#/gallery))
+* `Feature` imgui global object, for building floating windows and full-screen interfaces with Dear ImGui (requires the ImGui plugin)
+* `Feature` yolo module, for object detection through the YOLO plugin (see Project documentation > [YOLO](https://docs.autojs6.com/#/yolo))
+* `Feature` files.batchRename method, for batch renaming files by rules such as find and replace, regular expressions, counters and dates, with preview and undo (requires the Batch Rename plugin) (see Project documentation > [Files](https://docs.autojs6.com/#/files))
+* `Feature` plugins.tools module, for listing and calling tools provided by plugins (requires a plugin that provides tools) (see Project documentation > [Plugins](https://docs.autojs6.com/#/plugins))
+* `Feature` images.quantize/quantizeToFile methods and the quantization option of images.save and related methods, for compressing PNG images (requires the Image Quantization plugin)
+* `Feature` flow module and waitAsync global method, for chaining waits and operations, with branches, loops, timeouts, retries and cancellation (see Project documentation > [Flow](https://docs.autojs6.com/#/flow))
+* `Feature` Automation methods such as smartClick/scrollUntil/typeInto/launchAndWait and waiting methods such as waitForIdle/waitForToast, for clicking widgets, scrolling to find, entering text and switching apps (with Flow chaining support)
+* `Feature` select method supports string selector syntax, combining attributes, regular expressions and boolean conditions
+* `Feature` Methods such as isStale/waitUntilGone/toJSON/first/last/clickEach for UiObject and widget collections, for waiting on node states, serialization and per-widget operations
+* `Feature` auto.findWindows/explain/dump methods, for getting windows by conditions, diagnosing selectors and dumping node trees
+* `Feature` shell.spawn/shizuku.spawn methods, for running commands as processes and reading output in real time, with input writing, pseudo-terminals and process termination (the adb option and shizuku.spawn require Shizuku, the root option requires Root access)
+* `Feature` Shell constructor supports the { cmd, root, adb, pty, env, cwd } options object, with new methods such as $shell.setDefaultOptions/checkAccess (compatible with Auto.js Pro)
+* `Feature` settings module, for reading, modifying and exporting app settings by category (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (see Project documentation > [Settings](https://docs.autojs6.com/#/settings))
+* `Feature` work_manager module, for managing scheduled tasks and broadcast tasks (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (see Project documentation > [Work Manager](https://docs.autojs6.com/#/workManager))
+* `Feature` power_manager module, for querying and requesting battery optimization exemptions (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (see Project documentation > [Power Manager](https://docs.autojs6.com/#/powerManager))
+* `Feature` memory module, for reading AutoJs6 memory diagnostics in scripts, such as memory snapshots, unreclaimed script runtimes and hprof heap dumps (see Project documentation > [Memory](https://docs.autojs6.com/#/memory)) _[`issue #452`](http://issues.autojs6.com/452)_
+* `Feature` tts module, for text-to-speech (see Project documentation > [Text to Speech](https://docs.autojs6.com/#/tts))
+* `Feature` pangu global object, for spacing and checking mixed CJK and Western text (see Project documentation > [Text Spacing](https://docs.autojs6.com/#/pangu))
+* `Feature` Methods such as distance/blend/contrast/harmony and the colors.theme object for the colors module, for color calculations, palette generation, OKLab/OKLCH color space conversion and changing the app theme color (see Sample code > Images and colors)
+* `Feature` images.countPointsByColor/getMeanColor methods, for counting pixels matching a color and getting the mean color
+* `Feature` device.getMarketName method and device.pageSize property (getter), for getting the device marketing name and the system memory page size _[`issue #513`](http://issues.autojs6.com/513)_
+* `Feature` console.setTimeVisible/setTimeFormat/setColorful/setAvoidStatusBar/setInputVisible methods and the corresponding console.build options
+* `Feature` runtime.loadAar/loadJarWithR8 methods, for loading AAR files dynamically and loading JAR files through the R8 Compiler plugin (the latter is experimental)
+* `Feature` UI layouts support resources such as strings, colors, styles and images from the project res directory, selecting qualifier directories by night mode, language, screen orientation and more (see Project documentation > [User Interface](https://docs.autojs6.com/#/ui))
+* `Feature` Native Android XML layouts support more widget attributes, ConstraintLayout/CoordinatorLayout layouts and Material components (see Project documentation > [Android XML attributes](https://docs.autojs6.com/#/uiAndroidAttributes))
 * `Feature` ui.useAndroidLayout method, for enabling native Android layout widget support
-* `Feature` UI layouts support the project's res directory, with references to strings, colors, dimensions, arrays, styles, themes, images, Drawables (including vector images), color state lists and <include> layouts, selecting qualifier directories (such as values-night and layout-land) by night mode, language, orientation, screen width, density and Android version (see Project documentation > [User interface](https://docs.autojs6.com/#/ui))
-* `Feature` Native Android XML layouts support more widget attributes: attributes outside the attribute handlers are set through public widget methods or parent layout parameters according to Android SDK and AndroidX / Material definitions, including ConstraintLayout constraints and Barrier/Group/Flow/Guideline, CoordinatorLayout layout_behavior and AppBarLayout scroll flags; Material components such as MaterialButton can also be used directly (see Project documentation > [Android XML attributes](https://docs.autojs6.com/#/uiAndroidAttributes))
-* `Feature` runtime.loadAar method, for dynamically loading AAR files
-* `Feature` runtime.loadJarWithR8/retraceR8Stack methods, for loading JAR files and restoring obfuscated stack traces through the R8 Compiler plugin (experimental)
-* `Feature` images.quantize/quantizeToFile methods, for PNG image quantization and file saving, returning image size and quality information (requires the Image Quantization plugin)
-* `Feature` images.countPointsByColor/getMeanColor methods, for counting pixels that match a color and obtaining the average color
-* `Feature` colors.distance/invert/blend/contrast methods, for calculating color distance, inversion, blending and contrast (also available on Color instances)
-* `Feature` colors.toOklab/oklab/toOklch/oklch methods, for OKLab and OKLCH color space conversion; colors.distance/isSimilar and images.detectColor support the oklab algorithm
-* `Feature` colors.ensureContrast/harmony/tones/derive/nightVariant/simulate/extract methods, for contrast adjustment, color harmonies, tonal palettes, derived colors, night variants, color vision deficiency simulation and dominant image color extraction (see Sample code > Images and colors)
-* `Feature` colors.theme object, for reading, changing and resetting theme colors and controlling intelligent color libraries through scripts, with undo for script changes on the theme color page (see Sample code > Images and colors)
-* `Feature` console.setTimeVisible/setTimeFormat/setColorful/setAvoidStatusBar/setInputVisible methods and corresponding console.build options
-* `Feature` TypeScript scripts and TSX layouts in UI mode (requires the TypeScript Engine plugin)
 * `Feature` globalconsole element in UI mode, for displaying global logs; console elements support title, style and input bar settings
-* `Feature` UI-mode event listeners (such as ui.emitter back_pressed, widget click and dialog events) support suspending coroutines (such as dialogs.confirm(...).await()), requiring the continuation feature to be enabled in the script project (see Project documentation > [Continuations](https://docs.autojs6.com/#/continuation))
-* `Feature` Automation methods such as smartClick/clickIfExists/clickAny/findAny, for finding and clicking widgets, with Flow chaining support
-* `Feature` smartClickBounds/clickBoundsIfExists/clickBoundsAny methods, for coordinate clicks within widget bounds
-* `Feature` Automation methods such as scrollUntil/typeInto/dismissPopups/collectList, for scrolling searches, text input, popup handling and list collection
-* `Feature` Automation methods such as launchAndWait/backUntil/backToApp/toggle/retry, for switching apps, setting states and retrying operations
-* `Feature` waitForIdle/waitForEvent/waitForToast/waitForNotification methods, for waiting for an idle interface, accessibility events, toasts and notifications
-* `Feature` String selector syntax in select, for combining attributes, regular expressions and Boolean conditions
-* `Feature` UiSelector#minDepth/maxDepth/minIndexInParent/maxIndexInParent selectors, for filtering by node depth and index in the parent, also supported in string selector syntax
-* `Feature` UiSelector#findIterator method, for lazily traversing matching widgets
-* `Feature` UiObject#isStale/waitUntilGone/waitForStable methods, for detecting stale nodes and waiting for nodes to disappear or stabilize
-* `Feature` UiObject#contentInvalid/contextClickable/multiLine/dismissable methods, for obtaining Boolean widget properties
-* `Feature` UiObject#toJSON/dumpSubtree/fingerprint methods, for serializing nodes, exporting subtrees and calculating state fingerprints
-* `Feature` Widget collections support at/first/last/nonNull/slice and per-widget operations such as clickEach/setTextEach
-* `Feature` auto.findWindows/findWindowRoots methods, for obtaining windows and root nodes by window type, package name, title, display and other conditions
-* `Feature` auto.explain/dump methods and auto.stats object, for selector diagnostics, node tree export and query timing statistics
-* `Feature` Event deduplication and debouncing options in auto.registerEvent (disabled by default)
-* `Feature` appWindowsFallback flag in auto.setFlags, for using application window root nodes when the active window root is unavailable (disabled by default)
-* `Feature` File manager supports selecting multiple files and batch copying/moving/deleting
-* `Feature` Path bar in the file manager, supporting navigation to parent directories by clicking and horizontal scrolling
-* `Feature` Compact layout for the file manager path bar menu, with back/forward/up/refresh navigation, returning to the working directory, copying the path and setting the working directory, storage capacity display and switching between internal storage and storage cards, plus quick settings for hidden files and file extensions
-* `Feature` File manager supports browsing restricted directories through Shizuku or Root, opening and editing text files, and saving changes after verifying the original; edits are kept with guidance when authorization is lost, files conflict or save results are uncertain, while other apps use read-only in-place or on-demand access, with temporary compatibility copies available after confirmation; supports copying/moving/renaming/permanently deleting files or folders and multiple selection, without replacing existing targets when copying/moving, and shows permission status and preserved paths on failure (requires the corresponding authorization, accessible locations depend on the system; moves across filesystems are limited to shared storage)
+* `Feature` Event listeners in UI mode support suspending coroutines (such as dialogs.confirm(...).await()), requiring the continuation feature to be enabled in the script project (see Project documentation > [Continuation](https://docs.autojs6.com/#/continuation))
+* `Feature` Database callbacks of the sqlite module support the onDowngrade method, for handling database version downgrades (see Project documentation > [SQLite](https://docs.autojs6.com/#/sqlite))
+* `Feature` "Manage AutoJs6 settings" page, for exporting/importing app settings by category, restoring defaults and undoing the last operation, with encrypted credentials and automatic backups (entry: Settings > Configuration > Manage AutoJs6 settings)
+* `Feature` Shortcut backup feature, for automatically archiving home screen shortcuts, with export/import and batch restore (entry: Settings > Configuration > Shortcut backup)
+* `Feature` Accessibility service manager, supporting starting/stopping services, clearing caches, self-checks, event monitoring and copying diagnostic information (entry: Accessibility service item in the home drawer)
+* `Feature` File manager supports selecting multiple files and batch copying/moving/deleting, with a new path bar for jumping to parent folders, going back/forward and switching to the SD card
+* `Feature` File manager supports browsing restricted folders and editing their files through Shizuku or Root (requires the corresponding authorization; accessible locations depend on the system)
 * `Feature` "Floating run" option in the file manager script menu, for running/stopping scripts, editing files and viewing logs through a floating toolbar
-* `Feature` "Run with AutoJs4" option in the file manager script menu, for running scripts or projects with the AutoJs4 engine and comparing results (requires the AutoJs4 Runtime plugin)
-* `Feature` "Run with AutoJs4 and compare" option in the file manager script menu, for running the same script or project with the AutoJs6 and AutoJs4 engines in sequence to compare differences (requires the AutoJs4 Runtime plugin)
-* `Feature` "Copy path" option in the file manager file and directory menus, for copying absolute paths to the clipboard, with batch copying (one path per line) under "More" in the selection bar
-* `Feature` File manager supports browsing, previewing, compressing and extracting archives through the 3-Stack Archive plugin, with passwords, split archives and directly opening or running files within archives
-* `Feature` File manager supports previewing Markdown/HTML files through the Markdown Previewer/HTML Previewer plugins, with themes, custom CSS and full-screen mode
-* `Feature` File manager supports viewing images, playing audio/video and opening EPUB ebooks through the corresponding plugins, with background audio playback and notification controls
-* `Feature` Image viewer supports switching between images in the same directory, pinch zoom, EXIF information and full-screen mode, with image editing and format conversion through the 3-Maple Image plugin
-* `Feature` Files opened in a plugin from the file manager can be moved to the recycle bin from within the plugin and restored with undo (requires plugin support)
-* `Feature` When several plugin actions fit the files selected in the file manager, the selection bar offers the others under "More" (such as batch converting images with 3-Maple Image)
-* `Feature` The file manager supports batch renaming files and folders through the Batch Rename plugin, with find and replace, regular expressions, counters, date variables, photo metadata and Chinese-to-Pinyin conversion, name previews, individual exclusions, naming presets and undo (entry: multi-selection toolbar/folder menu "Batch rename items inside"/rename dialog "More" menu)
-* `Feature` "Rename history" page, for viewing, searching and filtering batch rename records from the file manager and scripts by source/status, undoing or deleting individual batches, clearing history and setting retained batch counts per source (entry: file manager rename dialog > More > Rename history)
-* `Feature` File manager supports viewing information and manifests of APK/APKS/XAPK/APKM/APKZ/AAB packages, and installing APKs and split APK containers
-* `Feature` Code editor supports loading Ace through the Ace Editor plugin, with editor engine selection in Settings and a Plugin Center entry when the plugin is unavailable
-* `Feature` Ace editor supports code completion, parameter hints, hover documentation and diagnostics; TypeScript projects support go to definition, symbol renaming and automatic imports (requires the TypeScript Engine plugin)
-* `Feature` Ace editor supports a shortcut panel, action history and favorite actions
-* `Feature` Ace editor supports unfolding or folding all code blocks (requires an updated Ace Editor plugin) (entry: Edit > Folding > Unfold all/Fold all)
-* `Feature` "Intelligent hints" group in code editor settings (Ace engine only), for configuring completion and parameter hint triggers and delays
-* `Feature` Code editor supports file encoding conversion and reloading, with file name, cursor position and encoding shown in the information bar
-* `Feature` Immersive full-screen mode in the code editor
+* `Feature` File manager supports browsing archives, previewing Markdown/HTML files, viewing images, playing audio/video and opening e-books through the corresponding plugins
+* `Feature` File manager supports viewing information and manifests of installation packages such as APK/APKS/XAPK/AAB
+* `Feature` File manager supports batch renaming files and folders through the Batch Rename plugin, with new name previews, undo and rename history (entry: multi-select toolbar/folder menu/the "More" menu of the rename dialog)
+* `Feature` "Run with AutoJs4" and "Run with AutoJs4 and compare" options in the file manager script menu, for running scripts with the AutoJs4 engine and comparing results (requires the AutoJs4 Runtime plugin)
+* `Feature` Code editor supports the Ace editor through the Ace Editor plugin, providing code completion, parameter hints, hover documentation, diagnostics and a shortcut panel, with the editor engine selectable in settings
+* `Feature` Code editor supports previewing layouts of ui mode scripts inside the editor, jumping to the source code when a widget in the preview is tapped (entry: the "Preview" switch on the toolbar)
 * `Feature` Bottom log panel in the code editor, with script start/stop and navigation to stack frame source code (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
-* `Feature` Dedicated code editor settings page, with options for theme, font, line numbers, word wrapping, syntax highlighting thresholds and log panel visibility
-* `Feature` Code editor settings add highlighted indentation guides, vector gutter icons, editor scrollbars (including automatic hiding), whitespace in selections, a drag magnifier, matching-symbol highlighting and inline completion previews (Ace engine only, requires Ace Editor plugin 2.0.0 or later)
-* `Feature` TypeScript snippet execution on the log page and in the code editor's bottom log panel (requires the TypeScript Engine plugin)
-* `Feature` "Screen color picker" tool in the home drawer (requires the 3-Color Picker plugin)
+* `Feature` Code editor supports a dedicated settings page, immersive full-screen mode and file encoding conversion, with an info bar showing the cursor position and encoding
+* `Feature` Layout analysis adds a search bar and "Copy as selector", supports saving node trees for offline analysis, and "Generate code" supports more waiting modes, actions and the Flow style
+* `Feature` Theme colors support custom color libraries, which can be created, cloned, imported/exported and edited
+* `Feature` Smart color libraries, for switching theme colors automatically by states such as night mode, time of day, sunrise/sunset and battery level, with built-in presets such as "Follow wallpaper"
+* `Feature` Version history supports previews, diff comparison, manual snapshots and pinned versions, and the trash supports batch restore and content previews, both with configurable retention policies
 * `Feature` Monthly/yearly/countdown scheduled tasks and conditions for ending repetition _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
-* `Feature` Scheduled and broadcast task creation for project folders
-* `Feature` "When mail arrives" broadcast task type, with sender and subject filters; mail information is available through engines.myEngine().execArgv.mail (requires the 3-Stamp Mail plugin)
-* `Feature` Layout inspection supports copying selectors that combine multiple attributes, saving node trees and offline analysis
-* `Feature` Search bar in layout inspection windows, matching widget text/desc/id/className by keywords or regular expressions; the hierarchy window retains only matching nodes and their ancestors, and the bounds window draws only matching node borders, with a result list, navigation between matches and query history
-* `Feature` Layout inspection search bar supports filter profiles (Boolean attributes, class presets, depth and size ranges, etc.), region selection, field mode (`k=v`) and selector mode (`$()`), retaining profiles and query modes across sessions
-* `Feature` "Copy as selector" in layout inspection, converting keywords, field conditions, filter profiles and selected regions into chained selectors
-* `Feature` "Generate code" in layout inspection supports single/collection scope, waiting modes, action arguments, classic/Flow style, relative locating and alternatives, with matching result previews in the layout
-* `Feature` Custom theme color libraries, supporting creation or cloning, adding colors from palettes, other libraries or history, renaming, editing color values, drag sorting and batch deletion
-* `Feature` Intelligent color libraries that automatically switch color groups based on night mode, time periods, sunrise/sunset, battery level, script states and other state sources, with timed or random switching and date overrides; built-in "Material day/night pairs", "Background colors" and "Follow wallpaper" presets, and generation from a seed color
-* `Feature` JSON import and export for color libraries (including multi-selection export and preset snapshots)
-* `Feature` "Color tools" in color details (harmonies, tonal palettes, contrast and color vision deficiency simulation), favorite and pinned colors, and a "Frequently used and recommended" virtual library
-* `Feature` "Derived colors" theme setting (disabled by default), for automatically deriving accent and dark colors from the primary color
-* `Feature` Retention policies for the recycle bin, version history and emergency drafts in Settings, with cleanup by age, count and storage size
-* `Feature` Dedicated version history list, version previews and comparisons, with search, sorting and batch deletion
-* `Feature` Manual snapshots, version pinning, tag editing, export and direct saving after restoration in version history
-* `Feature` Batch restore, content previews, details, expiration hints and undo after moving to the recycle bin, with detection and cleanup of invalid entries
-* `Feature` Packaged apps support Node.js projects and scripts, requiring the Node.js Runtime plugin at runtime (installation guidance appears if it is missing)
-* `Feature` Packaged apps support compiling Rhino TypeScript projects during the build, with encrypted compilation output and attached Source Maps
+* `Feature` Project folders support creating scheduled tasks and broadcast tasks, and broadcast tasks add the "When mail arrives" type (requires the 3-Stamp Mail plugin)
+* `Feature` "Screen color picker" tool in the home drawer (requires the 3-Color Picker plugin)
+* `Feature` "Memory diagnostics" page in developer options, for viewing memory usage and scripts that have ended but have not been reclaimed, with hprof heap dump export (entry: Developer options > Memory diagnostics)
+* `Feature` Developer options support viewing process exit records (Android 11+), with an "Allow Node.js scripts to use Inspector" switch for debugging Node.js scripts with breakpoints
+* `Feature` Code generation model management page, supporting local import, on-demand download, multi-version management and official model updates (entry: Settings > Accessibility service > Code generation models)
+* `Feature` Packaged apps support Node.js projects and scripts, requiring the Node.js Runtime plugin at runtime
+* `Feature` Packaged apps support compiling TypeScript projects at build time, with optional encryption of the compiled output
 * `Feature` Packaged app configuration supports showing or hiding logs and setting launcher shortcuts _[`issue #550`](http://issues.autojs6.com/550)_
-* `Feature` Packaged apps support the ONNX Runtime version of the Paddle OCR PP-OCRv3 plugin (2.0.0 or later), prefer it when the Paddle Lite version is also installed and automatically include the required OpenCV plugin runtime (requires the OpenCV plugin to be installed)
 * `Feature` QR code scanning, pairing confirmation and local network discovery for VSCode plugin connections (requires VSCode plugin 1.1.0+)
-* `Feature` Remote file management and device script execution through the VSCode plugin, with progress display for large file transfers (requires VSCode plugin 1.1.0+)
-* `Feature` Connection manager in client and server modes, for viewing connection status, managing clients and accessing address history
-* `Feature` Client mode supports automatic reconnection after unexpected disconnection, retries when the network returns and connection restoration at app startup
-* `Feature` Node.js screen_metrics module and compatibility coordinate globals, sharing host conversion rules with the Bun SDK and following current screen rotation
-* `Feature` Explicit Bun host API client with Pinyin, Pinyin4j, coordinate and console operations, with independent capability switches
-* `Feature` Node.js and Bun support asynchronous OpenCC conversions and common image codecs, pixel reads, transforms and color searches; Bun image file access is authorized separately
-* `Feature` Node.js Workers support OpenCC and image modules through the parent runtime, including CJS, ESM, nested Workers and binary image data
-* `Feature` Bun supports screen capture with a separate opt-in grant, Android consent, timeout/cancellation cleanup and repeated authorization
-* `Feature` Node.js Workers support pinyin, pinyin4j, console controls and coordinate conversion, sharing the parent execution while retaining native output streams
-* `Feature` Bun screenRecorder writes H.264 MP4 with optional microphone, app-playback or mixed AAC audio and screenshots during recording, with independent audio grants and cancellation cleanup
-* `Feature` Node.js main thread and Workers support H.264 MP4 recording with microphone, playback or mixed AAC audio, concurrent screenshots and cleanup of unsaved Worker recordings
-* `Feature` Node.js/Bun images supports advanced filters, color conversion, multi-color searches, circles, similarity metrics and URL loading
-* `Feature` Node.js/Bun images supports SIFT/ORB extraction and matching with scene coordinates, ObjectFrame geometry and execution-owned Mat/feature handles
-* `Feature` Node.js/Bun images supports PNG quantization and compression with quality/memory metrics, binary results and descriptor-backed file output
-* `Feature` Node.js/Bun UI and Compose support native layouts, data components, reactive state and window events, with independent grants and automatic window cleanup
-* `Feature` Node.js/Bun support execution-owned View handles, asynchronous AndroidView factories and XML Compose container attachments, with Worker cleanup and packaged application support
-* `Feature` Node.js/Bun support common XML form and layout widgets and asynchronous native View property access, including ordered assignments, error recovery and Worker use
-* `Feature` Node.js/Bun: WebView page loading and JavaScript results, Drawer panels, Toolbar navigation and menus, and ViewPager pages with asynchronous native events
-* `Feature` Node.js/Bun: WebView HTTP(S) downloads, system file selection and asynchronous WebViewClient/WebChromeClient callbacks with native navigation and resource rules
-* `Feature` Node.js/Bun: WebView full-size camera capture, save and directory selection, document byte reads, and streamed blob/data downloads with selected output locations
-* `Feature` node.timeoutMs execution deadline setting for Node.js projects (project.json); when unset or 0, Node.js scripts and projects have no execution time limit, like Rhino scripts
-* `Feature` Bun project timeoutMs configuration for interactive camera and file workflows, including packaged applications
-* `Feature` Node.js/Bun: WebView video capture and foreground AAC/M4A audio recording, with media options, configurable chooser deadlines and temporary-file cleanup
-* `Feature` WebView getUserMedia/MediaRecorder streaming audio and video, awaited page Promises, explicit Android media permission requests and Worker lifecycle support
-* `Feature` WebView screen sharing adapter, foreground-service audio capture and native background camera recording in Node.js/Bun, including Node Workers
-* `Feature` Bun accessibility, app operations and clipboard APIs aligned with the Node.js interfaces, with independent grants and packaged-app support
-* `Feature` Bun file and persistent storage APIs with separate host-file grants and shared Node.js storage
-* `Feature` Host database/sqlite APIs for Bun and Node.js Workers with parameterized queries, transactions and persistence
-* `Feature` Sensor sampling and subscriptions for Bun and Node.js Workers with cancellation and automatic listener cleanup
-* `Feature` Host Shell streaming, Shizuku authorization and process cleanup for Bun, Node.js and Workers
-* `Feature` Host event observers and notifications for Bun and Node.js Workers, with independent subscription and notification cleanup
-* `Feature` Device controls and dialogs for Bun and Node.js Workers, including brightness, volume and independent window cleanup
-* `Feature` Android object helpers for Node.js, Bun and Workers, including Paint, ColorStateList, theme colors and FileProvider URIs
-* `Feature` Persistent calendar and IntentTask APIs for Node.js and Bun, with daily, weekly, monthly, yearly, one-shot, countdown and broadcast tasks
-* `Feature` Java/Android object interop for Node.js, Bun and Workers, including public constructors and members, arrays, exact long values, explicit overloads and application Context handles
-* `Feature` Java callbacks, generated subclasses and JAR/DEX loading for Node.js, Bun and Workers, with Promise results, superclass calls and execution cleanup
-* `Feature` Text-to-speech APIs for Node.js, Bun and Workers, with engine and voice queries, speech, silence, audio file synthesis and task events
-* `Feature` Speech recognition and model management APIs for Node.js, Bun and Workers, with WAV/PCM, dictation and wake sessions, model installation/import, synthesis and cancellation cleanup
-* `Feature` Node.js/Bun/Worker: EPUB book reading, resource export, search and reader sessions with events
-* `Feature` AI text generation, streaming, model catalog and persistent sessions for Node.js, Bun and Workers, with cancellation and per-app consent in 3-Stone AI for packaged apps
-* `Fix` Bun UI event waits blocking other host calls and causing asynchronous Flow verification to time out
-* `Fix` Issue where runtime.loadJar could not dynamically load class files compiled with newer Java versions
-* `Fix` Issue where runtime.loadDex on Android 7.x could corrupt the DEX cache and cause class loading failures
-* `Fix` Abnormal script behavior caused by incompatible scope, argument conversion and return value handling in the Rhino engine and built-in modules
-* `Fix` Object.fromEntries created inaccessible properties and incomplete console output when keys were numbers or numeric strings _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_
-* `Fix` Object.defineProperty throwing TypeError when modifying a non-configurable (configurable is false) enumerable property even when the descriptor omits enumerable (such as passing only `{ value: 1 }`)
-* `Fix` const declarations inside loop bodies not being reassigned on each iteration (such as `const item = list[i]` inside for/while bodies always retaining the first iteration's value)
-* `Fix` Regular expressions throwing UnsupportedOperationException when using Unicode property escapes (such as `\p{L}`) on Android 7.x
-* `Fix` Some localized script error messages losing arguments or triggering MessageFormat exceptions
-* `Fix` Issue where Proxy-wrapped functions and some JavaScript callbacks could not be passed to built-in modules, or caused nested arguments and overload ambiguity
-* `Fix` Issue where EventEmitter#once listeners could be invoked repeatedly during recursive event dispatch or when callbacks threw exceptions
-* `Fix` Issue where app.isInstalled/kill and other methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
-* `Fix` Issue where shell-related methods could hang on devices without Root access
-* `Fix` Issue where dialogs.multiChoice incorrectly converted multiple-choice results to strings _[`issue #518`](http://issues.autojs6.com/518)_
-* `Fix` Issue where closing script dialogs when a thread ended could crash the app
-* `Fix` Occasional "Unable to schedule a timer callback because its looper is exiting" errors when stopping scripts with setInterval timers
-* `Fix` Issue where expired callbacks could prevent scripts from ending automatically after cancelling timers or stopping child threads
-* `Fix` threads.pool throwing IllegalArgumentException when corePoolSize is specified without maxPoolSize
-* `Fix` Promise / Flow await methods, continuation.await and await resumed through resumeError returning rejection errors as values instead of throwing at the call site in coroutines; uncaught errors now terminate the script with that error
-* `Fix` Suspending again after resuming a coroutine (such as calling await after continuation.delay) terminating UI-mode scripts (or crashing the app when resumed from another thread), and cancelling setInterval timers when resumed from their callbacks
-* `Fix` Promise wait blocking indefinitely on script threads (such as Promise.resolve(1).wait() or waiting for Promises settled by setTimeout or tts); waiting on an unsettled Promise on the UI thread now throws TypeError instead of freezing the interface
-* `Fix` Scripts occasionally failing to finish automatically after all child threads created by threads.start end
-* `Fix` blockedGet/blockedGetOrThrow on objects returned by threads.disposable() blocking indefinitely when setAndNotify is called before waiting, always waiting until timeout even after receiving a value with a timeout specified, or occasionally returning null before receiving a value; interruption of a waiting thread is now handled as script interruption, like sleep
-* `Fix` ui.run, blocking dialogs, getClip/setClip and gesture methods such as gesture/swipe occasionally returning before receiving results from other threads, and scripts blocking indefinitely when a blocking dialog closes before waiting begins
-* `Fix` Stopping a script while its child threads are processing images potentially crashing the app
-* `Fix` Issue where focus-related methods of floaty.window/rawWindow could throw threading exceptions when called from script threads
-* `Fix` Issue where the results of console.setPosition/setSize/setGravity and other methods depended on call order or window display timing
-* `Fix` Issue where dragging the floating console title bar could fail and the window could not approach screen edges
-* `Fix` Issue where string values in objects or arrays printed by console.log/util.format and other methods lacked single quotes, differing from the util.inspect format in Auto.js 4
-* `Fix` Issue where insecure options of an http request could cause subsequent requests to keep skipping certificate and hostname verification
-* `Fix` Promises returned by http.getAsync/postAsync/requestAsync throwing NetworkOnMainThreadException when reading response bodies in then callbacks (such as res.body.string() or res.body.json())
-* `Fix` Issue where network security configuration could unexpectedly block HTTP requests in release builds and packaged apps
-* `Fix` Issue where the file chooser of WebView elements in UI mode could not open correctly
-* `Fix` Dynamic attribute expressions in UI-mode list/grid item templates could not access the current item object (such as its name property), causing ReferenceError and blank items, and numeric expression results displayed as 18.0 instead of 18
-* `Fix` layout_toStartOf, layout_toEndOf and layout_alignBaseline having no effect on RelativeLayout children in UI layouts
-* `Fix` paddingHorizontal/paddingVertical causing UI layout loading to fail
-* `Fix` scrollbars and requiresFadingEdge failing to disable scrollbars or edge fading in UI layouts (such as when set to none)
-* `Fix` ImageView scaleType potentially not taking effect when set together with adjustViewBounds in UI layouts
-* `Fix` Issue where UI scripts could exit unexpectedly when entering split-screen mode or resizing the window
-* `Fix` Issue where regular expression arguments did not work correctly in selector overloads, the filter global method and collection selectors
-* `Fix` Issue where contains selectors incorrectly interpreted ordinary string arguments as regular expressions
-* `Fix` Issue where limiting widget search results could return too many results or leave remaining nodes unrecycled
-* `Fix` Incorrect parsing of compass arguments and returned results in UiObject#compass and pickup/detect
-* `Fix` Issue where UiObject#child/parent and other methods could enter infinite recursion
-* `Fix` Incorrect attribute names in selector string representations and incorrect decimal formatting in some languages
-* `Fix` Issue where exceptions thrown by global selector methods could not be caught with try/catch
-* `Fix` Issue where widget searches with the findOnUiThread flag could wait forever or fail to time out on schedule
-* `Fix` Issue where UiObject#clickBounds could unexpectedly end the script event loop and invalidate subsequent callbacks, or throw exceptions when called on the main thread (such as in "ui" mode scripts)
-* `Fix` Issue where the source node of auto.registerEvent callbacks could cause infinite loops or out-of-bounds exceptions after node tree changes
-* `Fix` Issue where pickup and UiSelector queries could always return empty results after restarting the accessibility service
-* `Fix` Issue where auto.stateListener was overwritten between scripts and not removed when scripts ended
-* `Fix` Issue where auto.waitFor could continue waiting until timeout even after the accessibility service began delivering events
-* `Fix` Issue where disabling or restarting the accessibility service with Root access could have no effect
-* `Fix` Issue where creating an app page could re-enable an accessibility service the user had manually disabled
-* `Fix` Issue where auto.start/enable repeatedly restarted the accessibility service even when it was already running
-* `Fix` Issue where auto.windowRoots could return empty nodes when the active window was unavailable
-* `Fix` Inconsistent accessibility service status queries and error messages compared with the home drawer switch state
-* `Fix` Issue where auto.services could not read enabled services when no automatic enabling method was configured
-* `Fix` Issue where layout inspection required a second trigger after automatically enabling the accessibility service
-* `Fix` Issue where registered event callbacks and key listeners stopped working after restarting the accessibility service
-* `Fix` Possible null pointer exceptions on the first call to automator global actions, and incorrect gesture Y-coordinate scaling
-* `Fix` Issue where the accessibility service could be unexpectedly interrupted when repeatedly performing back and similar actions _[`issue #527`](http://issues.autojs6.com/527)_
-* `Fix` Node.js accessibility.ensureEnabled reporting a bridge call timeout instead of returning false when the accessibility service was enabled but did not bind in time
-* `Fix` Issue where settings.isEnabled returned false for the never-changed settings of enabling the accessibility service with root access automatically and controlling script running with the volume key, unlike their default on state shown on the settings page
-* `Fix` Issue where the notification observer misreported system notifications as toasts and missed notification events
+* `Feature` Remote file management and running scripts on the device from the VSCode plugin (requires VSCode plugin 1.1.0+)
+* `Feature` Connection manager for client mode and server mode, with automatic reconnection after unexpected disconnections in client mode
+* `Fix` Memory not being released after scripts end or some pages close, causing memory usage to keep growing with repeated runs (such as scripts using threads.start, timers, WebSocket, webview widgets or runtime.loadDex) _[`issue #548`](http://issues.autojs6.com/548)_
+* `Fix` AutoJs6 and packaged apps crashing at startup, or version history and trash data failing to open, when data was written by a newer version (such as after a downgrade installation)
 * `Fix` Issue where requesting screen capture permission on Android 14+ could crash the app due to foreground service startup failures _[`issue #516`](http://issues.autojs6.com/516)_
-* `Fix` Issue where repeated OCR calls across threads or files could repeatedly request screen capture permission _[`issue #551`](http://issues.autojs6.com/551)_
-* `Fix` Issue where OCR plugin selection failures produced error messages inconsistent with the actual engine and installation state
-* `Fix` Issue where the Paddle OCR plugin could not recover after service disconnection or wake automatically when not running _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_ _[`issue #517`](http://issues.autojs6.com/517)_
-* `Fix` Connections to stopped plugins failing on some systems (such as ColorOS) and requiring manual activation in the Plugin Center (plugins are now awakened automatically when AutoJs6 is in the foreground or has the "Display over other apps" permission)
-* `Fix` Issue where using Paddle OCR followed by Rapid OCR in packaged apps could crash the app
-* `Fix` Issue where selecting both Paddle OCR v3 and v4/v5/v6 plugins during packaging made Paddle OCR unavailable in packaged apps (packaged apps support only the PP-OCRv3 plugin)
-* `Fix` Issue where invalid arguments to images.resize could crash the app
-* `Fix` Issue where some images methods could recycle images prematurely, leak native memory or recycle images belonging to other scripts
-* `Fix` Incorrect results from the hs algorithm in colors.isSimilar/images.detectColor, and incorrect handling of fractional or percentage components in colors.rgb/rgba
-* `Fix` Errors in Color methods such as toHex/toInt/alpha/toHsv/isSimilar/blend/build, images.getSimilarity and the client option of http requests terminating scripts with ClassCastException that cannot be caught with try/catch
-* `Fix` Incorrect comparison results and grayscale or RGBA image handling in images.isEqual/mse/ncc/isGrayscale and related methods
-* `Fix` Lost transparency in images.invert, swapped red and blue channels in ImageWrapper#saveTo, and incorrect handling of out-of-bounds regions in images.clip
-* `Fix` Issue where images.load and other methods could leave connections open or fail to release temporary image resources
-* `Fix` Incorrect edge matching, coordinate precision, result sorting and result count limits in images.findImage/matchTemplate
-* `Fix` Issue where images.matchTemplate could not correctly handle images with different channel counts, solid-color templates or transparency masks, and MatchingResult#sortBy rejected fractional comparison results
-* `Fix` Incorrect bounds returned by images.matchFeatures and errors in small-image feature detection, drawing match results and resource release
-* `Fix` Memory not being released after scripts finish: scripts using threads.start, child-thread timers or plugins.load, and scripts with threads.pool threads or WebSocket connections still active when forcibly stopped, retained memory on every run, causing continuous growth with repeated runs; other scripts also left one script's memory unreleased after completion _[`issue #548`](http://issues.autojs6.com/548)_
-* `Fix` Memory occupied by the original page remaining unreleased after closing Settings or recreating the home page (such as when switching night mode)
-* `Fix` Memory of the initiating page remaining unreleased after it closes following "Cancel download" in the download progress dialog or while "Client mode" / "Server mode" is enabled
-* `Fix` Each rejected plugin binding being retained when the system denies binding (such as ColorOS restricting background plugins), preventing Plugin Center page memory from being released after closing
-* `Fix` Each Node.js script run retaining a rejected binding when the system denies binding to the Node.js Runtime plugin (such as ColorOS restricting background plugins)
-* `Fix` Memory not being released after Node.js scripts finish: each run retained the script runtime and bridge objects for UI sessions, floating windows, dialogs, image handles, screen recording and plugin tool calls, causing continuous memory growth with repeated runs
-* `Fix` Memory not being released after Bun and QuickJS scripts finish: each run retained script engines, output callbacks and bridge objects for host capabilities (automation, images), causing continuous memory growth with repeated runs
-* `Fix` Memory of finished scripts previously displayed in the home page's "Tasks" list not being released until the list refreshes
-* `Fix` Connections created by web.newWebSocket staying open after scripts finish, and connections with exitOnClose being closed when any script finishes (connections are now handled only when their owning script finishes: those with exitOnClose close gracefully within the timeout, and others are disconnected)
-* `Fix` DEX files loaded by runtime.loadDex/loadJar/loadAar and their classes remaining unreleased after scripts finish (loaders now follow the lifetime of the scripts loading them: after all scripts loading the same file finish, other scripts must load it themselves to use its classes)
-* `Fix` When multiple UI scripts run together, memory of later-started UI scripts remaining unreleased after they finish until all other UI scripts finish, while other UI scripts wrap widgets using a finished script's runtime
-* `Fix` Some older WebViews (such as WebView 111) retaining closed script pages after UI scripts containing webview elements finish, preventing their memory from being released
-* `Fix` Memory remaining unreleased after scripts finish when speech.listen/wake fails to open a session (such as when no speech model is installed)
-* `Fix` Sessions or tasks opened late by the speech plugin not being cancelled after speech.listen/wake times out waiting for the plugin or the script finishes, retaining the plugin connection
-* `Fix` Sessions or scripts accepted late by plugins not being closed after gallery.pick/view/edit, yolo.load, mail.connect or epub.open/read times out waiting for a session or the script finishes, or after the AutoJs4 Runtime plugin exceeds its acceptance deadline, retaining plugin connections
-* `Fix` Creating JavaAdapter clearing the entire class cache directory, invalidating runtime.loadJar conversion caches and potentially deleting files used by concurrent loadJar/loadDex calls
-* `Fix` Issue where scripts run through external URIs or in the background could lose their original paths or file extensions _[`issue #545`](http://issues.autojs6.com/545)_
-* `Fix` Issue where Tasker could not invoke and run scripts correctly _[`issue #501`](http://issues.autojs6.com/501)_
-* `Fix` Issue where script paths and click mappings could be incorrectly deleted during batch updates of home screen widgets
-* `Fix` Issue where the file manager did not read scripts with a BOM using their actual encoding when running them directly
-* `Fix` Issue where script projects without packaging information were not recognized correctly or did not run the entry specified by project.json
-* `Fix` Issue where auto files launched through the file manager, scheduled tasks or external intents were executed as JavaScript scripts
-* `Fix` Issue where the file manager could not show information for some APKs or lacked an entry for viewing their manifests
-* `Fix` Issue where external URI imports could write outside the destination directory or overwrite files with the same name due to improper file name handling
-* `Fix` Issue where the file manager could flicker or reset its scroll position when returning to the page or deleting recycle bin entries
-* `Fix` Issue where the file manager could not distinguish TypeScript files from videos with the same extension, and some source files lacked a run action
-* `Fix` Issue where file manager operation messages could appear repeatedly
-* `Fix` The file manager displaying directories as empty when reads fail due to insufficient permissions or removed storage, and paths becoming inconsistent with the list after navigation failures
-* `Fix` Issue where list items such as those in the file manager could keep a gray background after opening another page and returning, on some touch screens
-* `Fix` Issue where the count of "Running task" in the task list did not match the items shown, and UI scripts that had exited were still listed as running
-* `Fix` Incorrect resolution of media and image file paths, and cache paths displayed in MediaInfo details
-* `Fix` Issue where failed media detail queries could crash the app, and incorrect video metadata fields
-* `Fix` Issue where version history did not follow file moves or renames, or was incorrectly associated with copies having identical content
-* `Fix` Issue where the recycle bin and version history could not access internal storage correctly in multi-user or work profile environments
-* `Fix` Issue where overwriting files during version history or recycle bin restoration could lose original content or leave incomplete files
-* `Fix` Incorrect automatic renaming of directory names containing dots during recycle bin restoration
-* `Fix` Missing retained versions in version history and incorrect display modes after switching operations
-* `Fix` Issue where version history cleanup could delete new snapshots before their records were complete
-* `Fix` Issue where failed recycle bin restorations were still reported as completed
-* `Fix` Issue where restoring directories from the recycle bin could write malformed archive entries outside the destination directory
-* `Fix` The current version failing to open version history/recycle bin/color library/keystore databases after a newer AutoJs6 version writes their data (data common to both versions is preserved; if preservation is impossible, the database is backed up and an empty one is used, with automatic restoration after reinstalling AutoJs6 at or above the data version)
-* `Fix` Issue where the code editor could lose the cursor, selection or unsaved content after page recreation
-* `Fix` Issue where the content area of the code editor and log page could be obscured or compressed when showing the keyboard or input bar
-* `Fix` The "More" menus in code editor dialogs having similar background and text colors when the editor theme and the app light/dark mode differed, making menu items hard to read
-* `Fix` Issue where the native code editor (JsDroidEditor) used text size 15 when no size was set, instead of the default 14 shown on the settings page
-* `Fix` Incorrect saved state, cursor colors and hint language in the home page search field
-* `Fix` Issue where handling abnormal multi-touch input on the home Documentation tab could crash the app
-* `Fix` Missing transition animation when switching to the home Files tab
-* `Fix` Clipped widgets, missing bottom buttons and overly small switch touch targets in the home drawer on narrow screens
-* `Fix` Issue where drawer cleanup listeners accessed a released context and crashed the app when the home page closed or was recreated
-* `Fix` Issue where the splash screen background did not cover the short-edge cutout area
-* `Fix` Incorrect recent app package name and Activity information in the floating button menu _[`issue #529`](http://issues.autojs6.com/529)_
-* `Fix` Issue where the floating button's "Run script" dialog could not be restored after minimization (tentative fix) _[`issue #500`](http://issues.autojs6.com/500)_
-* `Fix` Some entries shifting downward as information loads after the floating button's "More" dialog appears
-* `Fix` Recent app package names and Activity information obtained through Shizuku taking more than 1 second to appear when first opening the floating button's "More" dialog after AutoJs6 starts
-* `Fix` Issue where layout inspection could generate invalid statements for widget collections
-* `Fix` Insufficient text/widget contrast in layout inspection floating windows and dialogs with some theme colors or in night mode
-* `Fix` Issue where Material colors selected in the classic layout could not be found through "Locate current theme color" after changing layouts, and the Material colors page did not show the current color summary
-* `Fix` Issue where the home Plugins tab and Plugin Center retained search filters after closing search or switching tabs
-* `Fix` Issue where the Plugin Center incorrectly selected x86_64 packages on x86 devices
-* `Fix` Issue where enabling a plugin could not continue after successful authorization
-* `Fix` Issue where the Plugin Center could not parse dates with some abbreviated month names
-* `Fix` Incorrect icon caching, night mode switching and pull-to-refresh states in the Plugin Center
-* `Fix` Issue where refreshing the Plugin Center could lose installed plugins, show an empty list or reset the scroll position
-* `Fix` Plugin Center entries briefly appearing without icons and immediately rearranging when returning from pages such as system app details
-* `Fix` Issue where the Plugin Center could install the wrong variant or show duplicate packaging templates and update prompts
-* `Fix` Issue where the Plugin Center restored removed or renamed plugins from the cache even after a successful index refresh
-* `Fix` Issue where a plugin details dialog opened immediately after a cold start flickered because list refreshes rebuilt the entire dialog
-* `Fix` Issue where the Plugin Center kept plugins disabled after they became temporarily unreachable (such as during an update installation)
-* `Fix` The Offline Docs plugin failing to re-enable after being disabled in the Plugin Center, with "Failed to enable the plugin"
-* `Fix` Issue where Shizuku permission request listeners were not properly unregistered after destruction
-* `Fix` Shizuku functions reporting that the Shizuku service is unavailable on first use after an AutoJs6 update because Shizuku retains service records from the previous version
-* `Fix` Commands started by the Shizuku user service (such as volume-key listeners and processes started by shizuku.spawn) continuing to run in the background and accumulating after AutoJs6 is forcibly stopped or exits _[`issue #474`](http://issues.autojs6.com/474)_
-* `Fix` Enabling "Use 'Volume up' to control script execution" in Settings after startup requiring an app restart before the volume-up key can stop scripts if the floating button has not been shown
-* `Fix` The input event listener process used for script recording (getevent through Shizuku or Root) continuing to run in the background after recording ends until the app exits
-* `Fix` RootAutomator failing to be created with only Shizuku permission (without Root) because it cannot identify the touchscreen device, and the interface becoming unresponsive for more than 10 seconds when recording starts immediately after AutoJs6 launches
-* `Fix` Issue where APK installation started in the background could not proceed to confirmation
-* `Fix` Issue where cancelling APK packaging could incorrectly report a build failure
-* `Fix` Incorrect signing certificate consistency checks for packaged APKs and signature recognition on Android 9-11
-* `Fix` Issue where missing runtime components in packaged apps or the host could leave the shell native library missing or select the wrong ABI, crashing the app
-* `Fix` Issue where APK packaging silently kept one of several same-named native libraries with different content (packaging now stops and lists their sources)
-* `Fix` Issue where packaged UI scripts occasionally showed a blank page and exited on startup
-* `Fix` Issue where files deleted from a project remained on the device or in cache directories after saving through the VSCode plugin _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
+* `Fix` Issue where images.captureScreen threw a SecurityException on Android 14+ after the screen rotated or stayed still
+* `Fix` Issue where repeated OCR calls across threads or files could request screen capture permission repeatedly _[`issue #551`](http://issues.autojs6.com/551)_
+* `Fix` Issue where the Paddle OCR plugin service could not recover after disconnection or wake up automatically when not running _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_ _[`issue #517`](http://issues.autojs6.com/517)_
+* `Fix` Issue where plugins that were not running could not be connected on some systems (such as ColorOS) and had to be activated manually in the Plugin Center
+* `Fix` Issue where packaged apps could crash when using Paddle OCR and Rapid OCR in turn, and OCR was unavailable when multiple Paddle OCR plugin versions were selected
+* `Fix` Issue where app.isInstalled/kill and other methods could not use package name arguments correctly _[`issue #495`](http://issues.autojs6.com/495)_
+* `Fix` Issue where dialogs.multiChoice incorrectly converted multiple-choice results to strings _[`issue #518`](http://issues.autojs6.com/518)_
+* `Fix` Issue where const declarations in loop bodies were not reassigned on each iteration (such as `const item = list[i]` in a for/while loop body always keeping the first value)
+* `Fix` Incorrect behaviors of scopes, argument conversion and some built-in methods (such as Object.fromEntries and Object.defineProperty) in the Rhino engine _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_
+* `Fix` Issue where regular expressions using Unicode property escapes threw exceptions on Android 7.x
+* `Fix` Issue where runtime.loadJar could not load class files compiled by newer Java versions, and runtime.loadDex/loadJar could fail on Android 7.x
+* `Fix` Issue where await in coroutines did not throw on rejection, scripts were terminated when suspending again after resuming, and the Promise wait method blocked forever on script threads
+* `Fix` Issue where calling shell-related methods on devices without Root access could freeze
+* `Fix` Issue where the app could crash when a script dialog closed as its thread ended, or when a script was stopped while a child thread was still processing images
+* `Fix` Issue where scripts occasionally did not end automatically after their child threads or timers finished, and occasional errors when stopping scripts with setInterval timers
+* `Fix` Issue where ui.run, threads.disposable, blocking dialogs, gestures and similar methods occasionally returned early or blocked forever while waiting for results from other threads
+* `Fix` Issue where position and size settings of the floating console depended on the call order, and dragging its title bar could stop working
+* `Fix` Issue where console.log and similar methods printed string values in objects or arrays without single quotes, unlike the Auto.js 4 format
+* `Fix` Issue where the insecure option of http requests could make later requests skip certificate validation, and HTTP requests in release builds could be blocked unexpectedly by the network security configuration
+* `Fix` Issue where reading the response body in then callbacks of Promises returned by http.getAsync and similar methods threw a NetworkOnMainThreadException
+* `Fix` Issue where the file chooser of WebView widgets in UI mode could not be opened
+* `Fix` Issue where expressions in item templates of list/grid widgets in UI mode could not access the current item, leaving list items blank
+* `Fix` Issue where attributes such as RelativeLayout alignment, paddingHorizontal/paddingVertical and scrollbars had no effect or broke layout loading, and UI scripts could exit unexpectedly in split-screen mode
+* `Fix` Issue where regex arguments of selectors, contains selectors and result count limits behaved incorrectly, and exceptions thrown by global selector methods could not be caught with try/catch
+* `Fix` Issue where UiObject#child/parent and similar methods could recurse infinitely, UiObject#clickBounds could end the script event loop unexpectedly, and widget searches could wait forever with findOnUiThread enabled
+* `Fix` Issue where selector queries returned empty results and event callbacks stopped working after the accessibility service restarted, and the service state and start/stop behavior did not match the home drawer switch
+* `Fix` Issue where the accessibility service could be interrupted unexpectedly when performing consecutive operations such as back _[`issue #527`](http://issues.autojs6.com/527)_
+* `Fix` Issue where automator global actions could throw a NullPointerException on the first call, and the vertical coordinates of gestures were scaled incorrectly
+* `Fix` Issue where the notification observer reported system notifications as toasts and missed notification events
+* `Fix` Issue where some images methods could recycle images too early, leak native memory or crash the app with invalid arguments
+* `Fix` Incorrect match results, coordinate precision and sorting of images.findImage/matchTemplate/matchFeatures, and incorrect results of images.invert/clip and similar methods
+* `Fix` Issue where the hs algorithm of colors.isSimilar/images.detectColor returned wrong results, and colors.rgb/rgba could not handle decimal or percentage components
+* `Fix` Issue where running scripts through external URIs, in the background or from Tasker lost the original path or extension, or failed to run _[`issue #545`](http://issues.autojs6.com/545)_ _[`issue #501`](http://issues.autojs6.com/501)_
+* `Fix` Issue where auto files run from the file manager, scheduled tasks or external intents were executed as JavaScript scripts
+* `Fix` Issue where script projects did not run the entry specified in project.json, and scripts with a BOM were not read with their actual encoding
+* `Fix` Issue where importing from external URIs could write outside the target folder or overwrite files with the same name due to improper file name handling
+* `Fix` Issue where the file manager showed read failures as empty folders, flickered or reset the scroll position when returning to a page, and kept items highlighted in gray
+* `Fix` Issue where restoring from version history or the trash could lose existing content, version history did not follow moved files, and both could not be accessed in multi-user environments
+* `Fix` Issue where the code editor could lose the cursor, selection or unsaved content after the page was recreated, and the soft keyboard covered the content area
+* `Fix` Issue where home drawer controls were clipped on narrow screens, and the app could crash when the home page closed or on multi-finger touches
+* `Fix` Incorrect recent app package name and Activity information shown in the floating button menu _[`issue #529`](http://issues.autojs6.com/529)_
+* `Fix` Issue where the floating button "Run script" dialog might not be restored after being minimized (attempted fix) _[`issue #500`](http://issues.autojs6.com/500)_
+* `Fix` Issue where the Plugin Center could lose installed plugins, show a blank list or install the wrong variant when refreshing (such as choosing x86_64 packages on x86 devices)
+* `Fix` Issue where plugins could not be enabled after authorization or a temporary connection failure, and the Offline Docs plugin could not be enabled again after being turned off
+* `Fix` Issue where Shizuku-related features reported that the Shizuku service was unavailable on first use after updating AutoJs6
+* `Fix` Issue where commands started through Shizuku (such as volume key listeners) kept running in the background and accumulated after AutoJs6 was force-stopped _[`issue #474`](http://issues.autojs6.com/474)_
+* `Fix` Issue where RootAutomator could not be created with only Shizuku access, and the input event listener process did not exit after script recording ended
+* `Fix` Issue where the "Use 'Volume Up' key to control script running" switch in Settings required restarting the app to take effect
+* `Fix` Issue where canceling APK packaging reported a build failure, and signing certificate checks and signature detection on Android 9-11 behaved incorrectly
+* `Fix` Issue where packaged apps could crash due to missing shell native libraries when runtime components were absent, and packaged UI scripts occasionally showed a blank page and exited at startup
+* `Fix` Issue where installation could not be confirmed when installing APKs in the background
+* `Fix` Issue where deleted files remained on the device when saving projects from the VSCode plugin _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
 * `Fix` Issue where log processing could exhaust memory when receiving project archives from the VSCode plugin _[`issue #523`](http://issues.autojs6.com/523)_
-* `Fix` Issue where stale VSCode plugin connections blocked log sending and prevented new connections from receiving logs _[`issue #385`](http://issues.autojs6.com/385)_
-* `Fix` Issue where showing a dialog on a destroyed page after a VSCode plugin connection failure could throw exceptions
-* `Fix` Issue where successfully connected addresses in client mode were not saved to history
-* `Fix` Issue where update checks did not select packages according to the device's ABI priority
-* `Fix` Issue where IntelliJ IDEA builds could fail to resolve module dependencies, match compilation tasks or locate the current APK output
-* `Fix` Insufficient memory for Kotlin compilation during multi-variant builds
-* `Fix` Incorrect SDK resolution and packaging template path resolution during Gradle builds
-* `Fix` cXy/cYx ignoring absolute coordinate mode when false is specified, reversing landscape aspect ratios, and rejecting some calls after setting only one scale base
-* `Fix` setScaleBases changing the other axis and consuming its one-time assignment when the second argument is invalid or a scale base has already been set
-* `Fix` device.width/height and coordinate conversions reading zero dimensions when an activity is recreated concurrently with a script screen-size read
-* `Fix` Wake locks held by device.keepAwake/keepScreenOn/keepScreenDim without a timeout not being released after scripts finish
-* `Fix` Node.js pinyin/pinyin4j converting only a small built-in dictionary; they now use the installed Pinyin plugins
-* `Fix` Node.js console window and styling methods having no effect
-* `Fix` Bun losing trailing logs when the synchronous result arrived before output callbacks at script completion
-* `Fix` Screen capture consent ending prematurely when its caller is covered, system dialogs remaining after cancellation, and requested image dimensions being ignored
-* `Fix` Pinyin numeric style/mode constants being rejected after conversion to JSON or Rhino numbers
-* `Fix` Screen capture discards cleared transparent projection buffers while preserving valid black frames
-* `Fix` AndroidView bindings retain native View ownership during Compose renderer recreation, preventing premature disposal and reuse by another session
-* `Fix` JSON UI restores unselected lists and tab state during Activity recreation without treating event payloads as View properties
-* `Fix` Database queries losing null/numeric parameter types, incorrect multirow INSERT counts and unfinished transactions retaining connections
-* `Fix` Sensor listeners surviving cancelled samples, failed polling or registration queued during provider destruction
-* `Fix` Shell cleanup hanging when commands ignore SIGTERM; process descendants are stopped before termination
-* `Fix` Notifications with the same numeric ID from separate script executions overwriting or cancelling each other
-* `Fix` Progress dialog handles retaining stale values after an update and pending dialogs remaining open after cancellation
-* `Fix` Daily and weekly calendar tasks shifting their local execution time across daylight-saving transitions
-* `Fix` IntentTask local and external receiver conflicts and stale registrations after updates or removal
-* `Fix` AutoJs6 and packaged apps crashing on startup and repeatedly restarting when installed over data left by a newer version (such as downgrades) (scheduled-task and intent-task database downgrades preserve existing data; if they still cannot open, they are backed up and startup continues with empty databases, AutoJs6 also sends a notification, and data is restored automatically after reinstalling a version at or above the data version)
-* `Fix` AutoJs6 and packaged apps not passing uncaught exceptions to the system, leaving no system crash records and allowing background components to repeatedly restart processes that crash on startup without system limits
-* `Fix` FileProvider URI helpers in built applications using the template authority instead of the actual manifest authority
-* `Fix` Node.js ESM imports fail when a host module exports a reserved name such as java.new
-* `Fix` Bun packaged apps with hidden launch/log pages can lose their host process during cold startup because the launch activity closes before runtime initialization
-* `Fix` tts.engines lists installed engines even when initialization of the default engine fails
-* `Fix` Mail attachment download progress no longer resets to zero when debug output is enabled
+* `Fix` Issue where stale VSCode plugin connections blocked log delivery so that new connections could not receive logs _[`issue #385`](http://issues.autojs6.com/385)_
+* `Fix` Issue where update checks did not choose installation packages by the device ABI priority
+* `Fix` Incorrect screen coordinate conversion (cXy/cYx/setScaleBases), and swapped device.width/height on devices whose natural orientation is landscape
+* `Fix` Issue where wake locks held by device.keepAwake/keepScreenOn/keepScreenDim without a timeout were not released after scripts ended
+* `Fix` Issue where module dependencies, the SDK and packaging template paths were resolved incorrectly when building the project with IntelliJ IDEA/Gradle
 * `Improvement` Deferred initialization of noncritical components to improve app startup speed
 * `Improvement` Permission dialogs no longer appear automatically at startup; when all-files access is missing, the home page shows a reminder with a direct authorization action
-* `Improvement` Adapted the app and packaged apps for Android 17, with improved guidance for local network permission, Advanced Protection and background audio restrictions
-* `Improvement` Added 16 KB memory page support for the app and packaged apps, with warnings about incompatible native libraries during plugin installation, loading and packaging
-* `Improvement` Improved multilingual display of interfaces and exception messages
-* `Improvement` Reduced package size by trimming dependencies, language resources and image resources
-* `Improvement` Update checks obtain version and package information through the GitHub REST API, with local rendering of release notes
-* `Improvement` Bundled Simplified Chinese and English release histories; other languages can be fetched online and cached (offline use prefers the cache and falls back to English when no cache exists)
-* `Improvement` Application settings use shared key declarations and storage, with the Settings page, script settings module and settings import/export using the same defaults and categories; existing setting keys and storage files remain unchanged, requiring no migration on upgrade
-* `Improvement` Moved offline project documentation into the Offline Docs plugin for independent installation and updates, with documentation source changes taking effect immediately
-* `Improvement` Moved packaging templates into the APK Builder Template plugin, validating plugin signatures, host versions and template compatibility during packaging
+* `Improvement` Adapted the app and packaged apps to Android 17 and devices with 16 KB memory pages
+* `Improvement` Trimmed dependencies, language resources and image resources in the installation package to reduce its size
+* `Improvement` Improved multilingual display of the interface, exception messages and engine error messages
+* `Improvement` Update checks get version and installation package information through the GitHub REST API
+* `Improvement` The app includes release history in Simplified Chinese and English, with other languages fetched online and cached
+* `Improvement` Pluginized offline project documentation (Offline Docs plugin) for independent installation and updates
+* `Improvement` Pluginized the packaging template (APK Builder Template plugin), with template compatibility checks during packaging
 * `Improvement` Pluginized functionality related to ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization
 * `Improvement` Pluginized functionality related to OpenCC/Pinyin/Pinyin4j/MediaInfo
-* `Improvement` Official plugins can follow the host's theme color, night mode and language settings
-* `Improvement` Improved online installation and updates, variant selection, plugin settings, instructions and release history display in the Plugin Center
-* `Improvement` Plugin Center list icons respond to taps/long presses according to installation status: installed plugins open system app details/their standalone launch page (with a message when no launch page exists), while uninstalled plugins open plugin details/start installation
-* `Improvement` The home Plugins tab FAB menu prioritizes the installation wizard, official and third-party repositories, and Plugin Center, with URL/local file installation and management actions grouped under "More"
-* `Improvement` Plugin Center supports two-level sorting with independent ascending/descending order at each level, defaulting to installed > disabled > not installed, with most recently updated first within each state
-* `Improvement` Entries operated on in the Plugin Center or changed through plugin settings retain their positions while updating status; background refresh continues normally, and pull-to-refresh or changing sorting/filtering restores normal ordering
-* `Improvement` The Plugin Center temporarily places newly installed plugins at the top (including those installed while it was closed) and marks them "Newly installed" or "Enable failed", restoring the original order when switching tabs or closing; plugins installed or enabled directly from their entries only show the status and stay in place
-* `Improvement` Plugin Center supports automatic mounting of SDK plugins and available ABI detection
-* `Improvement` Officially signed plugins (including MCP Server and YOLO) are enabled by default after installation; the Plugin Center automatically enables newly detected installations (including those installed while it was closed), first waking plugins on systems such as ColorOS that cannot connect to stopped plugins; MCP Server and YOLO plugins with other signatures still require manual enabling, and updates preserve the existing enabled state
-* `Improvement` Improved list display and refresh smoothness in the Plugin Center through caching and asynchronous loading, with recovery guidance when enabling plugins fails
-* `Improvement` Long-pressing the floating button on the home Plugins tab opens the Plugin Center
-* `Improvement` Plugin information dialogs separately show supported ABIs and the ABI of the installed package
-* `Improvement` Cached Rhino runtime initialization data to speed up script startup, improved large-array printing performance and Java reflection compatibility on older Android versions
-* `Improvement` Rhino synchronized with upstream, supporting new.target, const declarations in for...of/for...in loop headers and Uint8Array Base64/Hex conversion methods (such as Uint8Array.fromBase64 and toHex), with improvements to scope, TypedArray and debugger compatibility
-* `Improvement` Rhino array destructuring, spread, for...of and Proxy/Reflect/with/TypedArray behavior aligned with ECMAScript: argument spread f(...args) and logical assignment short-circuiting work, assignment throws TypeError when a Proxy set trap returns false in strict mode, and destructuring array-like objects without Symbol.iterator throws TypeError
-* `Improvement` Passing Number to BigInt.asIntN/asUintN or DataView setBigInt64/setBigUint64 now throws TypeError (previously converted automatically); use BigInt(x)
-* `Improvement` Reassigning const variables now throws TypeError even in non-strict mode (consistent with ECMAScript and Node.js), instead of being silently ignored
-* `Improvement` Completed translations in 9 languages for 28 engine error messages covering ArrayBuffer, DataView, TypedArray, regular expressions and destructuring
-* `Improvement` runtime.loadJar supports loading JAR files through the DEX Compiler plugin, with compilation diagnostics and fallback on failure (experimental, disabled by default)
-* `Improvement` Scheduled tasks, broadcast tasks, shortcuts and Tasker support TypeScript scripts (requires the TypeScript Engine plugin)
-* `Improvement` pinyin supports per-call custom pronunciation dictionaries, with improved compare/compact methods
-* `Improvement` pinyin4j supports multiple romanization schemes and complete pronunciation queries
-* `Improvement` opencc supports conversion type queries, batch conversion and chained conversion
-* `Improvement` ocr automatically selects available engines in ML Kit/Paddle/Rapid order, with explicit engine selection and restoration of automatic selection
-* `Improvement` The ocr module reached through the host bridge (Node.js plugin and other plugin sessions) selects an enabled engine in ML Kit/Paddle/Rapid order when no engine is specified, instead of always requiring the ML Kit OCR plugin
-* `Improvement` The Paddle engine's profile option in the ocr module participates in plugin selection, choosing only plugins declaring the same profile (such as zh/en/zh-hant/ja/ko for Paddle OCR PP-OCRv3 language packs and mobile/server/mobile-en for PP-OCRv4, case-insensitive); when no plugin matches, the error lists profiles provided by installed plugins
-* `Improvement` When multiple plugins match the Paddle engine in the ocr module and variant priorities have not been customized, plugins of the same generation (such as PP-OCRv3 ONNX Runtime language packs and Paddle Lite) prefer the declared recommended default plugin (PP-OCRv3 Chinese), then sort by package name, making selection independent of discovery order
-* `Improvement` The host bridge accessibility module adds captureScreenImage, which turns an accessibility screenshot (falling back to screen capture when unavailable) into a session image handle that plugin sessions such as MCP Server use directly for barcode recognition and image or color search; plugin sessions may now hold twice their concurrent-call count of image handles instead of 4
-* `Improvement` When model-facing plugin sessions such as MCP Server and 3-Stove Agent read an image through the bridge (image.readImage), images whose longest edge exceeds 4096 px are decoded at a sample size that is a power of 2 and the result carries scale plus the source dimensions, so large gallery photos cannot exhaust host memory; Node.js plugin scripts are unaffected
-* `Improvement` Model-facing plugin sessions such as MCP Server and 3-Stove Agent that read images or media information by path through the bridge (image.readImage, mediainfo) are confined to the working directory, and writes (image.saveImage) stay inside it as well; when the request declares files.shared_read and AutoJs6 holds all-files access, shared storage becomes readable read-only (excluding Android/data and Android/obb), and files.list and files.stat can list shared storage under the same token; Node.js plugin scripts are unaffected
-* `Improvement` The host bridge app module adds pluginCapabilities, which reports in real time the status of the plugin families OCR, barcode, Pinyin, Pinyin4j, MediaInfo, OpenCV and offline docs (available / not_installed / disabled / incompatible), the installed plugins' versions, enablement and authorization, the bridge methods they back and the Plugin Center entry, so plugin sessions such as MCP Server can show tools by installation state and point users to the plugin to install; the optional method list a plugin session receives when it opens is completed by the same logic for the families available at that time
-* `Improvement` plugin_tools module in the host bridge, for plugin sessions such as MCP Server to list, invoke and cancel plugin-declared tools: screenshots and files within the working directory are passed as file descriptors, generated files are written to the working directory, and timeouts or cancellation notify the plugin to stop; tools from unofficial plugins require the request to declare the plugin_tools.user_granted token; MCP Server's default capability grant includes the module, while 3-Stove Agent's grant does not
-* `Improvement` The default capability grant of MCP Server plugin sessions grows: the ocr, barcode, pinyin, pinyin4j and mediainfo module methods, image.readImage and the image / color search methods, accessibility.readScreenText / captureScreenImage and app.pluginCapabilities, with their permission tokens (including files.shared_read for read-only shared storage); these methods work only while the corresponding plugin is installed and enabled, image.saveImage and image.toBytes stay outside the grant, and the 3-Stove Agent grant is unchanged; agent.listScripts / readManifest / execRegistered with the agent and agent.exec tokens join as well, so MCP Server can list and run registered scripts
-* `Improvement` When the AutoJs6 working directory is missing, occupied by a same-named file or inaccessible due to missing storage permissions, errors from the bridged files module and calls such as engines.execScript / execScriptFile explain the cause and remedy (error code ERR_AUTOJS6_WORKING_DIRECTORY_UNAVAILABLE)
-* `Improvement` images.save/saveImage/compress/compressToBytes support PNG quantization options (preserving transparency) and pixel/memory limits (requires the Image Quantization plugin)
-* `Improvement` images.readPixels supports ImageWrapper arguments
-* `Improvement` images.matchTemplate/findPointByImage support the scales option, with size, scale and region information in matching results
-* `Improvement` images.matchFeatures supports image or path arguments and more matching options, with additional feature and result information
-* `Improvement` Improved performance and accuracy of multi-point color searches, template matching and feature matching
-* `Improvement` Screen capture supports retries when no frame is temporarily available, reducing the impact of capture resource release on concurrent image operations
-* `Improvement` mediainfo supports snapshot/capabilities methods and media stream counts, with faster file detail queries
-* `Improvement` Improved argument compatibility in KeyCode and support for sending keycode commands through Shizuku _[`issue #492`](http://issues.autojs6.com/492)_
-* `Improvement` The shell function supports the adb option for running commands through Shizuku (compatible with Auto.js Pro); the adb key in arguments no longer becomes an --adb argument; write "--adb" when that argument is needed
-* `Improvement` Accessibility service supports automatic enabling through Shizuku and synchronized start/stop states with the official companion plugin
-* `Improvement` The source node in auto.registerEvent callbacks is now resolved on demand (must be read within the callback below Android 13)
-* `Improvement` Accessibility window queries skip unavailable root nodes, with improved node recycling strategies across Android versions
-* `Improvement` Improved resource recycling and retries after system rate limiting in automator.captureScreen, preventing screenshot requests from remaining unfinished for long periods
-* `Improvement` Integer arguments in global and collection selectors are consistently rounded, with more stable multithreaded queries and timeout interruption
-* `Improvement` Selectors and Flow waits support event-assisted polling, retrying early when accessibility events arrive (enabled through the eventAssistedPolling flag in auto.setFlags)
-* `Improvement` Restored console.rawInput/input, for reading text or evaluating expressions through the console input bar
-* `Improvement` Each console remembers its own time visibility and format settings; rerunning a script with the same name replaces its existing floating window
-* `Improvement` media.playMusic supports foreground playback, audio focus and notification controls, with playback resource cleanup when the script ends
-* `Improvement` WebViews created by web.newInjectableWebView are destroyed when their script finishes if they are not displayed in the interface
-* `Improvement` Removed bundled copies of com.stardust compatibility classes; class names referenced with the com.stardust prefix now map to the same-named AutoJs6 implementations (218 classes fully mapped, 90 partially mapped, and the remaining 46 without counterparts no longer provided), making class-name usage such as new and instanceof consistent with runtime objects (see Project documentation > [AutoJs4 runtime](https://docs.autojs6.com/#/autojs4Runtime))
-* `Improvement` Sample code adds 3-Block Compose, 3-Macaw Speech, automation workflows, console interaction and ebook operations, and improves screen OCR examples
+* `Improvement` APK installation now uses the installation dialog of the 3-Setup Installer plugin, falling back to the system installer when the plugin is unavailable; split APK containers such as APKS/XAPK require the plugin
+* `Improvement` Improved online installation and updates, variant selection, sorting, plugin settings and release history in the Plugin Center, with smoother list loading and refreshing
+* `Improvement` Official plugins are enabled by default after installation and follow the AutoJs6 theme color, night mode and language settings
+* `Improvement` The Plugin Center temporarily pins newly installed plugins to the top and marks them as "Newly installed" or "Failed to enable"
+* `Improvement` The floating button menu on the home Plugins tab shows the installation wizard and plugin libraries first, and long-pressing the floating button opens the Plugin Center
+* `Improvement` Synchronized the Rhino engine with upstream, supporting new features such as new.target and Base64/Hex conversion of Uint8Array, with faster script startup and better compatibility
+* `Improvement` Behaviors of destructuring, spread, optional chaining, Proxy/Reflect, BigInt and block-level function declarations in the Rhino engine now follow the ECMAScript specification
+* `Improvement` The global Promise is now the built-in implementation of Rhino, adding Promise.any/withResolvers/try methods, with unhandled rejections reported as errors in the console
+* `Improvement` Removed the built-in copies of com.stardust compatibility classes; class names referenced with the com.stardust prefix now map to the AutoJs6 implementations with the same names (see Project documentation > [AutoJs4 Runtime](https://docs.autojs6.com/#/autojs4Runtime))
+* `Improvement` File logging now uses a built-in implementation, retaining documented configuration options and common PatternLayout formats; other Log4j APIs are no longer available
+* `Improvement` ocr selects installed engines automatically in ML Kit/Paddle/Rapid order by default, and the Paddle engine supports choosing plugins by language (profile) and the useCls option for text direction classification
+* `Improvement` pinyin/pinyin4j/opencc modules support custom pronunciation dictionaries, multiple romanization schemes, batch conversion and chained conversion
+* `Improvement` images.matchTemplate/matchFeatures and related methods support more arguments, and multi-point color finding, template matching and feature matching are faster and more accurate
+* `Improvement` images.captureScreen refreshes frames promptly when the screen is still, and images.requestScreenCapture requests sharing the entire screen only, so that captures match screen coordinates on Android 14+
+* `Improvement` runtime.loadJar supports loading JAR files through the DEX Compiler plugin (experimental, off by default)
+* `Improvement` KeyCode method improves argument compatibility and supports sending key codes with Shizuku access _[`issue #492`](http://issues.autojs6.com/492)_
+* `Improvement` shell function supports the adb option, for running commands through Shizuku (compatible with Auto.js Pro)
+* `Improvement` Accessibility service supports automatic enabling through Shizuku
+* `Improvement` device.getAndroidId supports the useSystemId argument, for getting the system value through Shizuku/Root on Android 8.0+
+* `Improvement` Restored console.rawInput/input methods, for reading text or evaluating expressions through the console input bar
 * `Improvement` Unified action menu for the floating console, with resizing and settings for time, coloring, font size and transparency
-* `Improvement` Unified code editor theme colors and menu layout, with improved fonts, read-only mode and text selection
-* `Improvement` The code editor run button switches to a stop button after starting a script
-* `Improvement` Improved code editor font download messages, go-to-line correction, and file encoding detection and saving
-* `Improvement` Faster page display when opening files in the code editor
-* `Improvement` File manager loads package information on demand, with improved display of large packages and manifest information
-* `Improvement` Unified file preview and plugin action entries in the file manager, with incremental list refreshes that retain scroll position
-* `Improvement` Privileged file edit backups can be viewed, restored and cleaned in one place, with automatic retention by version count and space target per file (default: up to 5 versions, a 64 MiB target, and at least the latest 1 backup); recovery data that is in use, has changed or has an unconfirmed outcome is not cleaned automatically
-* `Improvement` File manager prefers in-place access when opening normally readable files in other apps; read-only on-demand access to restricted files supports files larger than 1 GiB and video seeking where supported by the system; compatibility copies require confirmation showing required and available temporary space, with copying progress and cancellation
-* `Improvement` Version history avoids duplicate snapshots and preserves original content before overwrites; restoring recycle bin items to a new path also migrates their version history
-* `Improvement` Improved recycle bin storage hints, recovery of damaged entries and error messages, with incremental list refreshes
-* `Improvement` Layout hierarchy inspection supports attribute summaries, parent highlighting, horizontal scrolling and selecting parent widgets level by level
-* `Improvement` Removed colored hierarchy lines from layout hierarchy inspection; expand/collapse indicators move to the left of widget text and distinguish expandable, expanded and leaf nodes
-* `Improvement` Layout inspection node information dialogs mark multiple selections with the theme color; copy modes support "Always ask/Copy object selector/Copy chained selector" and persist across sessions
-* `Improvement` Unified grouped layouts in accessibility service and connection managers, with expansion/collapse at each level and separate settings
-* `Improvement` Task lists and script execution logs use abbreviated paths such as the working directory, while preserving actual entry file names and extensions
-* `Improvement` Floating buttons and related windows follow the app language and night mode, with menu information loaded in the background
-* `Improvement` Renamed the home drawer group "Connect to computer" to "Remote connections"
-* `Improvement` Combined light and dark window backgrounds in the default color library into "Background colors", with light, dark, automatic following and automatic inversion options; pre-upgrade selections are preserved
-* `Improvement` Theme settings support locating colors in custom libraries and the active intelligent color library; search now includes custom library colors and intelligent library groups
-* `Improvement` APK installation dialogs are provided by the 3-Setup Installer plugin; when unavailable, the system installer is used with guidance to install the plugin; apks/xapk/apkm/apkz split-package containers require this plugin
-* `Improvement` Added heartbeat detection and data length validation for VSCode plugin connections to prevent stale connections and malformed data from disrupting communication _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
-* `Improvement` VSCode plugin file saving supports retaining relative directory structure within the working directory _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
-* `Improvement` Improved QR code recognition for client mode connections and moved its entry to the address dialog menu
-* `Improvement` Gradle builds support dynamically matching compatible Kotlin/KSP/AGP/R8 versions, with reduced startup memory usage and cleaned-up compilation warnings
-* `Improvement` Moved Gradle platform compatibility data and update tasks to AutoJs6-Gradle-Platform-Versions, with cross-repository synchronization in Scrapers
-* `Improvement` Added the useSystemId Boolean argument to device.getAndroidId, obtaining the system value for the Android user running the app through Shizuku/Root on Android 8.0+; permission or read failures throw exceptions, and older systems ignore this argument
-* `Improvement` cX/cY/cXy/cYx support explicit auto mode, consistently validate coordinates and scale bases, and preserve large finite results beyond the Long range
-* `Improvement` Unsettable or unknown attributes in native Android XML layouts are skipped with a single console warning instead of causing the entire layout to fail to load
-* `Improvement` UI layout attributes are applied in written order, with later attributes overriding earlier ones (such as paddingHorizontal after padding)
-* `Improvement` Bun host calls wait within their deadlines and support cancellation while queued, allowing short overlapping task triggers to run in sequence
-* `Improvement` Java object snapshots use identity text instead of implicitly invoking toString and triggering callbacks
+* `Improvement` media.playMusic supports foreground playback, audio focus and notification controls
+* `Improvement` Attributes that cannot be applied in native Android XML layouts are now skipped with a console warning instead of failing the whole layout
+* `Improvement` Unified theme colors and menu layouts of the code editor, faster display when opening files, and the run button switches to a stop button after running a script
+* `Improvement` Unified file preview and plugin action entries in the file manager, keeping the scroll position when the list refreshes
+* `Improvement` Version history avoids duplicate snapshots, and restoring from the trash to a new path moves the version history along
+* `Improvement` Layout hierarchy analysis supports attribute summaries, parent highlighting and selecting parent widgets level by level
+* `Improvement` Renamed the "Connect to computer" group in the home drawer to "Remote connection"
+* `Improvement` The floating button and related windows follow the app language and night mode
+* `Improvement` Merged the light and dark window backgrounds of the default color library into a single "Background color" item with automatic follow or inversion options, keeping choices made before the upgrade
+* `Improvement` Heartbeat checks and data length validation for VSCode plugin connections _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
+* `Improvement` Files saved from the VSCode plugin can keep their relative folder structure in the working directory _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
+* `Improvement` Added sample code for 3-Block Compose, speech, automation flows, console interaction and e-book operations
+* `Improvement` Gradle builds match compatible Kotlin/KSP/AGP/R8 versions dynamically, and platform compatibility data moved to the AutoJs6-Gradle-Platform-Versions project
 * `Dependency` Modularized Android AXML
 * `Dependency` Modularized Android ARSC Editor
 * `Dependency` Modularized APK Signer
@@ -525,14 +209,15 @@
 * `Dependency` Added AndroidX Test Ext JUnit version 1.3.0
 * `Dependency` Added ZXing Android Embedded version 4.3.0
 * `Dependency` Added Android Hidden API Bypass version 6.1
-* `Dependency` Added NDK version 28.2.13676358 and CMake version 3.22.1 for building the native components of privileged file operations
+* `Dependency` Added NDK version 28.2.13676358 and CMake version 3.22.1
+* `Dependency` Replaced Desugar JDK Libs version 2.1.5 with Desugar JDK Libs NIO version 2.1.5
 * `Dependency` Upgraded Android SDK version 36 -> 37
 * `Dependency` Upgraded Gradle 9 version 9.4.0 -> 9.7.1
 * `Dependency` Upgraded AndroidX Lifecycle version 2.6.2 -> 2.9.4
 * `Dependency` Upgraded AndroidX SavedState version 1.2.1 -> 1.3.2
 * `Dependency` Upgraded AndroidX Emoji2 version 1.3.0 -> 1.4.0
 * `Dependency` Upgraded AndroidX Window version 1.0.0 -> 1.5.0
-* `Dependency` Upgrade Rhino to 2.0.0-SNAPSHOT (upstream snapshot 2025/12/22 -> 2026/10/23)
+* `Dependency` Upgraded Rhino version 2.0.0-SNAPSHOT (upstream snapshot 2025/12/22 -> 2026/10/31)
 * `Dependency` Removed Android Annotations version 4.8.0
 * `Dependency` Removed Android dx version 1.14
 * `Dependency` Removed AndroidX AppCompat (Legacy) version 1.0.2

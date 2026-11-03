@@ -6,513 +6,197 @@
 
 # v6.8.0
 
-###### 2026/10/24 - 部分功能插件化, 謹慎升級
+###### 2026/11/03 - 部分功能插件化, 謹慎升級
 
 * `提示` 部分內置功能改由獨立插件提供 (如 OCR, 條碼識別, OpenCV, OpenCC, 拼音, MediaInfo, 終端及離線項目文檔), 使用前需在插件中心安裝並啓用對應插件
+* `提示` Rhino 引擎的 Promise 及部分語法行為改為與 ECMAScript 規範一致 (如 Promise 回調改為微任務執行, 為 const 變量重新賦值時拋出 TypeError), 依賴舊行為的腳本可能需要調整
+* `提示` console 控件及控制枱浮動窗口改為顯示當前腳本日誌, 全局日誌可通過 globalconsole 控件或日誌頁面查看
 * `提示` 打包應用的目標 SDK 版本由 29 調整為 37, 共享存儲及本地網絡訪問需按系統要求授權
 * `提示` 打包應用使用 images 等依賴 OpenCV 的功能時, 需在打包時勾選 OpenCV 插件
-* `提示` console 控件及控制枱浮動窗口改為顯示當前腳本日誌, 全局日誌可通過 globalconsole 控件或日誌頁面查看
-* `提示` 文件日誌改用內置實現, 保留已文檔化的配置選項及常用 PatternLayout 格式, 其他 Log4j API 不再提供
-* `提示` Node.js 的 pinyin/pinyin4j 和控制台視窗控制方法改為非同步宿主呼叫, 指令碼需使用 await 等待結果
-* `新增` Rhino 引擎支持 ES2015+ class 語法, 包括字段, 靜態塊, 私有名, 以及繼承 Error/Array/Map 等內建類型 (參閲 項目文檔 > [類語法](https://docs.autojs6.com/#/classSyntax))
-* `新增` Rhino 腳本的 class 可繼承 Java 類與接口 (如 class Worker extends java.lang.Thread), 支持 super 調用 Java 父類方法, 受保護成員, 多接口 (extends JavaAdapter(Base, I1, I2)); View 子類實例可使用 attr/on 等控件方法; 不能繼承 final 類或覆蓋 final 方法 (參閲 項目文檔 > [類語法](https://docs.autojs6.com/#/classSyntax))
-* `新增` Node.js/Bun/Worker 的 ai.agent 任務控制與事件, 登記指令碼上下文和結果回傳, 以及打包應用程式的獨立授權
-* `新增` Node.js, Bun 與 Worker 的 Flow within/scope 範圍繼承, 羅盤導航和結果投影, 以及 press/swipe/gesture/gestures 手勢重載
-* `新增` Node.js, Bun 及 Worker 的 flow 非同步鏈與條件/穩定性等待, 支援分支取消, 單步驟重試及宿主介面快照; Node.js, Bun 及 Worker 的 Flow 進階點擊, 捲動, 輸入, 清單擷取與真實事件等待, 支援監聽就緒, 快照驗證和取消
-* `新增` Node.js/Bun/Worker: 郵件帳戶連線, 郵件操作, 附件與郵箱監聽, 支援取消及 Worker 結束清理
-* `新增` 桌面捷徑支援新增自動存檔及納入升級前已有的固定捷徑, 支援備份匯出/匯入及批次還原; 無法讀取的圖示支援逐項補選或批次使用預設圖示, 已儲存的圖示不會被覆寫; 解凍後遺失的捷徑會在捷徑備份頁面標示以供還原, 首頁不主動彈出提示, 已識別的主動移除預設不勾選; 同一指令碼的多個捷徑依原 ID 獨立儲存 (納入已有固定捷徑需要 Android 7.1+, 自動偵測需要 Android 8+) (入口: 設定頁面 > 設定 > 捷徑備份)
-* `新增` "管理 AutoJs6 設置" 頁面, 用於按分類導出/導入應用設置 (zip 文件), 按分類恢復默認設置, 以及撤銷上次導入或恢復默認; 導入時可創建不存在的工作目錄或下載尚未下載的編輯器字體, 未處理的項保持當前值; "憑據與授權" 分類加密保存, 設置憑據密碼後可在其他設備上輸入密碼導入, 否則只能在本機導入; 快捷方式與顏色庫可作為數據分類導出, 並可通過 "細化..." 選擇條目, 導入的快捷方式可隨後選擇恢復到桌面, 撤銷導入時一併移除導入新增的快捷方式與顏色庫; 自動備份包括週期備份 (每日/每週/每月, 默認關閉), 變更後備份 (設置停止變化 5 分鐘後, 默認關閉) 及操作後備份 (導入, 恢復默認或撤銷完成後, 默認開啓), 寫入工作目錄的 backups/settings, 每種保留最新的 7 份且不含憑據, 週期或變更後備份失敗時發送通知; 設置嚮導增加設置導入嚮導, 用於首次啓動時導入之前導出的設置 (入口: 設置頁面 > 配置 > 管理 AutoJs6 設置/設置嚮導)
-* `新增` 設置嚮導, 用於依次運行權限申請嚮導及插件安裝嚮導, 首次啓動後主頁以歡迎提示提供入口 (入口: 設置頁面 > 配置 > 設置嚮導)
-* `新增` 權限申請嚮導, 用於勾選主頁抽屜中的權限並依次申請, 內置 "標準"/"最小"/"全部" 配置並支持自定義配置, 已授予的權限可通過菜單隱藏 (入口: 設置嚮導/主頁抽屜 "權限" 分組標題按鈕)
-* `新增` 插件安裝嚮導, 用於按分類勾選並批量安裝官方插件, 內置 "標準"/"最小"/"全部" 配置並支持自定義配置的保存, 重命名及刪除 (入口: 設置嚮導/主頁插件標籤頁懸浮按鈕菜單/插件中心 "+" 菜單)
-* `新增` 插件安裝嚮導支持邊下載邊安裝, 具備 Shizuku/Root/Dhizuku 授權時可通過 3-Setup Installer 插件靜默安裝, 使用系統安裝器時在下載前檢查安裝未知應用權限
-* `新增` 插件設置增加 "顯示啓動器圖標" 開關 (默認開啓), 插件安裝嚮導可統一設置本次新安裝插件是否顯示圖標 (修改應用組件需要 Root 或 Shizuku)
-* `新增` 無障礙服務管理器, 支持服務啓停, 緩存清理, 自檢, 事件監視及診斷信息複製 (入口: 主頁抽屜無障礙服務條目)
-* `新增` 開發者選項頁面支持查看進程退出記錄及複製診斷信息 (Android 11+) (入口: 關於應用與開發者頁面長按應用圖標)
-* `新增` 開發者選項增加 "允許 Node.js 腳本使用 Inspector" 開關 (默認關閉), 用於配合 Node.js Runtime 插件進行斷點調試及 CPU/堆分析
-* `新增` 開發者選項增加 "內存診斷" 頁面, 用於查看 Java 堆, 原生堆, 進程 PSS, 存活的腳本引擎, 已結束但未被回收的腳本運行時, 未釋放的圖像及腳本線程 (每 2 秒刷新), 支持強制 GC 後複查, 導出 hprof 堆轉儲及複製診斷文本 (入口: 開發者選項 > 內存診斷 > 打開內存診斷)
-* `新增` 全局控制枱支持在腳本結束 10 秒後其運行時仍未被回收時輸出警告並提示查看 "內存診斷" 頁面, debug 構建附帶 LeakCanary 的監視狀態 (默認開啓) (入口: 開發者選項 > 內存診斷 > 腳本結束後未回收時在控制枱警告)
-* `新增` debug 構建默認包含 LeakCanary, 監視已結束腳本的引擎, 運行時, 線程及懸浮窗, 用於發現腳本結束後未被回收的對象; 開發者選項 "內存診斷" 分類增加 "LeakCanary" 開關 (僅 debug 構建顯示) (可通過 Gradle 屬性 autojs.leakcanary.enabled 排除)
-* `新增` memory 模塊, 用於在腳本中讀取 AutoJs6 進程的內存診斷數據 (與 "內存診斷" 頁面同源): snapshot 獲取內存快照, collect 強制回收後複查, retained 列出已結束但未被回收的腳本運行時, dumpHeap 導出 hprof 堆轉儲, watch 交由 LeakCanary 監視對象 (僅 debug 構建); 正式版本中 dumpHeap 需開啓開發者選項 "允許腳本導出 hprof" (默認關閉) (參閲 示例代碼 > 工具 > 內存診斷) (參閲 項目文檔 > [內存](https://docs.autojs6.com/#/memory)) _[`issue #452`](http://issues.autojs6.com/452)_
-* `新增` 代碼生成模型管理頁, 支持本地導入, 按需下載, 多版本管理與對比及官方模型更新 (入口: 設置頁面 > 無障礙服務 > 代碼生成模型)
-* `新增` MCP Server 插件, 用於通過 MCP 客户端訪問 AutoJs6 的腳本, 文件及設備操作能力 (入口: 主頁抽屜/插件中心)
-* `新增` 3-Shell Terminal 插件, 提供終端能力 (入口: 主頁抽屜, 項目工具欄, 文件管理器目錄菜單)
-* `新增` 3-Macaw Speech 插件, 用於離線語音識別, 喚醒詞檢測及語音合成, 可註冊為系統 TTS 引擎, 語音模型按需下載 (入口: 插件中心/插件安裝嚮導)
-* `新增` Paddle OCR PP-OCRv3 Paddle Lite 插件, 用於繼續提供基於 Paddle Lite 的 PP-OCRv3 文字識別 (Paddle OCR PP-OCRv3 插件 2.0.0 起改用 ONNX Runtime), 可與之同時安裝, 腳本可用 `variant: "v3-paddle-lite"` 指定 (入口: 插件中心/插件安裝嚮導)
-* `新增` ocr 模塊 Paddle 引擎的 useCls 選項參數, 用於在檢測與識別之間運行文字方向分類, 以識別旋轉 180 度的文本行 (默認關閉; 需要 Paddle OCR PP-OCRv3 插件 2.0.0 及以上, 打包應用同樣適用)
-* `新增` Node.js Runtime 插件, 用於運行 Node.js 文件及項目 (支持 "nodejs" 模式參數及 .node.js/.cjs/.mjs 文件)
-* `新增` Python Runtime 插件, 用於運行 Python 文件及項目, 支持模塊入口, 執行超時及預置標準輸入
-* `新增` Lua Runtime 插件, 用於運行 Lua 腳本
+* `新增` 設置嚮導, 用於首次使用時依次完成權限申請及插件安裝, 首次啓動後主頁以歡迎提示提供入口 (入口: 設置頁面 > 配置 > 設置嚮導)
+* `新增` 插件安裝嚮導, 用於按分類勾選並批量安裝官方插件, 具備 Shizuku/Root/Dhizuku 授權時可通過 3-Setup Installer 插件靜默安裝 (入口: 設置嚮導/主頁插件標籤頁懸浮按鈕菜單/插件中心 "+" 菜單)
+* `新增` 權限申請嚮導, 用於勾選所需權限並依次申請, 內置 "標準"/"最小"/"全部" 配置並支持自定義配置 (入口: 設置嚮導/主頁抽屜 "權限" 分組標題按鈕)
+* `新增` Rhino 引擎支持 class 語法, 包括字段, 靜態塊, 私有成員及繼承 Error/Array/Map 等內建類型, 並可繼承 Java 類與接口 (參閲 項目文檔 > [類語法](https://docs.autojs6.com/#/classSyntax))
+* `新增` Rhino 引擎支持 async/await, 包括 async 函數, async 箭頭函數, async 方法, async 生成器及 for await (參閲 項目文檔 > [async/await 與 continuation](https://docs.autojs6.com/#/asyncAwait))
+* `新增` Node.js Runtime 及 Bun Runtime 插件, 用於運行 Node.js 及 Bun 的腳本和項目, 可調用 AutoJs6 的自動化, 圖像, 界面及文件等大部分腳本能力
+* `新增` Python Runtime, Lua Runtime 及 QuickJS Runtime 插件, 用於運行 Python, Lua 及 QuickJS (JavaScript) 腳本
 * `新增` Java Runtime 及 Kotlin Runtime 插件, 用於編譯並運行 Java/Kotlin 源碼 (Java 需要 Android 7+, Kotlin 需要 Android 8+)
-* `新增` QuickJS Runtime 插件, 用於運行 JavaScript 文件及 ES module (支持 "quickjs"/"qjs" 模式參數及 .quickjs.js/.quickjs.mjs 文件)
-* `新增` Bun Runtime 插件, 用於運行 JavaScript/TypeScript 文件及項目 (支持 "bun" 模式參數及 .bun.js/.bun.ts/.bun.tsx 文件)
-* `新增` TypeScript Engine 插件, 用於編譯 Rhino/Node.js 的 TypeScript 文件及項目, 支持類型檢查與 Source Map
-* `新增` ai 模塊, 用於通過 AI Provider 插件 (如 3-Stone AI) 調用本地或在線模型, 支持流式輸出, 持久會話及結構化 JSON 結果 (參閲 示例代碼 > ai)
-* `新增` ai.agent 腳本 API, 用於啓動, 查詢, 回應, 確認及取消 3-Stove Agent 任務, 支持 detached 後台任務 (需要 3-Stove Agent 插件) (參閲 示例代碼 > agent)
-* `新增` ai.agent.run/create 方法支持 plan 選項參數, 用於讓 3-Stove Agent 以計劃模式先提出步驟計劃再執行
-* `新增` 腳本可通過 project.json 或 @agent 頭註釋登記為 3-Stove Agent 可調用的腳本, 支持參數校驗, 超時停止及結構化結果回傳
-* `新增` plugins.tools 模塊, 用於列出並調用插件自行聲明的工具, 支持同步與異步調用; 參數按工具聲明的格式校驗, 圖片參數支持當前屏幕, 文件路徑或 ImageWrapper, 目錄參數把目錄中的文件 (例如模型文件) 交給插件, 工具生成的文件或目錄 (例如解壓結果) 寫入指定路徑 (需要提供工具的插件) (參閲 項目文檔 > [插件](https://docs.autojs6.com/#/plugins))
-* `新增` 插件工具契約, 用於插件聲明自己提供的工具 (名稱, 説明, 參數格式及風險等級), 由 AutoJs6 彙總, 校驗參數並轉發調用, 供腳本及 MCP Server 等插件使用; 只實現該契約的第三方插件也會列在插件中心 (僅收錄在插件中心啓用並授權的插件)
-* `新增` compose 模塊, 用於以 Jetpack Compose 構建界面, 提供節點工廠, 長期節點句柄, 響應式 state/render/ref 及主題控制 (需要 3-Block Compose 插件) (參閲 示例代碼 > 3-Block Compose)
-* `新增` 編輯器菜單新增 "在 3-Block Compose 設計器中打開": 保存當前文件後交給 3-Block Compose 插件 (1.2.0 及以上) 的可視化設計器編輯, 回到編輯器時自動重新加載設計器保存的內容 (有未保存修改時先詢問) (參閱 示例代碼 > 3-Block Compose)
-* `新增` ui 模式佈局預覽服務, 供 3-Block Compose 設計器在畫布內以宿主真實佈局器預覽 XML 佈局, Android 11 及以上嵌入顯示, 更低版本提供快照 (需要 3-Block Compose 插件 1.6.0 及以上)
-* `新增` 3-Block Compose 設計器的交互預覽 (Android 13 及以上) 在畫布內真實運行 ui 模式腳本: 腳本的對話框顯示在畫布內, ui.statusBarColor / navigationBarColor / backgroundColor 以仿狀態欄 / 導航欄色條與背景顯示, 長時間佔用主線程的腳本在設定時長 (默認 5 秒) 後停止並報告所在行; 設計器切到後台, 回到前台或按下畫布上方的返回鍵時 ui.emitter 收到 pause / resume / back_pressed 事件, 返回鍵未被處理時結束運行; TSX 腳本先經 TypeScript Engine 插件編譯後運行, 編譯錯誤與運行時錯誤均按 TSX 源碼報告行號 (需要 3-Block Compose 插件 1.7.0 及以上, 生命週期事件, 時長設置與 TSX 腳本需要 1.9.0 及以上)
-* `新增` 3-Block Compose 設計器的文件夾工程 (含 XML 佈局文件) 可直接交給 AutoJs6 運行或導入: 運行時解壓到緩存目錄並以工程方式運行, 結束後自動清理; 導入時解壓到腳本目錄下的同名文件夾, 已存在時可選擇覆蓋或另存為新文件夾 (需要 3-Block Compose 插件 1.8.0 及以上)
-* `新增` 代碼編輯器打開 ui 模式腳本時可用工具欄 "預覽" 開關在編輯器內預覽佈局 (豎屏位於下半區, 橫屏位於右半區): 佈局按整屏尺寸排布後等比縮小顯示, 停止輸入後自動刷新, 點擊預覽中的控件跳轉到對應源碼位置, 佈局有誤時在面板內説明原因並保留上一次的畫面; 只預覽佈局, 不運行腳本, 開關狀態按文件記住; 安裝 3-Block Compose 插件 (1.2.0 及以上) 後面板右上角提供 "在 3-Block Compose 設計器中打開" 按鈕
-* `新增` compose.mount/floaty 方法, 用於掛載 UI 頁面或創建懸浮窗 (懸浮窗同時支持 UI 與非 UI 腳本), 腳本停止時自動清理所屬會話
-* `新增` compose.dialog 方法, 用於創建可更新和關閉的對話框及模態底部彈層會話, 可在 UI 或普通腳本中使用
-* `新增` XML <compose> 容器及 compose.attach 方法, 用於在 UI 頁面或懸浮窗內嵌入 Compose 會話; compose.AndroidView 可承載現有 Android View
-* `新增` TSX 佈局支持 <compose.Column>, <compose:Text> 等 Compose 組件, 節點工廠引用, 插槽及響應式回調 (需要 TypeScript Engine 插件)
-* `新增` ui.inflate 方法支持編譯後的 XML TSX 佈局及其 onClick 回調綁定
-* `新增` flow 模塊及 waitAsync 全局方法, 用於異步等待與鏈式操作, 支持分支, 循環, 超時, 重試及取消 (參閲 項目文檔 > [流程](https://docs.autojs6.com/#/flow))
-* `新增` terminal 全局對象, 用於終端會話管理, 可見執行與輸出監聽, 支持等待輸出及退出碼 (需要 3-Shell Terminal 插件) (參閲 示例代碼 > 終端)
-* `新增` imgui 全局對象, 用於以 Dear ImGui 構建懸浮窗及全屏即時模式界面, 插件啓用後直接使用, 首次調用成員時加載插件; 原有 plugins.load("io.github.supermonster003.autojs6.plugin.imgui") 寫法返回同一對象 (需要 ImGui 插件)
-* `新增` shell.spawn/shizuku.spawn 方法, 用於以進程運行命令並實時讀取輸出, 支持逐行讀取, output/errorOutput/exit 事件, 寫入 stdin, 限時等待及結束進程 (連同其啓動的子進程), 腳本結束時自動結束進程 (adb 選項與 shizuku.spawn 需要 Shizuku, root 選項需要 Root 權限)
-* `新增` Shell 構造器支持選項對象 { cmd, root, adb, pty, env, cwd } (兼容 Auto.js Pro), 以此創建的 Shell 基於管道運行並提供 getInputStream/getErrorStream/getOutputStream/waitFor/exitCode/exitAndReadOutput/raw/execForResult 方法, 可經 Shizuku (adb 選項) 運行, 其 execAndWaitFor 按退出碼標記分割每條命令的輸出
-* `新增` shell.spawn 及選項構造的 Shell 支持 pty 選項, 用於在偽終端上運行命令, 使 getevent/awk 等在管道上緩衝輸出的程序逐行輸出 (stderr 併入 stdout)
-* `新增` $shell.setDefaultOptions/checkAccess/isRootAvailable 方法 (兼容 Auto.js Pro), 用於設置當前腳本中 shell 函數等的默認 root/adb 選項, 以及檢查 Root/Shizuku 權限
-* `新增` installer 模塊, 用於安裝, 更新及卸載應用, 支持 Shizuku/Root/Dhizuku 靜默操作及通知安裝等選項 (需要 3-Setup Installer 插件) (參閲 項目文檔 > [安裝器](https://docs.autojs6.com/#/installer))
-* `新增` mail 模塊, 用於郵件收發, 查詢, 附件下載及文件夾管理, 支持同步與異步調用 (需要 3-Stamp Mail 插件) (參閲 項目文檔 > [郵件](https://docs.autojs6.com/#/mail))
-* `新增` mail.watch 方法, 用於監聽新郵件並支持斷線重連
-* `新增` epub 模塊, 用於讀取電子書元數據, 目錄, 章節文本及封面, 支持資源導出與全文搜索 (需要 3-Folio EPUB 插件) (參閲 項目文檔 > [電子書](https://docs.autojs6.com/#/epub))
-* `新增` epub.read 方法, 用於打開電子書閲讀器並控制閲讀位置, 書籤及閲讀偏好
-* `新增` epub.annotations/annotationsAsync 方法, 用於讀取高亮與筆記, 閲讀器會話支持監聽標註變更
-* `新增` files.batchRename 方法, 用於按查找與替換, 正則表達式, 計數器, 日期變量, 照片元數據 (EXIF / XMP) 及漢字轉拼音批量重命名文件與文件夾, 支持預覽方案, 不訪問文件的名稱試算, 命名預設, 衝突處理策略, 進度回調, 撤銷及歷史記錄的查詢與清理 (需要 Batch Rename 插件, 照片元數據, 漢字轉拼音與命名預設需要 1.1.0 及以上版本) (參閲 項目文檔 > [文件](https://docs.autojs6.com/#/files))
-* `新增` gallery 模塊, 用於通過 3-Maple Image 插件選擇, 查看, 編輯及轉換圖片, 讀取與寫入的文件限於腳本自身可訪問的路徑 (需要 3-Maple Image 插件 3.4.0 及以上) (參閲 項目文檔 > [相冊](https://docs.autojs6.com/#/gallery))
-* `新增` speech 模塊, 用於離線語音識別, 語音活動檢測, 喚醒詞檢測及語音合成, 支持麥克風聽寫會話, 喚醒詞會話 (可在喚醒後自動聽寫), 識別 WAV 文件或 PCM 數據, 合成到 WAV 文件, 通過插件引擎朗讀文本及管理語音模型, 讀取與寫入的文件限於腳本自身可訪問的路徑; 麥克風會話在 AutoJs6 位於前台時開啓後, 應用退到後台或熄屏仍可繼續收音 (需要 3-Macaw Speech 插件) (參閲 示例代碼 > 3-Macaw Speech)
-* `新增` speech.speaker 模塊, 用於説話人識別, 可註冊説話人的聲音, 判斷一段錄音是否出自某人 (驗證) 或在已註冊的人中找出最像的一位 (辨認); 聲紋只保存在插件內, 腳本只得到名字與相似度分數 (需要 3-Macaw Speech 插件 1.3.0 及以上) (參閲 示例代碼 > 3-Macaw Speech)
-* `新增` speech.diarize/detectLanguage/tag 方法, 用於離線分析音頻文件: 找出誰在什麼時候説話 (説話人分離, 可按已註冊的聲紋取名), 識別説話的語種, 以及聽出錄音裏的聲音類別 (説話, 音樂, 狗叫, 雨聲等), 均帶進度回調與 Async 形式 (需要 3-Macaw Speech 插件 1.3.0 及以上) (參閲 示例代碼 > 3-Macaw Speech)
-* `新增` yolo 模塊, 用於通過 YOLO 插件加載模型並進行目標檢測 (參閲 項目文檔 > [YOLO](https://docs.autojs6.com/#/yolo))
-* `新增` tts 模塊, 用於文本轉語音 (參閲 項目文檔 > [文本轉語音](https://docs.autojs6.com/#/tts))
-* `新增` settings 模塊, 用於讀取及修改應用設置 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (參閲 項目文檔 > [設置](https://docs.autojs6.com/#/settings))
-* `新增` settings.export/categories 方法, 用於在腳本中將應用設置按分類導出為 zip 文件 (與 "管理 AutoJs6 設置" 頁面導出的文件相同, 不含憑據) 及列出分類與條目數 (參閲 項目文檔 > [設置](https://docs.autojs6.com/#/settings))
+* `新增` TypeScript Engine 插件, 用於編譯並運行 TypeScript 文件及項目, 支持類型檢查及 UI 模式 TSX 佈局, 定時任務, 快捷方式及日誌頁面也可運行 TypeScript
+* `新增` ai 模塊, 用於通過 AI 提供方插件 (如 3-Stone AI) 調用本地或在線大模型, 支持流式輸出, 持久會話及結構化 JSON 結果 (參閲 示例代碼 > ai)
+* `新增` ai.agent 腳本 API, 用於啓動及控制 3-Stove Agent 智能體任務 (支持計劃模式及後台任務), 腳本也可登記為供智能體調用 (需要 3-Stove Agent 插件) (參閲 示例代碼 > agent)
+* `新增` MCP Server 插件, 用於通過 MCP 客户端訪問 AutoJs6 的腳本, 文件及設備操作能力 (入口: 主頁抽屜/插件中心)
+* `新增` compose 模塊, 用於以 Jetpack Compose 構建界面, 懸浮窗及對話框, 代碼編輯器可在 3-Block Compose 可視化設計器中打開並編輯界面 (需要 3-Block Compose 插件) (參閲 示例代碼 > 3-Block Compose)
+* `新增` speech 模塊, 用於離線語音識別, 喚醒詞檢測, 語音合成, 説話人識別及音頻分析 (需要 3-Macaw Speech 插件) (參閲 示例代碼 > 3-Macaw Speech)
+* `新增` 3-Shell Terminal 插件, 用於在應用內使用終端, 腳本可通過 terminal 全局對象管理終端會話 (入口: 主頁抽屜/項目工具欄/文件管理器目錄菜單) (參閲 示例代碼 > 終端)
+* `新增` installer 模塊, 用於安裝, 更新及卸載應用, 支持 Shizuku/Root/Dhizuku 靜默操作 (需要 3-Setup Installer 插件) (參閲 項目文檔 > [安裝器](https://docs.autojs6.com/#/installer))
+* `新增` mail 模塊, 用於郵件收發, 查詢, 附件下載及新郵件監聽 (需要 3-Stamp Mail 插件) (參閲 項目文檔 > [郵件](https://docs.autojs6.com/#/mail))
+* `新增` epub 模塊, 用於讀取電子書內容及打開閲讀器 (需要 3-Folio EPUB 插件) (參閲 項目文檔 > [電子書](https://docs.autojs6.com/#/epub))
+* `新增` gallery 模塊, 用於選擇, 查看, 編輯及轉換圖片 (需要 3-Maple Image 插件) (參閲 項目文檔 > [相冊](https://docs.autojs6.com/#/gallery))
+* `新增` imgui 全局對象, 用於以 Dear ImGui 構建懸浮窗及全屏界面 (需要 ImGui 插件)
+* `新增` yolo 模塊, 用於通過 YOLO 插件進行目標檢測 (參閲 項目文檔 > [YOLO](https://docs.autojs6.com/#/yolo))
+* `新增` files.batchRename 方法, 用於按查找與替換, 正則表達式, 計數器及日期等規則批量重命名文件, 支持預覽及撤銷 (需要 Batch Rename 插件) (參閲 項目文檔 > [文件](https://docs.autojs6.com/#/files))
+* `新增` plugins.tools 模塊, 用於列出並調用插件提供的工具 (需要提供工具的插件) (參閲 項目文檔 > [插件](https://docs.autojs6.com/#/plugins))
+* `新增` images.quantize/quantizeToFile 方法及 images.save 等方法的量化選項, 用於壓縮 PNG 圖像 (需要 Image Quantization 插件)
+* `新增` flow 模塊及 waitAsync 全局方法, 用於以鏈式寫法編排等待與操作, 支持分支, 循環, 超時, 重試及取消 (參閲 項目文檔 > [流程](https://docs.autojs6.com/#/flow))
+* `新增` smartClick/scrollUntil/typeInto/launchAndWait 等自動化方法及 waitForIdle/waitForToast 等等待方法, 用於控件點擊, 滾動查找, 文本輸入及應用切換 (支持 Flow 鏈式調用)
+* `新增` select 方法支持字符串選擇器語法, 可組合屬性, 正則表達式及布爾條件
+* `新增` UiObject 及控件集合增加 isStale/waitUntilGone/toJSON/first/last/clickEach 等方法, 用於節點狀態等待, 序列化及逐控件操作
+* `新增` auto.findWindows/explain/dump 方法, 用於按條件獲取窗口, 診斷選擇器及導出節點樹
+* `新增` shell.spawn/shizuku.spawn 方法, 用於以進程運行命令並實時讀取輸出, 支持寫入輸入, 偽終端及結束進程 (adb 選項與 shizuku.spawn 需要 Shizuku, root 選項需要 Root 權限)
+* `新增` Shell 構造器支持 { cmd, root, adb, pty, env, cwd } 選項對象, 並增加 $shell.setDefaultOptions/checkAccess 等方法 (兼容 Auto.js Pro)
+* `新增` settings 模塊, 用於讀取, 修改及按分類導出應用設置 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (參閲 項目文檔 > [設置](https://docs.autojs6.com/#/settings))
 * `新增` work_manager 模塊, 用於管理定時任務及廣播任務 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (參閲 項目文檔 > [Work Manager](https://docs.autojs6.com/#/workManager))
 * `新增` power_manager 模塊, 用於查詢及申請忽略電池優化 (Ref to [Auto.js Pro](https://g.pro.autojs.org/)) (參閲 項目文檔 > [Power Manager](https://docs.autojs6.com/#/powerManager))
-* `新增` sqlite 模塊的數據庫回調 (DatabaseCallback) 支持 onDowngrade 方法, 用於在請求的版本低於現有數據庫版本時處理降級; 未實現時降級不執行任何操作, 現有的表與數據保持不變, 不再拋出異常 (參閲 項目文檔 > [SQLite](https://docs.autojs6.com/#/sqlite))
+* `新增` memory 模塊, 用於在腳本中讀取 AutoJs6 的內存診斷數據, 如內存快照, 未被回收的腳本運行時及 hprof 堆轉儲 (參閲 項目文檔 > [內存](https://docs.autojs6.com/#/memory)) _[`issue #452`](http://issues.autojs6.com/452)_
+* `新增` tts 模塊, 用於文本轉語音 (參閲 項目文檔 > [文本轉語音](https://docs.autojs6.com/#/tts))
 * `新增` pangu 全局對象, 用於中西文混排的間距處理及檢查 (參閲 項目文檔 > [文本間距](https://docs.autojs6.com/#/pangu))
-* `新增` device.pageSize 屬性 (getter), 用於獲取系統內存頁大小
-* `新增` device.getMarketName 方法, 用於獲取設備的市場名稱 _[`issue #513`](http://issues.autojs6.com/513)_
-* `新增` ui.useAndroidLayout 方法, 用於啓用 Android 原生布局控件支持
-* `新增` UI 佈局支持工程 res 目錄, 可引用其中的字符串, 顏色, 尺寸, 數組, 樣式, 主題, 圖片, Drawable (含 vector 矢量圖), 顏色狀態列表及 <include> 佈局, 並按夜間模式, 語言, 屏幕方向, 屏幕寬度, 密度與 Android 版本選擇對應的限定符目錄 (如 values-night, layout-land) (參閲 項目文檔 > [用户界面](https://docs.autojs6.com/#/ui))
-* `新增` 原生 Android XML 佈局支持更多控件屬性: 屬性處理器之外的屬性按 Android SDK 及 AndroidX / Material 庫的屬性定義, 經控件公開方法或父佈局參數設置, 包括 ConstraintLayout 的約束與 Barrier/Group/Flow/Guideline, CoordinatorLayout 的 layout_behavior 及 AppBarLayout 的滾動標誌等, 並可直接使用 MaterialButton 等 Material 組件 (參閲 項目文檔 > [Android XML 屬性](https://docs.autojs6.com/#/uiAndroidAttributes))
-* `新增` runtime.loadAar 方法, 用於動態加載 AAR 文件
-* `新增` runtime.loadJarWithR8/retraceR8Stack 方法, 用於藉助 R8 Compiler 插件加載 JAR 文件及還原混淆堆棧 (實驗性)
-* `新增` images.quantize/quantizeToFile 方法, 用於 PNG 圖像量化及文件保存, 並返回圖像大小與質量信息 (需要 Image Quantization 插件)
+* `新增` colors 模塊增加 distance/blend/contrast/harmony 等方法及 colors.theme 對象, 用於顏色計算, 配色生成, OKLab/OKLCH 色彩空間轉換及修改應用主題色 (參閲 示例代碼 > 圖像與顏色)
 * `新增` images.countPointsByColor/getMeanColor 方法, 用於統計匹配顏色的像素數量及獲取平均顏色
-* `新增` colors.distance/invert/blend/contrast 方法, 用於顏色距離, 反色, 混合及對比度計算 (同樣適用於 Color 實例)
-* `新增` colors.toOklab/oklab/toOklch/oklch 方法, 用於 OKLab 與 OKLCH 色彩空間轉換; colors.distance/isSimilar 及 images.detectColor 支持 oklab 算法
-* `新增` colors.ensureContrast/harmony/tones/derive/nightVariant/simulate/extract 方法, 用於對比度調整, 和諧色, 色階, 派生配色, 夜間對應色, 色覺缺陷模擬及圖像主色提取 (參閲 示例代碼 > 圖像與顏色)
-* `新增` colors.theme 對象, 用於通過腳本讀取, 修改及重置主題色並控制智能顏色庫, 主題色頁面可撤銷腳本修改 (參閲 示例代碼 > 圖像與顏色)
+* `新增` device.getMarketName 方法及 device.pageSize 屬性 (getter), 用於獲取設備市場名稱及系統內存頁大小 _[`issue #513`](http://issues.autojs6.com/513)_
 * `新增` console.setTimeVisible/setTimeFormat/setColorful/setAvoidStatusBar/setInputVisible 方法及對應的 console.build 選項參數
-* `新增` UI 模式支持 TypeScript 腳本及 TSX 佈局 (需要 TypeScript Engine 插件)
+* `新增` runtime.loadAar/loadJarWithR8 方法, 用於動態加載 AAR 文件及藉助 R8 Compiler 插件加載 JAR 文件 (後者為實驗性)
+* `新增` UI 佈局支持工程 res 目錄中的字符串, 顏色, 樣式及圖片等資源, 並可按夜間模式, 語言及屏幕方向等選擇對應的限定符目錄 (參閲 項目文檔 > [用户界面](https://docs.autojs6.com/#/ui))
+* `新增` 原生 Android XML 佈局支持更多控件屬性, ConstraintLayout/CoordinatorLayout 佈局及 Material 組件 (參閲 項目文檔 > [Android XML 屬性](https://docs.autojs6.com/#/uiAndroidAttributes))
+* `新增` ui.useAndroidLayout 方法, 用於啓用 Android 原生布局控件支持
 * `新增` UI 模式增加 globalconsole 控件, 用於顯示全局日誌; console 系列控件支持標題, 樣式及輸入欄設置
-* `新增` UI 模式的事件監聽器 (如 ui.emitter 的 back_pressed, 控件的 click 及對話框事件) 支持掛起協程 (如 dialogs.confirm(...).await()), 需要腳本項目啓用 continuation 特性 (參閲 項目文檔 > [續體](https://docs.autojs6.com/#/continuation))
-* `新增` smartClick/clickIfExists/clickAny/findAny 等自動化方法, 用於控件查找與點擊, 支持 Flow 鏈式調用
-* `新增` smartClickBounds/clickBoundsIfExists/clickBoundsAny 方法, 用於按控件區域執行座標點擊
-* `新增` scrollUntil/typeInto/dismissPopups/collectList 等自動化方法, 用於滾動查找, 文本輸入, 彈窗處理及列表採集
-* `新增` launchAndWait/backUntil/backToApp/toggle/retry 等自動化方法, 用於應用切換, 狀態設置及操作重試
-* `新增` waitForIdle/waitForEvent/waitForToast/waitForNotification 方法, 用於等待界面空閒, 無障礙事件, 消息浮動框及通知
-* `新增` select 方法支持字符串選擇器語法, 用於組合屬性, 正則表達式及布爾條件
-* `新增` UiSelector#minDepth/maxDepth/minIndexInParent/maxIndexInParent 選擇器, 用於按節點深度及父級索引篩選, 並支持選擇器字符串語法
-* `新增` UiSelector#findIterator 方法, 用於惰性遍歷匹配控件
-* `新增` UiObject#isStale/waitUntilGone/waitForStable 方法, 用於檢測節點失效及等待節點消失或穩定
-* `新增` UiObject#contentInvalid/contextClickable/multiLine/dismissable 方法, 用於獲取控件布爾屬性
-* `新增` UiObject#toJSON/dumpSubtree/fingerprint 方法, 用於節點序列化, 子樹導出及狀態指紋計算
-* `新增` 控件集合支持 at/first/last/nonNull/slice 方法及 clickEach/setTextEach 等逐控件操作
-* `新增` auto.findWindows/findWindowRoots 方法, 用於按窗口類型, 包名, 標題及顯示器等條件獲取窗口及根節點
-* `新增` auto.explain/dump 方法及 auto.stats 對象, 用於選擇器診斷, 節點樹導出及查詢耗時統計
-* `新增` auto.registerEvent 方法支持事件去重及去抖選項 (默認關閉)
-* `新增` auto.setFlags 方法支持 appWindowsFallback 標誌, 用於活動窗口根節點不可用時改用應用窗口根節點 (默認關閉)
-* `新增` 文件管理器支持文件多選及批量複製/移動/刪除
-* `新增` 文件管理器增加路徑欄, 支持點擊父級目錄跳轉及橫向滑動瀏覽
-* `新增` 文件管理器路徑欄菜單採用緊湊佈局, 支持後退/前進/向上/刷新, 返回工作路徑, 複製路徑及設為工作路徑, 顯示存儲容量並切換內部存儲或存儲卡, 可快捷設置隱藏文件和文件擴展名
-* `新增` 文件管理器支持通過 Shizuku 或 Root 瀏覽受限目錄, 打開並編輯文字文件, 核對原文件後保存修改; 權限失效, 文件衝突或保存結果不確定時保留編輯內容並提示處理方式, 其他應用以唯讀方式原地或按需讀取, 兼容方式可在確認後使用臨時副本; 支持文件或文件夾複製/移動/重命名/永久刪除及多選操作, 複製/移動不覆蓋同名目標, 失敗時提示權限狀態與保留路徑 (需要對應授權, 可訪問範圍取決於系統; 跨文件系統移動限共用存儲)
+* `新增` UI 模式的事件監聽器支持掛起協程 (如 dialogs.confirm(...).await()), 需要腳本項目啓用 continuation 特性 (參閲 項目文檔 > [續體](https://docs.autojs6.com/#/continuation))
+* `新增` sqlite 模塊的數據庫回調支持 onDowngrade 方法, 用於處理數據庫版本降級 (參閲 項目文檔 > [SQLite](https://docs.autojs6.com/#/sqlite))
+* `新增` "管理 AutoJs6 設置" 頁面, 用於按分類導出/導入應用設置, 恢復默認設置及撤銷上次操作, 支持憑據加密保存及自動備份 (入口: 設置頁面 > 配置 > 管理 AutoJs6 設置)
+* `新增` 快捷方式備份功能, 用於自動存檔桌面快捷方式, 支持導出/導入及批量恢復 (入口: 設置頁面 > 配置 > 快捷方式備份)
+* `新增` 無障礙服務管理器, 支持服務啓停, 緩存清理, 自檢, 事件監視及診斷信息複製 (入口: 主頁抽屜無障礙服務條目)
+* `新增` 文件管理器支持文件多選及批量複製/移動/刪除, 並增加路徑欄, 支持快速跳轉上級目錄, 前進/後退及切換存儲卡
+* `新增` 文件管理器支持通過 Shizuku 或 Root 瀏覽受限目錄並編輯其中的文件 (需要對應授權, 可訪問範圍取決於系統)
 * `新增` 文件管理器腳本菜單增加 "懸浮運行" 選項, 支持通過浮動工具欄運行/停止腳本, 編輯文件及查看日誌
-* `新增` 文件管理器腳本菜單增加 "使用 AutoJs4 運行" 選項, 用於以 AutoJs4 引擎運行腳本或項目並對照運行結果 (需要 AutoJs4 Runtime 插件)
-* `新增` 文件管理器腳本菜單增加 "使用 AutoJs4 運行並對照" 選項, 用於先後以 AutoJs6 與 AutoJs4 引擎運行同一腳本或項目做差異比較 (需要 AutoJs4 Runtime 插件)
-* `新增` 文件管理器文件及目錄菜單增加 "複製路徑" 選項, 用於將絕對路徑複製到剪貼板, 多選時可從選擇欄的 "更多" 中批量複製 (每行一個路徑)
-* `新增` 文件管理器支持通過 3-Stack Archive 插件瀏覽, 預覽, 壓縮及解壓壓縮檔案, 支持密碼, 分卷及檔案內文件的直接打開或運行
-* `新增` 文件管理器支持通過 Markdown Previewer/HTML Previewer 插件預覽 Markdown/HTML 文件, 支持主題, 自定義 CSS 及全屏模式
-* `新增` 文件管理器支持通過對應插件查看圖片, 播放音視頻及打開 EPUB 電子書, 音頻支持後台播放與通知欄控制
-* `新增` 圖片查看器支持同目錄圖片切換, 雙指縮放, EXIF 信息顯示及全屏模式, 並可通過 3-Maple Image 插件編輯圖片及轉換格式
-* `新增` 從文件管理器用插件打開的文件可在插件內移入回收站並撤銷 (需要插件支持)
-* `新增` 文件管理器多選文件時, 若有多個插件動作可用, 可從選擇欄的 "更多" 中選擇其餘動作 (如用 3-Maple Image 批量轉換圖片)
-* `新增` 文件管理器支持通過 Batch Rename 插件批量重命名文件與文件夾, 支持查找與替換, 正則表達式, 計數器, 日期變量, 照片元數據及漢字轉拼音, 可預覽新名稱, 逐項排除, 使用命名預設並撤銷 (入口: 多選工具欄/文件夾菜單 "批量重命名其中的項目"/重命名對話框 "更多" 菜單)
-* `新增` "重命名歷史" 頁面, 用於查看, 搜索及按來源/狀態篩選文件管理器與腳本的批量重命名記錄, 可撤銷或刪除單個批次, 清空歷史並設置每個來源保留的批數 (入口: 文件管理器重命名對話框 "更多" 菜單 > 重命名歷史)
-* `新增` 文件管理器支持查看 APK/APKS/XAPK/APKM/APKZ/AAB 安裝包的信息及清單, 並支持安裝 APK 及拆分 APK 容器
-* `新增` 代碼編輯器支持通過 Ace Editor 插件加載 Ace 編輯器, 可在設置中選擇編輯器引擎, 插件不可用時提供插件中心入口
-* `新增` Ace 編輯器支持代碼補全, 參數提示, 懸浮文檔與診斷, TypeScript 項目支持定義跳轉, 符號重命名及自動導入 (需要 TypeScript Engine 插件)
-* `新增` Ace 編輯器支持快捷鍵面板, 操作歷史及操作收藏
-* `新增` Ace 編輯器支持展開或折疊全部代碼塊 (需要更新 Ace Editor 插件) (入口: 編輯 > 折疊 > 全部展開/全部折疊)
-* `新增` 代碼編輯器設置增加 "智能提示" 分組 (僅 Ace 引擎), 用於配置補全與參數提示的觸發方式及延遲
-* `新增` 代碼編輯器支持文件編碼轉換與重新加載, 並通過信息欄顯示文件名, 光標位置及編碼
-* `新增` 代碼編輯器支持沉浸式全屏模式
+* `新增` 文件管理器支持通過對應插件瀏覽壓縮檔案, 預覽 Markdown/HTML 文件, 查看圖片, 播放音視頻及打開電子書
+* `新增` 文件管理器支持查看 APK/APKS/XAPK/AAB 等安裝包的信息及清單
+* `新增` 文件管理器支持通過 Batch Rename 插件批量重命名文件與文件夾, 可預覽新名稱, 撤銷操作及查看重命名歷史 (入口: 多選工具欄/文件夾菜單/重命名對話框 "更多" 菜單)
+* `新增` 文件管理器腳本菜單增加 "使用 AutoJs4 運行" 及 "使用 AutoJs4 運行並對照" 選項, 用於以 AutoJs4 引擎運行腳本並比較運行結果 (需要 AutoJs4 Runtime 插件)
+* `新增` 代碼編輯器支持通過 Ace Editor 插件使用 Ace 編輯器, 提供代碼補全, 參數提示, 懸浮文檔, 診斷及快捷鍵面板, 可在設置中選擇編輯器引擎
+* `新增` 代碼編輯器支持在編輯器內預覽 ui 模式腳本的佈局, 點擊預覽中的控件可跳轉到對應源碼 (入口: 工具欄 "預覽" 開關)
 * `新增` 代碼編輯器支持底部日誌面板, 並支持腳本啓停及堆棧幀源碼跳轉 (by [M17764017422](https://github.com/M17764017422)) _[`pr #502`](http://pr.autojs6.com/502)_
-* `新增` 代碼編輯器支持獨立設置頁面, 提供主題, 字體, 行號, 自動換行, 代碼高亮閾值及日誌面板顯示等選項
-* `新增` 程式碼編輯器設定增加縮排參考線高亮, 向量側欄圖示, 編輯器捲動列 (含自動隱藏), 選取範圍內顯示空白字元, 拖曳放大鏡, 同名符號高亮及補全行內預覽等選項 (僅 Ace 引擎, 需要 Ace Editor 插件 2.0.0 及以上)
-* `新增` 日誌頁面及代碼編輯器底部日誌面板支持執行 TypeScript 代碼片段 (需要 TypeScript Engine 插件)
-* `新增` 主頁抽屜增加 "屏幕取色" 工具 (需要 3-Color Picker 插件)
+* `新增` 代碼編輯器支持獨立設置頁面, 沉浸式全屏模式及文件編碼轉換, 並通過信息欄顯示光標位置及編碼
+* `新增` 佈局分析增加搜索欄及 "複製為選擇器" 功能, 支持節點樹保存與離線分析, "生成代碼" 支持更多等待方式, 動作及 Flow 風格
+* `新增` 主題色支持自建顏色庫, 可新建, 克隆, 導入/導出顏色庫並管理其中的顏色
+* `新增` 智能顏色庫, 可按夜間模式, 時段, 日出日落及電量等狀態自動切換主題色, 內置 "跟隨壁紙" 等預設
+* `新增` 版本歷史支持版本預覽, 差異比較, 手動快照及版本固定, 回收站支持批量恢復及內容預覽, 兩者均可設置保留策略
 * `新增` 定時任務支持按月/按年/倒計時任務及重複結束條件 _[`issue #294`](http://issues.autojs6.com/294)_ _[`issue #537`](http://issues.autojs6.com/537)_
-* `新增` 項目文件夾支持創建定時任務及廣播任務
-* `新增` 廣播任務增加 "郵件到達時" 類型, 支持按發件人及主題篩選, 郵件信息可通過 engines.myEngine().execArgv.mail 獲取 (需要 3-Stamp Mail 插件)
-* `新增` 佈局分析支持多屬性組合選擇器複製, 節點樹保存與離線分析
-* `新增` 佈局分析窗口增加搜索欄, 支持按關鍵詞或正則表達式匹配控件的 text/desc/id/className, 層次窗口只保留匹配節點及其祖先, 範圍窗口只繪製匹配節點邊框, 支持結果列表, 匹配項跳轉及查詢歷史
-* `新增` 佈局分析搜索欄支持篩選配置 (布爾屬性, 類名預設, 深度及尺寸區間等), 框選區域, 字段模式 (`k=v`) 及選擇器模式 (`$()`), 配置與查詢模式跨會話記憶
-* `新增` 佈局分析支持 "複製為選擇器", 將關鍵詞, 字段條件, 篩選配置及框選區域轉換為鏈式選擇器
-* `新增` 佈局分析 "生成代碼" 支持單個/集合範圍, 等待方式, 動作參數, 經典/Flow 風格, 相對定位及備選方案, 並可在佈局中預覽匹配結果
-* `新增` 主題色支持自建顏色庫, 可新建或克隆顏色庫, 從調色盤, 其他顏色庫或歷史記錄添加顏色, 並支持重命名, 修改色值, 拖動排序及批量刪除
-* `新增` 智能顏色庫, 可按夜間模式, 時段, 日出日落, 電量及腳本狀態等狀態源自動切換顏色組, 支持定時或隨機換組及日期覆蓋; 內置 "材料設計日夜配對", "背景色" 及 "跟隨壁紙" 預設, 並可從種子色生成
-* `新增` 顏色庫支持以 JSON 格式導入與導出 (支持多選導出及預設快照)
-* `新增` 顏色詳情增加 "配色工具" (和諧色, 色階, 對比度及色覺缺陷模擬), 顏色支持收藏與置頂, 並增加 "常用與推薦" 虛擬庫
-* `新增` 主題色 "派生配色" 設置 (默認關閉), 用於由主色自動推導強調色與深色
-* `新增` 設置頁面增加回收站, 版本歷史及緊急草稿的保留策略, 支持按天數, 數量及容量清理
-* `新增` 版本歷史支持獨立列表, 版本預覽及差異比較, 並支持搜索, 排序與批量刪除
-* `新增` 版本歷史支持手動快照, 版本固定, 標籤編輯, 導出及恢復後直接保存
-* `新增` 回收站支持批量恢復, 內容預覽, 詳情查看, 到期提示及移入後撤銷, 並支持識別與清理失效條目
-* `新增` 打包應用支持 Node.js 項目及腳本, 運行時需要 Node.js Runtime 插件 (未安裝時顯示安裝引導)
-* `新增` 打包應用支持在構建時編譯 Rhino TypeScript 項目, 並支持加密編譯產物及附加 Source Map
+* `新增` 項目文件夾支持創建定時任務及廣播任務, 廣播任務增加 "郵件到達時" 類型 (需要 3-Stamp Mail 插件)
+* `新增` 主頁抽屜增加 "屏幕取色" 工具 (需要 3-Color Picker 插件)
+* `新增` 開發者選項增加 "內存診斷" 頁面, 用於查看內存佔用及已結束但未被回收的腳本, 支持導出 hprof 堆轉儲 (入口: 開發者選項 > 內存診斷)
+* `新增` 開發者選項支持查看進程退出記錄 (Android 11+), 並增加 "允許 Node.js 腳本使用 Inspector" 開關, 用於斷點調試 Node.js 腳本
+* `新增` 代碼生成模型管理頁, 支持本地導入, 按需下載, 多版本管理及官方模型更新 (入口: 設置頁面 > 無障礙服務 > 代碼生成模型)
+* `新增` 打包應用支持 Node.js 項目及腳本, 運行時需要 Node.js Runtime 插件
+* `新增` 打包應用支持在構建時編譯 TypeScript 項目, 並可加密編譯產物
 * `新增` 打包應用配置支持顯示或隱藏日誌及設置啓動器快捷方式 _[`issue #550`](http://issues.autojs6.com/550)_
-* `新增` 打包應用支持 ONNX Runtime 版 Paddle OCR PP-OCRv3 插件 (2.0.0 及以上), 與 Paddle Lite 版同時安裝時優先打包 ONNX Runtime 版, 並自動附帶其依賴的 OpenCV 插件運行庫 (需要已安裝 OpenCV 插件)
 * `新增` VSCode 插件連接支持二維碼掃描, 配對確認及局域網發現 (需要 VSCode 插件 1.1.0+)
-* `新增` VSCode 插件支持遠程文件管理及設備腳本運行, 大文件傳輸支持進度顯示 (需要 VSCode 插件 1.1.0+)
-* `新增` 客户端模式及服務端模式增加連接管理器, 支持查看連接狀態, 管理客户端及訪問地址歷史記錄
-* `新增` 客户端模式支持意外斷開後自動重連, 網絡恢復時重試及應用啓動時恢復連接
-* `新增` Node.js screen_metrics 模組及相容全域座標轉換方法, 與 Bun SDK 共用宿主換算規則並跟隨螢幕方向變化
-* `新增` Bun 明確匯入的宿主 API 用戶端, 提供拼音, Pinyin4j, 座標和控制台操作, 支援獨立能力開關
-* `新增` Node.js 和 Bun 支援非同步 OpenCC 轉換及常用圖像編解碼, 像素讀取, 變換和顏色搜尋; Bun 圖像檔案存取獨立授權
-* `新增` Node.js Worker 支援透過父運行時呼叫 OpenCC 與圖像模組, 包含 CJS, ESM, 巢狀 Worker 和圖像二進制傳輸
-* `新增` Bun 支援獨立授權的螢幕擷取, Android 錄製權限申請, 逾時/取消清理和重新申請
-* `新增` Node.js Worker 支援 pinyin, pinyin4j, 控制台視窗和座標換算, 共用父執行狀態並保留原生輸出串流
-* `新增` Bun screenRecorder 支援 H.264 MP4 螢幕錄製, 可選麥克風/應用程式播放/混合 AAC 音軌及錄製期間擷取畫面, 包含獨立音訊授權和取消清理
-* `新增` Node.js 主執行緒與 Worker 支援 H.264 MP4 錄屏, 麥克風/播放/混合 AAC 音訊, 錄製期間並行截圖及 Worker 未儲存錄屏清理
-* `新增` Node.js/Bun images 支援進階濾鏡, 色彩空間轉換, 多點找色, 圓形偵測, 相似度指標及 URL 載入
-* `新增` Node.js/Bun images 支援 SIFT/ORB 特徵擷取與比對, 返回場景座標和 ObjectFrame 幾何資訊, 並管理執行內的 Mat/特徵控制代碼
-* `新增` Node.js/Bun images 支援 PNG 量化和壓縮, 提供品質/記憶體度量, 二進位結果及檔案描述元輸出
-* `新增` Node.js/Bun UI 與 Compose 支援原生佈局, 資料組件, 響應式狀態及視窗事件, 提供獨立授權與視窗自動清理
-* `新增` Node.js/Bun 支援執行所屬 View 控制代碼, 非同步 AndroidView 工廠與 XML Compose 容器掛載, 同步支援 Worker 清理及打包應用
-* `新增` Node.js/Bun 支援常用 XML 表單與佈局組件及原生 View 非同步屬性代理, 包含順序賦值, 錯誤恢復與 Worker 呼叫
-* `新增` Node.js/Bun: WebView 頁面載入與 JavaScript 回傳值, Drawer 側欄, Toolbar 導覽與選單, ViewPager 頁面及非同步原生事件
-* `新增` Node.js/Bun: WebView HTTP(S) 下載, 系統檔案選擇及非同步 WebViewClient/WebChromeClient 回調, 支援原生導覽和資源規則
-* `新增` Node.js/Bun: WebView 完整照片拍攝, 儲存和目錄選擇, 文件位元組讀取, blob/data 分塊下載及所選位置輸出
-* `新增` Node.js 項目的 node.timeoutMs 執行期限配置 (project.json), 未設置或為 0 時 Node.js 腳本及項目與 Rhino 腳本一樣不限運行時長
-* `新增` Bun 項目的 timeoutMs 執行期限設定, 適用於等待拍照或檔案操作的腳本及封裝應用
-* `新增` Node.js/Bun: WebView 影片拍攝與前台 AAC/M4A 錄音, 支援媒體參數, 可設定選擇等待時限及臨時檔案清理
-* `新增` WebView getUserMedia/MediaRecorder 串流音訊與影片, 支援等待網頁 Promise, 明確申請 Android 媒體權限及 Worker 生命週期管理
-* `新增` Node.js/Bun 的 WebView 螢幕共享適配, 前景服務背景錄音及原生背景攝影機錄影, 包括 Node Worker 封裝
-* `新增` Bun 無障礙, 應用程式操作與剪貼簿 API 對齊 Node.js 對應介面, 支援獨立授權和打包應用程式
-* `新增` Bun 檔案與持久化儲存 API, 支援獨立授權的宿主檔案讀寫及 Node.js 儲存互通
-* `新增` Node.js Worker 與 Bun 的 database/sqlite API, 支援參數化查詢, 交易和資料庫持久化
-* `新增` Bun 與 Node.js Worker 的感應器取樣及訂閱 API, 支援取消和監聽器自動釋放
-* `新增` Bun, Node.js 及 Worker 的宿主 Shell API, 支援串流輸入輸出, Shizuku 授權與進程清理
-* `新增` Bun 與 Node.js Worker 的宿主事件及通知 API, 支援獨立訂閱與通知清理
-* `新增` Bun 與 Node.js Worker 的裝置控制及對話框 API, 支援亮度, 音量和獨立視窗清理
-* `新增` Node.js/Bun 的 Android 物件輔助介面及 Worker 封裝, 支援 Paint, ColorStateList, 主題色和 FileProvider URI
-* `新增` Node.js/Bun 的持久日曆與 IntentTask API, 支援每日, 每週, 每月, 每年, 單次, 倒數計時和廣播任務
-* `新增` Node.js/Bun/Worker 的 Java/Android 物件互操作, 支援公開建構函式和成員, 陣列, 精確 long 值, 明確多載及應用程式 Context 控制代碼
-* `新增` Node.js/Bun/Worker 的 Java 回調代理, 子類別產生和 JAR/DEX 載入, 支援 Promise 回傳值, 父類別呼叫及執行結束清理
-* `新增` Node.js/Bun/Worker 的文字轉語音介面, 支援引擎與音色查詢, 朗讀, 靜音任務, 音訊檔案合成和任務事件
-* `新增` Node.js/Bun/Worker 的 speech 語音識別與模型管理介面, 支援 WAV/PCM, 聽寫與喚醒工作階段, 模型安裝/匯入, 語音合成及取消清理
-* `新增` Node.js/Bun/Worker: EPUB 書籍讀取, 資源匯出, 搜尋及帶事件的閱讀器會話
-* `新增` Node.js, Bun 與 Worker 的 AI 文字生成, 串流結果, 模型目錄及持續工作階段, 支援取消與 3-Stone AI 對打包應用程式的個別授權
-* `修復` Bun 介面事件等待阻塞其他宿主呼叫並導致 Flow 非同步驗證逾時的問題
-* `修復` runtime.loadJar 方法無法動態加載較高 Java 版本編譯的 class 文件的問題
-* `修復` Android 7.x 調用 runtime.loadDex 方法時可能損壞 DEX 緩存並導致類加載失敗的問題
-* `修復` Rhino 引擎及內置模塊的作用域, 參數轉換與返回值處理不兼容導致部分腳本行為異常的問題
-* `修復` Object.fromEntries 使用數字或數字字串作為鍵時, 產生的屬性無法正常存取且控制台顯示不完整的問題 _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_
-* `修復` Object.defineProperty 方法修改不可配置 (configurable 為 false) 的可枚舉屬性時, 描述符未指定 enumerable (如只傳 `{ value: 1 }`) 也會拋出 TypeError 的問題
-* `修復` 循環體中的 const 聲明每輪不重新賦值的問題 (如 for/while 循環體中的 `const item = list[i]` 始終為首輪的值)
-* `修復` 正則表達式在 Android 7.x 上使用 Unicode 屬性轉義 (如 `\p{L}`) 時拋出 UnsupportedOperationException 的問題
-* `修復` 部分本地化的腳本錯誤消息丟失參數或觸發 MessageFormat 異常的問題
-* `修復` Proxy 包裝函數及部分 JavaScript 回調可能無法傳入內置模塊, 或出現參數嵌套與重載歧義的問題
-* `修復` EventEmitter#once 監聽器在遞歸派發事件或回調拋出異常時可能被重複調用的問題
-* `修復` app.isInstalled/kill 等方法無法正常使用包名參數的問題 _[`issue #495`](http://issues.autojs6.com/495)_
-* `修復` 無 Root 權限設備調用 shell 相關方法時可能出現假死的問題
-* `修復` dialogs.multiChoice 方法返回的多選結果被錯誤轉換為字符串的問題 _[`issue #518`](http://issues.autojs6.com/518)_
-* `修復` 腳本對話框在線程結束時關閉可能導致應用崩潰的問題
-* `修復` 停止帶有 setInterval 定時器的腳本時偶爾顯示 "Unable to schedule a timer callback because its looper is exiting" 錯誤的問題
-* `修復` 取消定時器或停止子線程後, 過期回調可能阻止腳本自動結束的問題
-* `修復` threads.pool 指定 corePoolSize 但未指定 maxPoolSize 時拋出 IllegalArgumentException 的問題
-* `修復` 協程中 Promise / Flow 的 await 方法, continuation.await 及 resumeError 恢復的 await 遇到拒絕時把錯誤作為返回值交回而不在調用處拋出的問題; 腳本未捕獲時現在以該錯誤結束
-* `修復` 協程恢復後再次掛起 (如 continuation.delay 之後再調用 await) 時, UI 模式下腳本被結束 (由其他線程恢復時應用崩潰), 以及由 setInterval 回調恢復時該定時器被取消的問題
-* `修復` Promise 的 wait 方法在腳本線程上調用時一直阻塞的問題 (如 Promise.resolve(1).wait() 及等待 setTimeout 或 tts 等方法結算的 Promise); 在 UI 線程上等待尚未結算的 Promise 時改為拋出 TypeError, 不再卡住界面
-* `修復` threads.start 創建的子線程全部結束後腳本偶爾不會自動結束的問題
-* `修復` threads.disposable() 返回對象的 blockedGet/blockedGetOrThrow 方法在先調用 setAndNotify 再等待時一直阻塞, 帶超時參數時即使已收到值也總要等到超時才返回, 以及偶爾未收到值就返回 null 的問題; 等待中的線程被中斷時改為與 sleep 一樣按腳本中斷處理
-* `修復` ui.run, 阻塞式對話框, getClip/setClip 及 gesture/swipe 等手勢方法在等待其他線程的結果時偶爾未得到結果就提前返回, 以及阻塞式對話框在開始等待前就被關閉時腳本一直阻塞的問題
-* `修復` 停止腳本時其子線程仍在處理圖像可能導致應用崩潰的問題
-* `修復` floaty.window/rawWindow 的聚焦相關方法在腳本線程調用時可能出現線程異常的問題
-* `修復` console.setPosition/setSize/setGravity 等方法的設置結果受調用順序或窗口顯示時機影響的問題
-* `修復` 控制枱浮動窗口標題欄拖動可能失效及窗口無法貼近屏幕邊緣的問題
-* `修復` console.log/util.format 等方法輸出對象或數組時其中的字符串值缺少單引號包裹, 與 Auto.js 4 的 util.inspect 格式不一致的問題
-* `修復` http 請求的不安全選項可能使後續請求繼續跳過證書及主機名校驗的問題
-* `修復` http.getAsync/postAsync/requestAsync 等方法返回的 Promise 在 then 回調中讀取響應體 (如 res.body.string() 或 res.body.json()) 時拋出 NetworkOnMainThreadException 的問題
-* `修復` 正式發行版本及打包應用的 HTTP 請求可能被網絡安全配置意外攔截的問題
-* `修復` UI 模式 WebView 控件的文件選擇器無法正常打開的問題
-* `修復` UI 模式 list/grid 控件項目範本中的動態屬性運算式無法存取目前項目物件 (如 name 屬性) 而報告 ReferenceError 並導致清單項目顯示空白, 以及數值運算式結果顯示為 18.0 而非 18 的問題
-* `修復` UI 佈局中 RelativeLayout 子控件的 layout_toStartOf, layout_toEndOf 及 layout_alignBaseline 屬性無效的問題
-* `修復` UI 佈局中 paddingHorizontal/paddingVertical 屬性導致佈局加載失敗的問題
-* `修復` UI 佈局中 scrollbars 及 requiresFadingEdge 屬性無法關閉滾動條或邊緣漸隱 (如設為 none) 的問題
-* `修復` UI 佈局中 ImageView 控件同時設置 adjustViewBounds 與 scaleType 時縮放類型可能失效的問題
-* `修復` UI 腳本進入分屏或調整窗口尺寸時可能意外退出的問題
-* `修復` 選擇器重載方法, filter 全局方法及集合選擇器的正則參數無法正常使用的問題
-* `修復` contains 系列選擇器將普通字符串參數誤解析為正則表達式的問題
-* `修復` 控件搜索限制結果數量時可能多返回結果或未回收剩餘節點的問題
-* `修復` UiObject#compass 及 pickup/detect 方法的羅盤參數解析與結果返回異常
-* `修復` UiObject#child/parent 等方法可能出現無限遞歸的問題
-* `修復` 選擇器字符串表示中的屬性名稱錯誤及部分語言下的小數格式異常
-* `修復` 全局選擇器方法拋出的異常無法被 try/catch 捕獲的問題
-* `修復` 啓用 findOnUiThread 標誌時控件查找可能永久等待或無法按時超時的問題
-* `修復` UiObject#clickBounds 方法可能意外結束腳本事件循環並導致後續回調失效, 或在主線程 (如 "ui" 模式腳本) 調用時拋出異常的問題
-* `修復` auto.registerEvent 回調的 source 節點在節點樹變化後可能出現死循環或越界異常的問題
-* `修復` 無障礙服務重啓後 pickup 及 UiSelector 查詢可能始終返回空結果的問題
-* `修復` auto.stateListener 在多個腳本間互相覆蓋且未隨腳本結束移除的問題
-* `修復` 無障礙服務已開始投遞事件時 auto.waitFor 仍可能等待至超時的問題
-* `修復` 使用 Root 權限關閉無障礙服務或重啓服務時可能未生效的問題
-* `修復` 應用頁面創建時可能重新啓用用户已手動關閉的無障礙服務的問題
-* `修復` auto.start/enable 方法在無障礙服務已運行時仍重複重啓服務的問題
-* `修復` auto.windowRoots 在活動窗口不可用時可能返回空節點的問題
-* `修復` 無障礙服務運行狀態查詢及錯誤提示與主頁抽屜開關狀態不一致的問題
-* `修復` auto.services 在未配置自動啓用方式時無法讀取已啓用服務列表的問題
-* `修復` 佈局分析在自動啓用無障礙服務後仍需再次觸發才能執行的問題
-* `修復` 無障礙服務重啓後已註冊的事件回調及按鍵監聽失效的問題
-* `修復` automator 全局操作首次調用時可能出現空指針異常, 以及手勢縱座標縮放錯誤的問題
-* `修復` 無障礙服務在連續執行 back 等操作時可能意外中斷的問題 _[`issue #527`](http://issues.autojs6.com/527)_
-* `修復` Node.js 指令碼 accessibility.ensureEnabled 方法在無障礙服務已啟用但未能及時綁定時報告橋接呼叫逾時而不是傳回 false 的問題
-* `修復` settings.isEnabled 方法讀取從未修改過的 Root 自動啟用無障礙服務與音量鍵控制指令碼執行兩項設定時傳回 false, 與設定頁顯示的預設開啟狀態不一致的問題
-* `修復` 通知觀察器將系統通知誤報為消息浮動框並遺漏通知事件的問題
+* `新增` VSCode 插件支持遠程文件管理及設備腳本運行 (需要 VSCode 插件 1.1.0+)
+* `新增` 客户端模式及服務端模式增加連接管理器, 客户端模式支持意外斷開後自動重連
+* `修復` 腳本結束後或部分頁面關閉後佔用的內存未被釋放, 反覆運行時內存佔用持續增長的問題 (如使用 threads.start, 定時器, WebSocket, webview 控件或 runtime.loadDex 的腳本) _[`issue #548`](http://issues.autojs6.com/548)_
+* `修復` AutoJs6 及打包應用遇到較新版本寫入的數據 (如降級安裝後) 時啓動即崩潰, 或版本歷史及回收站等數據無法打開的問題
 * `修復` Android 14+ 申請屏幕捕獲權限時可能因前台服務啓動異常導致應用崩潰的問題 _[`issue #516`](http://issues.autojs6.com/516)_
+* `修復` Android 14+ 屏幕旋轉或畫面靜止後 images.captureScreen 方法拋出 SecurityException 異常的問題
 * `修復` 多線程或跨文件重複調用 OCR 時可能反覆申請屏幕捕獲權限的問題 _[`issue #551`](http://issues.autojs6.com/551)_
-* `修復` OCR 插件選擇失敗時錯誤提示與實際引擎及安裝狀態不一致的問題
 * `修復` Paddle OCR 插件服務斷開後無法恢復或未運行時無法自動喚醒的問題 _[`issue #515`](http://issues.autojs6.com/515)_ _[`issue #525`](http://issues.autojs6.com/525)_ _[`issue #517`](http://issues.autojs6.com/517)_
-* `修復` 部分系統 (如 ColorOS) 上插件未運行時無法連接, 需在插件中心手動激活的問題 (AutoJs6 位於前台或擁有 "顯示在其他應用上層" 權限時自動喚醒插件)
-* `修復` 打包應用依次使用 Paddle OCR 和 Rapid OCR 時可能導致應用崩潰的問題
-* `修復` 打包時同時勾選 Paddle OCR v3 與 v4/v5/v6 插件時, 打包應用的 Paddle OCR 不可用的問題 (打包應用僅支持 PP-OCRv3 插件)
-* `修復` images.resize 方法傳入錯誤參數時可能導致應用崩潰的問題
-* `修復` images 部分方法可能提前回收圖像, 泄漏原生內存或回收其他腳本圖像的問題
+* `修復` 部分系統 (如 ColorOS) 上插件未運行時無法連接, 需在插件中心手動激活的問題
+* `修復` 打包應用依次使用 Paddle OCR 和 Rapid OCR 時可能崩潰, 以及同時勾選多個版本的 Paddle OCR 插件時 OCR 不可用的問題
+* `修復` app.isInstalled/kill 等方法無法正常使用包名參數的問題 _[`issue #495`](http://issues.autojs6.com/495)_
+* `修復` dialogs.multiChoice 方法返回的多選結果被錯誤轉換為字符串的問題 _[`issue #518`](http://issues.autojs6.com/518)_
+* `修復` 循環體中的 const 聲明每輪不重新賦值的問題 (如 for/while 循環體中的 `const item = list[i]` 始終為首輪的值)
+* `修復` Rhino 引擎的作用域, 參數轉換及部分內置方法 (如 Object.fromEntries, Object.defineProperty) 行為異常的問題 _[`Rhino #2518`](https://github.com/mozilla/rhino/issues/2518)_
+* `修復` 正則表達式在 Android 7.x 上使用 Unicode 屬性轉義時拋出異常的問題
+* `修復` runtime.loadJar 方法無法加載較高 Java 版本編譯的 class 文件, 以及 Android 7.x 上 runtime.loadDex/loadJar 可能失敗的問題
+* `修復` 協程中的 await 遇到拒絕時不拋出錯誤, 恢復後再次掛起時腳本被結束, 以及 Promise 的 wait 方法在腳本線程上一直阻塞的問題
+* `修復` 無 Root 權限設備調用 shell 相關方法時可能出現假死的問題
+* `修復` 腳本對話框在線程結束時關閉, 或停止腳本時子線程仍在處理圖像, 可能導致應用崩潰的問題
+* `修復` 子線程或定時器結束後腳本偶爾無法自動結束, 以及停止帶有 setInterval 定時器的腳本時偶爾報錯的問題
+* `修復` ui.run, threads.disposable, 阻塞式對話框及手勢等方法等待其他線程結果時偶爾提前返回或一直阻塞的問題
+* `修復` 控制枱浮動窗口的位置與尺寸設置受調用順序影響, 以及標題欄拖動可能失效的問題
+* `修復` console.log 等方法輸出對象或數組時字符串值缺少單引號包裹, 與 Auto.js 4 的格式不一致的問題
+* `修復` http 請求的不安全選項可能使後續請求跳過證書校驗, 以及正式版本的 HTTP 請求可能被網絡安全配置意外攔截的問題
+* `修復` http.getAsync 等方法返回的 Promise 在 then 回調中讀取響應體時拋出 NetworkOnMainThreadException 的問題
+* `修復` UI 模式 WebView 控件的文件選擇器無法正常打開的問題
+* `修復` UI 模式 list/grid 控件項目模板中的表達式無法訪問當前項目對象而導致列表項顯示空白的問題
+* `修復` UI 佈局中 RelativeLayout 對齊, paddingHorizontal/paddingVertical 及 scrollbars 等屬性無效或導致佈局加載失敗, 以及 UI 腳本進入分屏時可能意外退出的問題
+* `修復` 選擇器的正則參數, contains 系列選擇器及結果數量限制異常, 以及全局選擇器方法拋出的異常無法被 try/catch 捕獲的問題
+* `修復` UiObject#child/parent 等方法可能無限遞歸, UiObject#clickBounds 方法可能意外結束腳本事件循環, 以及啓用 findOnUiThread 時控件查找可能永久等待的問題
+* `修復` 無障礙服務重啓後選擇器查詢返回空結果及事件回調失效, 以及服務的狀態與啓停和主頁抽屜開關不一致的問題
+* `修復` 無障礙服務在連續執行 back 等操作時可能意外中斷的問題 _[`issue #527`](http://issues.autojs6.com/527)_
+* `修復` automator 全局操作首次調用時可能出現空指針異常, 以及手勢縱座標縮放錯誤的問題
+* `修復` 通知觀察器將系統通知誤報為消息浮動框並遺漏通知事件的問題
+* `修復` images 部分方法可能提前回收圖像, 泄漏原生內存或因錯誤參數導致應用崩潰的問題
+* `修復` images.findImage/matchTemplate/matchFeatures 的匹配結果, 座標精度及排序異常, 以及 images.invert/clip 等方法的處理結果錯誤
 * `修復` colors.isSimilar/images.detectColor 的 hs 算法結果錯誤, 以及 colors.rgb/rgba 無法正確處理小數或百分比分量的問題
-* `修復` Color 對象的 toHex/toInt/alpha/toHsv/isSimilar/blend/build 等方法, images.getSimilarity 及 http 請求的 client 選項參數出錯時, 腳本以 ClassCastException 異常結束且無法被 try/catch 捕獲的問題
-* `修復` images.isEqual/mse/ncc/isGrayscale 等方法的比較結果及灰度或 RGBA 圖像處理異常
-* `修復` images.invert 丟失透明度, ImageWrapper#saveTo 紅藍通道顛倒及 images.clip 越界區域處理錯誤
-* `修復` images.load 等方法可能未關閉連接或釋放臨時圖像資源的問題
-* `修復` images.findImage/matchTemplate 的邊緣匹配, 座標精度, 結果排序及數量限制異常
-* `修復` images.matchTemplate 無法正確處理通道數不同的圖像, 純色模板或透明遮罩, 以及 MatchingResult#sortBy 不接受小數比較結果的問題
-* `修復` images.matchFeatures 返回邊框與實際位置不符, 以及小圖像特徵檢測, 匹配結果繪製與資源釋放異常
-* `修復` 腳本結束後佔用的內存未被釋放的問題: 使用 threads.start, 子線程定時器或 plugins.load 的腳本, 以及強制停止時仍有 threads.pool 線程或 WebSocket 連接的腳本, 每次運行的內存都會殘留, 反覆運行時內存佔用持續增長; 其他腳本結束後也會有一個腳本的內存一直無法釋放 _[`issue #548`](http://issues.autojs6.com/548)_
-* `修復` 設置頁面關閉後, 以及主頁面重建 (如切換夜間模式) 後, 原頁面佔用的內存一直無法釋放的問題
-* `修復` 在下載進度對話框中點擊 "取消下載" 後, 以及開啓 "客户端模式" / "服務端模式" 期間, 發起操作的頁面關閉後其佔用的內存仍無法釋放的問題
-* `修復` 系統拒絕綁定插件 (如 ColorOS 限制後台插件) 時, 每次被拒的綁定都會殘留, 並使插件中心頁面關閉後其佔用的內存無法釋放的問題
-* `修復` 系統拒絕綁定 Node.js Runtime 插件 (如 ColorOS 限制後台插件) 時, 每次運行 Node.js 腳本都會殘留一個被拒的綁定的問題
-* `修復` Node.js 腳本結束後佔用的內存未被釋放的問題: 每次運行的腳本運行時及其 UI 會話, 懸浮窗, 對話框, 圖像句柄, 屏幕錄製與插件工具調用等橋接對象都會殘留, 反覆運行時內存佔用持續增長
-* `修復` Bun 與 QuickJS 腳本結束後佔用的內存未被釋放的問題: 每次運行的腳本引擎, 輸出回調與宿主能力調用 (自動化, 圖像) 等橋接對象都會殘留, 反覆運行時內存佔用持續增長
-* `修復` 主頁 "任務" 列表顯示過的腳本結束後, 其佔用的內存要等列表刷新才能釋放的問題
-* `修復` web.newWebSocket 創建的連接在腳本結束後仍保持打開, 以及設置了 exitOnClose 的連接會在任意腳本結束時被關閉的問題 (連接現只在所屬腳本結束時處理: 設置了 exitOnClose 的連接按超時正常關閉, 其餘連接斷開)
-* `修復` runtime.loadDex/loadJar/loadAar 加載的 DEX 及其中的類在腳本結束後一直無法釋放的問題 (加載器現隨加載它的腳本釋放: 加載過同一文件的腳本全部結束後, 其他腳本需自行加載才能使用其中的類)
-* `修復` 多個 UI 腳本同時運行時, 後啓動的 UI 腳本結束後其內存要等其餘 UI 腳本全部結束才能釋放, 且期間其餘 UI 腳本按已結束腳本的運行時包裝控件的問題
-* `修復` 含 webview 控件的 UI 腳本結束後, 部分舊版 WebView (如 WebView 111) 仍持有已關閉的腳本頁面, 使該腳本佔用的內存一直無法釋放的問題
-* `修復` speech.listen/wake 未能打開會話 (如未安裝語音模型) 時, 腳本結束後其佔用的內存一直無法釋放的問題
-* `修復` speech.listen/wake 等調用在等待語音插件時超時或腳本結束後, 插件隨後才打開的會話或任務不會被取消, 並一直佔用與插件的連接的問題
-* `修復` gallery.pick/view/edit, yolo.load, mail.connect, epub.open/read 等調用在等待插件打開會話時超時或腳本結束後, 以及 AutoJs4 運行時插件超過受理時限後, 插件隨後才打開的會話或受理的腳本不會被關閉, 並一直佔用與插件的連接的問題
-* `修復` 創建 JavaAdapter 時會清空整個類緩存目錄, 使 runtime.loadJar 的轉換緩存失效, 並可能刪除同時進行的 loadJar/loadDex 正在使用的文件的問題
-* `修復` 通過外部 URI 或後台運行腳本時可能丟失原始路徑或文件擴展名的問題 _[`issue #545`](http://issues.autojs6.com/545)_
-* `修復` Tasker 無法正常調用並運行腳本的問題 _[`issue #501`](http://issues.autojs6.com/501)_
-* `修復` 小組件批量更新時腳本路徑及點擊映射可能被誤刪的問題
-* `修復` 文件管理器直接運行帶 BOM 的腳本時未按實際編碼讀取的問題
-* `修復` 缺少打包信息的腳本項目無法正確識別或未按 project.json 指定入口運行的問題
+* `修復` 通過外部 URI, 後台或 Tasker 運行腳本時丟失原始路徑, 擴展名或無法運行的問題 _[`issue #545`](http://issues.autojs6.com/545)_ _[`issue #501`](http://issues.autojs6.com/501)_
 * `修復` auto 文件通過文件管理器, 定時任務或外部意圖運行時被當作 JavaScript 腳本執行的問題
-* `修復` 文件管理器無法查看部分 APK 信息或缺失清單入口的問題
+* `修復` 腳本項目未按 project.json 指定入口運行, 以及帶 BOM 的腳本未按實際編碼讀取的問題
 * `修復` 外部 URI 導入可能因文件名處理不當寫入目標目錄之外或覆蓋同名文件的問題
-* `修復` 文件管理器返回頁面或刪除回收站條目後可能閃動或重置滾動位置的問題
-* `修復` 文件管理器無法正確區分 TypeScript 文件與同後綴視頻, 以及部分源碼文件缺少運行入口的問題
-* `修復` 文件管理器操作提示可能重複顯示的問題
-* `修復` 文件管理器將權限不足或存儲移除導致的目錄讀取失敗顯示為空目錄, 以及導航失敗後路徑與列表不一致的問題
-* `修復` 部分觸摸屏設備上文件管理器等列表的條目在打開其他頁面並返回後持續顯示灰色背景的問題
-* `修復` 任務列表中 "運行中任務" 的數量與顯示的條目不一致, 以及已退出的 UI 腳本仍被列為運行中的問題
-* `修復` 媒體及圖像文件路徑解析異常, 以及 MediaInfo 詳情顯示緩存路徑的問題
-* `修復` 媒體詳情查詢失敗時可能導致應用崩潰, 以及視頻元數據字段顯示錯誤的問題
-* `修復` 文件移動或重命名後版本歷史未跟隨路徑更新, 或被內容相同的副本錯誤關聯的問題
-* `修復` 多用户或工作資料環境下回收站及版本歷史無法正確訪問內部存儲的問題
-* `修復` 版本歷史及回收站恢復覆蓋文件時可能丟失原有內容或留下不完整文件的問題
-* `修復` 回收站恢復時含點目錄名稱的自動改名錯誤
-* `修復` 版本歷史未顯示全部保留版本及切換操作後顯示模式異常
-* `修復` 版本歷史清理時可能誤刪尚未完成記錄的新快照的問題
-* `修復` 回收站恢復失敗時仍提示操作完成的問題
-* `修復` 回收站恢復目錄時可能將異常歸檔條目寫入目標目錄之外的問題
-* `修復` 版本歷史/回收站/顏色庫/密鑰庫的數據由較新版本的 AutoJs6 寫入後, 當前版本無法打開對應數據庫的問題 (保留兩個版本共有的數據; 無法保留時將該數據庫備份後以空庫繼續, 之後裝回不低於該數據版本的 AutoJs6 時自動還原)
-* `修復` 代碼編輯器在頁面重建後可能丟失光標, 選區或未保存內容的問題
-* `修復` 代碼編輯器及日誌頁面顯示軟鍵盤或輸入欄時, 內容區域可能被遮擋或壓縮的問題
-* `修復` 程式碼編輯器內的對話框在編輯器主題與應用日夜模式深淺不一致時, "更多" 選單的背景與文字顏色相近而難以辨認的問題
-* `修復` 原生程式碼編輯器 (JsDroidEditor) 在未設定字體大小時以 15 顯示, 與設定頁顯示的預設字體大小 14 不一致的問題
-* `修復` 主頁搜索框的狀態保存, 光標配色及提示語言異常
-* `修復` 主頁文檔標籤頁處理異常多指觸摸時可能導致應用崩潰的問題
-* `修復` 主頁切換到文件標籤頁時缺少過渡動畫的問題
-* `修復` 主頁抽屜在窄屏下控件裁切, 底部按鈕缺失及開關點擊區域過小的問題
-* `修復` 主頁關閉或重建時, 抽屜清理監聽器訪問已釋放的上下文導致應用崩潰的問題
-* `修復` 啓動頁背景未覆蓋劉海屏短邊區域的問題
+* `修復` 文件管理器將讀取失敗顯示為空目錄, 返回頁面時閃動或重置滾動位置, 以及條目持續顯示灰色背景的問題
+* `修復` 版本歷史及回收站恢復時可能丟失原有內容, 文件移動後版本歷史未跟隨, 以及多用户環境下無法訪問的問題
+* `修復` 代碼編輯器在頁面重建後可能丟失光標, 選區或未保存內容, 以及軟鍵盤遮擋內容區域的問題
+* `修復` 主頁抽屜在窄屏下控件裁切, 以及主頁關閉或多指觸摸時可能導致應用崩潰的問題
 * `修復` 浮動按鈕菜單顯示的最近應用包名及 Activity 信息異常 _[`issue #529`](http://issues.autojs6.com/529)_
 * `修復` 浮動按鈕 "運行腳本" 對話框最小化後可能無法還原的問題 (試修) _[`issue #500`](http://issues.autojs6.com/500)_
-* `修復` 浮動按鈕 "更多" 對話框顯示後部分條目隨信息加載向下偏移的問題
-* `修復` 浮動按鈕 "更多" 對話框在 AutoJs6 啓動後首次打開時, 通過 Shizuku 獲取的最近應用包名及 Activity 信息需 1 秒以上才能顯示的問題
-* `修復` 佈局分析生成集合控件代碼時可能包含無效語句的問題
-* `修復` 佈局分析浮動窗口及其對話框的文字/控件在部分主題色或夜間模式下對比度不足的問題
-* `修復` 在傳統佈局中選擇的材料設計顏色, 切換佈局後無法通過 "定位當前主題色" 找到, 且材料設計顏色頁面不顯示當前顏色摘要的問題
-* `修復` 主頁插件標籤頁及插件中心關閉搜索或切換標籤頁後仍保留搜索條件的問題
-* `修復` 插件中心在 x86 設備上誤選 x86_64 安裝包的問題
-* `修復` 插件授權成功後無法繼續完成啓用操作的問題
-* `修復` 插件中心無法正確解析部分月份縮寫日期的問題
-* `修復` 插件中心圖標緩存, 夜間模式切換及下拉刷新狀態異常
-* `修復` 插件中心刷新時可能丟失已安裝插件, 顯示空白列表或重置滾動位置的問題
-* `修復` 插件中心從系統應用詳情等頁面返回時, 列表短暫顯示缺少圖標的條目並隨即重新排列的問題
-* `修復` 插件中心可能安裝錯誤變體或重複顯示打包模板及更新提示的問題
-* `修復` 插件中心刷新索引成功後仍從緩存恢復已移除或更名的舊插件的問題
-* `修復` 插件中心冷啓動後立即打開插件詳情時, 對話框隨列表刷新被整體重建而閃爍的問題
-* `修復` 插件中心在插件暫時無法連接 (如更新安裝期間) 後持續保持其禁用的問題
-* `修復` 插件中心關閉 Offline Docs 插件後無法再次啓用, 提示 "Failed to enable the plugin" 的問題
-* `修復` Shizuku 權限請求監聽器在銷燬後未正確註銷的問題
-* `修復` AutoJs6 更新後首次使用 Shizuku 相關功能時, 因 Shizuku 仍保留舊版服務記錄而報告無法使用 Shizuku 服務的問題
-* `修復` AutoJs6 被強制停止或結束後, Shizuku 用户服務啓動的命令 (如音量鍵控制的按鍵監聽及 shizuku.spawn 啓動的進程) 仍在後台運行並逐次累積的問題 _[`issue #474`](http://issues.autojs6.com/474)_
-* `修復` 設置頁面 "使用 '音量加' 鍵控制腳本運行" 開關在應用啓動後由關閉改為開啓時, 若未顯示過浮動按鈕, 需重啓應用才能用音量加鍵停止腳本的問題
-* `修復` 錄製腳本結束後, 錄製所用的輸入事件監聽進程 (經 Shizuku 或 Root 運行的 getevent) 仍在後台運行直到應用退出的問題
-* `修復` 僅具備 Shizuku 權限 (無 Root) 時 RootAutomator 因無法識別觸摸屏設備而創建失敗, 以及 AutoJs6 啓動後立即開始錄製腳本時界面無響應 10 秒以上的問題
+* `修復` 插件中心刷新時可能丟失已安裝插件, 顯示空白列表或安裝錯誤變體 (如 x86 設備誤選 x86_64 安裝包) 的問題
+* `修復` 插件授權或暫時無法連接後無法完成啓用, 以及關閉 Offline Docs 插件後無法再次啓用的問題
+* `修復` AutoJs6 更新後首次使用 Shizuku 相關功能時報告無法使用 Shizuku 服務的問題
+* `修復` AutoJs6 被強制停止後, 經 Shizuku 啓動的命令 (如音量鍵監聽) 仍在後台運行並逐次累積的問題 _[`issue #474`](http://issues.autojs6.com/474)_
+* `修復` 僅具備 Shizuku 權限時 RootAutomator 創建失敗, 以及錄製腳本結束後輸入事件監聽進程未退出的問題
+* `修復` 設置頁面 "使用 '音量加' 鍵控制腳本運行" 開關開啓後需重啓應用才能生效的問題
+* `修復` APK 打包取消時誤報構建失敗, 以及簽名證書校驗和 Android 9-11 簽名識別異常的問題
+* `修復` 打包應用缺少運行時組件時 shell 原生庫可能缺失導致崩潰, 以及打包的 UI 腳本啓動時偶發空白頁面後退出的問題
 * `修復` 後台安裝 APK 時無法繼續確認安裝的問題
-* `修復` APK 打包取消時可能誤報構建失敗的問題
-* `修復` APK 打包產物的簽名證書一致性校驗及 Android 9-11 簽名識別異常
-* `修復` 打包應用或宿主缺少運行時組件時, shell 原生庫可能缺失或使用錯誤 ABI 導致應用崩潰的問題
-* `修復` APK 打包時同名但內容不同的原生庫被靜默保留其中一份的問題 (現改為終止打包並列出來源)
-* `修復` 打包的 UI 腳本啓動時偶發顯示空白頁面後退出的問題
-* `修復` VSCode 插件保存項目時已刪除文件仍殘留在設備或緩存目錄中的問題 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
+* `修復` VSCode 插件保存項目時已刪除文件仍殘留在設備中的問題 _[`vscode-ext issue #29`](http://vscext-project.autojs6.com/issues/29)_
 * `修復` VSCode 插件接收項目歸檔時可能因日誌處理導致內存不足的問題 _[`issue #523`](http://issues.autojs6.com/523)_
 * `修復` VSCode 插件的失效連接阻塞日誌發送, 導致新連接無法接收日誌的問題 _[`issue #385`](http://issues.autojs6.com/385)_
-* `修復` VSCode 插件連接失敗時在已銷燬頁面顯示對話框可能出現異常的問題
-* `修復` 客户端模式成功連接過的地址未寫入歷史記錄的問題
 * `修復` 檢查更新時未按設備 ABI 優先級選擇安裝包的問題
-* `修復` IntelliJ IDEA 構建項目時可能無法解析模塊依賴, 匹配編譯任務或定位當前 APK 產物的問題
-* `修復` 多變體構建時 Kotlin 編譯內存不足的問題
-* `修復` Gradle 構建時 SDK 解析及打包模板路徑解析異常
-* `修復` cXy/cYx 的 false 模式未強制使用絕對座標, 橫向螢幕寬高比換算倒置及單獨設定基數後部分呼叫異常的問題
-* `修復` setScaleBases 的第二個參數無效或基數已設定時, 提前修改另一方向並佔用其設定機會的問題
-* `修復` 介面重建與指令碼讀取螢幕尺寸同時進行時, device.width/height 及座標換算讀取到零尺寸的問題
-* `修復` device.keepAwake/keepScreenOn/keepScreenDim 未指定超時時持有的喚醒鎖在腳本結束後仍未釋放的問題
-* `修復` Node.js pinyin/pinyin4j 僅轉換少量內建字典文字的問題, 現使用已安裝的拼音外掛程式
-* `修復` Node.js 控制台視窗和樣式控制方法呼叫後沒有實際效果的問題
-* `修復` Bun 指令碼結束時同步結果早於輸出回呼導致末尾日誌遺失的問題
-* `修復` 錄製授權呼叫方被遮擋時請求提前結束, 取消後系統對話框殘留及指定擷取尺寸失效的問題
-* `修復` 拼音 style/mode 數字常數轉換為 JSON 或 Rhino 數值後無法識別的問題
-* `修復` 螢幕擷取跳過尚未合成的全透明投影緩衝, 保留正常黑色畫面
-* `修復` AndroidView 在 Compose 渲染器重建期間保持原生 View 借用狀態, 防止提前釋放或被其他工作階段重複使用
-* `修復` JSON UI 在 Activity 重建時恢復未選取清單和分頁狀態, 避免將事件資料誤作 View 屬性而發生異常
-* `修復` 資料庫橋接查詢遺失 null/數字參數類型, 多列 INSERT 影響行數不正確及未結束交易保留連線的問題
-* `修復` 感應器單次取樣取消, 輪詢失敗及宿主銷毀時排隊註冊可能遺留監聽器的問題
-* `修復` Shell 命令忽略 SIGTERM 時結束清理可能阻塞的問題, 結束前凍結並清理子進程
-* `修復` 不同腳本執行使用相同數字 ID 的通知互相覆寫或取消的問題
-* `修復` 進度對話框控制代碼更新後仍傳回舊值及取消後視窗未及時關閉的問題
-* `修復` 每日和每週任務跨夏令時間轉換後本地執行時刻偏移的問題
-* `修復` IntentTask 本地與外部接收器衝突及更新或刪除後的註冊殘留問題
-* `修復` AutoJs6 及打包應用安裝到較新版本留下的數據上 (如降級安裝) 時啓動即崩潰並被反覆重啓的問題 (定時任務與意圖任務的數據庫降級時保留原有數據; 仍無法打開時將其備份後以空庫繼續啓動, AutoJs6 同時發送通知, 之後裝回不低於該數據版本的版本時自動還原)
-* `修復` AutoJs6 及打包應用發生未捕獲異常後未交由系統處理, 導致系統缺少崩潰記錄, 且啓動時即崩潰的進程被後台組件反覆拉起而不受系統限制的問題
-* `修復` 打包應用的 FileProvider URI 輔助介面使用範本識別碼而非實際清單識別碼的問題
-* `修復` Node.js 宿主模組包含 java.new 等保留字成員時 ESM 匯入失敗的問題
-* `修復` Bun 打包應用程式隱藏啟動畫面和日誌畫面時, 啟動 Activity 過早結束導致冷啟動初始化期間程序被系統回收的問題
-* `修復` tts.engines 查詢不再依賴預設引擎初始化, 預設引擎無法使用時仍可列出其他已安裝引擎
-* `修復` mail 在啟用偵錯輸出時附件下載進度被重設為零的問題
+* `修復` 屏幕座標換算 (cXy/cYx/setScaleBases) 異常, 以及自然方向為橫屏的設備上 device.width/height 寬高互換的問題
+* `修復` device.keepAwake/keepScreenOn/keepScreenDim 未指定超時時喚醒鎖在腳本結束後仍未釋放的問題
+* `修復` IntelliJ IDEA/Gradle 構建項目時模塊依賴, SDK 及打包模板路徑解析異常的問題
 * `優化` 延遲初始化非關鍵組件以提升應用啓動速度
 * `優化` 應用啓動時不再自動彈出權限申請對話框, 缺少所有文件管理權限時改為在主頁顯示可直接授權的提醒
-* `優化` 應用及打包應用適配 Android 17, 完善本地網絡授權, 高級保護及後台音頻限制的提示
-* `優化` 應用及打包應用支持 16 KB 內存頁, 並在插件安裝, 加載及打包時提示不兼容的原生庫
-* `優化` 完善界面及異常消息的多語言顯示
+* `優化` 應用及打包應用適配 Android 17 及 16 KB 內存頁設備
 * `優化` 精簡安裝包內的依賴, 語言資源及圖像資源以縮減文件體積
-* `優化` 檢查更新通過 GitHub REST API 獲取版本與安裝包信息, 更新説明支持本地渲染
-* `優化` 應用內置簡體中文及英文發行歷史, 其他語言支持在線獲取與緩存 (離線時優先使用緩存, 無緩存時顯示英文)
-* `優化` 應用設置統一由同一套鍵聲明與存儲層讀寫, 設置頁面, 腳本 settings 模塊及設置導入/導出使用相同的默認值與分類; 已有設置的鍵名及存儲文件保持不變, 升級後無需遷移
-* `優化` 插件化離線項目文檔 (Offline Docs 插件), 支持獨立安裝及更新, 文檔來源切換即時生效
-* `優化` 插件化打包模板 (APK Builder Template 插件), 打包時校驗插件簽名, 宿主版本及模板兼容性
+* `優化` 完善界面, 異常消息及引擎錯誤消息的多語言顯示
+* `優化` 檢查更新通過 GitHub REST API 獲取版本與安裝包信息
+* `優化` 應用內置簡體中文及英文發行歷史, 其他語言支持在線獲取與緩存
+* `優化` 插件化離線項目文檔 (Offline Docs 插件), 支持獨立安裝及更新
+* `優化` 插件化打包模板 (APK Builder Template 插件), 打包時校驗模板兼容性
 * `優化` 插件化 ML Kit OCR/ML Kit Barcode/Rapid OCR/OpenCV/Image Quantization 相關功能
 * `優化` 插件化 OpenCC/Pinyin/Pinyin4j/MediaInfo 相關功能
-* `優化` 官方插件的主題色, 夜間模式及語言支持跟隨宿主設置
-* `優化` 插件中心完善在線安裝與更新, 變體選擇, 插件設置, 使用説明及發行歷史顯示
-* `優化` 插件中心列表圖標按安裝狀態響應短按/長按: 已安裝時開啓系統應用詳情/獨立啓動頁面 (無啓動頁面時提示), 未安裝時開啓插件詳情/啓動安裝
-* `優化` 首頁插件標籤頁 FAB 選單優先顯示安裝嚮導, 官方插件庫, 第三方插件庫及插件中心, URL/本地文件安裝及管理操作收納至 "更多"
-* `優化` 插件中心支持二級排序及各級獨立升降序, 默認按已安裝 > 已禁用 > 未安裝排序, 同狀態內按最近更新時間降序排列
-* `優化` 插件中心主動操作及修改插件設置後的條目保持原位並更新狀態, 後台自動刷新照常運行, 下拉刷新或調整排序/篩選後恢復正常排列
-* `優化` 插件中心臨時置頂全新安裝的插件 (含插件中心關閉期間安裝的插件) 並標出 "新安裝" 或 "啓用失敗", 切換標籤頁或關閉插件中心後恢復原有排列; 在條目上直接安裝或啓用的插件只標出狀態, 保持原位
-* `優化` 插件中心支持 SDK 插件自動掛載及可用 ABI 檢測
-* `優化` 官方簽名的插件 (含 MCP Server 與 YOLO) 安裝後默認啓用, 插件中心發現全新安裝 (含插件中心關閉期間的安裝) 後自動啓用, 並在 ColorOS 等不允許連接未運行插件的系統上先喚醒插件; 其他簽名的 MCP Server 與 YOLO 仍需手動啓用, 覆蓋安裝保留原有啓用狀態
-* `優化` 插件中心採用緩存與異步加載提升列表顯示及刷新流暢度, 插件啓用失敗時提供恢復提示
-* `優化` 主頁插件標籤頁浮動按鈕支持長按進入插件中心
-* `優化` 插件信息對話框分別顯示插件支持的 ABI 及當前安裝包的 ABI
-* `優化` 緩存 Rhino 運行時初始化數據以提升腳本啓動效率, 並提升大型數組打印效率及低版本安卓系統的 Java 反射兼容性
-* `優化` Rhino 引擎同步上游, 支持 new.target, for...of/for...in 循環頭部的 const 聲明及 Uint8Array 的 Base64/Hex 轉換方法 (如 Uint8Array.fromBase64 及 toHex 方法), 並改進作用域, TypedArray 與調試器兼容性
-* `優化` Rhino 數組解構, 展開, for...of 及 Proxy/Reflect/with/TypedArray 的行為與 ECMAScript 規範一致: 調用實參展開 f(...args) 與邏輯賦值短路可用, 嚴格模式下 Proxy 的 set trap 返回 false 時賦值拋出 TypeError, 沒有 Symbol.iterator 的類數組對象解構時拋出 TypeError
-* `優化` BigInt.asIntN/asUintN 及 DataView 的 setBigInt64/setBigUint64 傳入 Number 時拋出 TypeError (此前自動轉換), 需寫為 BigInt(x)
-* `優化` 為 const 聲明的變量重新賦值時, 非嚴格模式下同樣拋出 TypeError (與 ECMAScript 規範及 Node.js 一致), 不再靜默忽略
-* `優化` ArrayBuffer, DataView, TypedArray, 正則表達式及解構等 28 條引擎錯誤消息補齊 9 種語言的翻譯
-* `優化` runtime.loadJar 方法支持藉助 DEX Compiler 插件加載 JAR 文件, 並提供編譯診斷與失敗回退 (實驗性, 默認關閉)
-* `優化` 定時任務, 廣播任務, 快捷方式及 Tasker 支持執行 TypeScript 腳本 (需要 TypeScript Engine 插件)
-* `優化` pinyin 模塊支持調用級自定義讀音詞典, 並完善 compare/compact 方法
-* `優化` pinyin4j 模塊支持多種羅馬字方案及完整讀音查詢
-* `優化` opencc 模塊支持轉換類型查詢, 批量轉換及鏈式轉換
-* `優化` ocr 模塊默認按 ML Kit/Paddle/Rapid 順序選擇可用引擎, 並支持顯式指定或恢復自動選擇
-* `優化` Node.js 插件等經宿主橋接調用的 ocr 模塊在未指定 engine 時按 ML Kit/Paddle/Rapid 順序自動選擇已啟用的引擎, 不再固定要求 ML Kit OCR 插件
-* `優化` ocr 模塊 Paddle 引擎的 profile 選項參數參與插件選擇, 只選用聲明瞭相同 profile 的插件 (如 Paddle OCR PP-OCRv3 語種包的 zh/en/zh-hant/ja/ko 及 PP-OCRv4 的 mobile/server/mobile-en, 不區分大小寫), 沒有匹配的插件時錯誤消息列出已安裝插件提供的 profile
-* `優化` ocr 模塊 Paddle 引擎有多個插件符合條件且未調整變體優先級時, 同代插件 (如 PP-OCRv3 的 ONNX Runtime 版各語種包與 Paddle Lite 版) 優先選用插件聲明的推薦默認插件 (PP-OCRv3 中文版), 其次按包名排序, 選擇結果不再取決於插件的發現順序
-* `優化` 宿主橋接層 accessibility 模塊增加 captureScreenImage 方法, 以無障礙截圖 (不可用時回退屏幕捕獲) 生成會話內圖像句柄, 供 MCP Server 等插件會話直接用於條碼識別與找圖找色; 插件會話可同時持有的圖像句柄數由 4 提高為並發調用數的兩倍
-* `優化` MCP Server 與 3-Stove Agent 等面向模型的插件會話經橋接讀取圖片 (image.readImage) 時, 最長邊超過 4096 px 的圖片按 2 的冪降採樣解碼, 結果附 scale 與原圖尺寸, 避免相冊大圖耗盡宿主內存; Node.js 插件腳本不受影響
-* `優化` MCP Server 與 3-Stove Agent 等面向模型的插件會話經橋接按路徑讀取圖片與媒體信息 (image.readImage, mediainfo) 時限制在工作目錄內, 寫入 (image.saveImage) 同樣只限工作目錄; 請求聲明 files.shared_read 且 AutoJs6 持有所有文件訪問權限時可只讀訪問共享存儲 (不含 Android/data 與 Android/obb), files.list 與 files.stat 也可按同一令牌列出共享存儲; Node.js 插件腳本不受影響
-* `優化` 宿主橋接層 app 模塊增加 pluginCapabilities 方法, 實時返回 OCR, 條碼, 拼音, Pinyin4j, MediaInfo, OpenCV 與離線文檔各插件家族的狀態 (available / not_installed / disabled / incompatible), 已安裝插件的版本, 啟用與授權情況, 對應的橋接方法以及插件中心入口, 供 MCP Server 等插件會話按安裝情況顯示工具並提示用戶安裝; 插件會話打開時的可選方法列表也按同一邏輯補充已可用家族的方法
-* `優化` 宿主橋接層增加 plugin_tools 模塊, 供 MCP Server 等插件會話列出, 調用及取消插件聲明的工具: 截屏與工作目錄內的文件以文件描述符交給插件, 工具生成的文件寫入工作目錄, 超時或取消時通知插件停止; 非官方插件的工具需請求聲明 plugin_tools.user_granted 令牌; MCP Server 的默認能力授權包含該模塊, 3-Stove Agent 的授權不包含
-* `優化` MCP Server 插件會話的默認能力授權擴充: 加入 ocr, barcode, pinyin, pinyin4j, mediainfo 各模塊的方法, image.readImage 與找圖找色方法, accessibility.readScreenText / captureScreenImage 和 app.pluginCapabilities, 以及對應的權限令牌 (含共享存儲只讀的 files.shared_read); 這些方法只在相應插件已安裝並啟用時可用, image.saveImage 與 image.toBytes 仍不在授權內; 3-Stove Agent 的授權不變; 另加入 agent.listScripts / readManifest / execRegistered 與 agent, agent.exec 令牌, 供 MCP Server 列出並運行已登記腳本
-* `優化` AutoJs6 工作目錄不存在, 被同名文件佔用或因缺少存儲權限無法訪問時, 經宿主橋接的 files 模塊與 engines.execScript / execScriptFile 等調用的錯誤消息説明原因與處理辦法 (錯誤碼 ERR_AUTOJS6_WORKING_DIRECTORY_UNAVAILABLE)
-* `優化` images.save/saveImage/compress/compressToBytes 方法支持 PNG 量化選項 (保留透明度) 及像素與內存限制 (需要 Image Quantization 插件)
-* `優化` images.readPixels 方法支持 ImageWrapper 參數
-* `優化` images.matchTemplate/findPointByImage 方法支持 scales 選項, 匹配結果增加尺寸, 比例及區域信息
-* `優化` images.matchFeatures 方法支持圖像或路徑參數及更多匹配選項, 並補充特徵與結果信息
-* `優化` 多點找色, 模板匹配及特徵匹配提升執行效率與結果準確性
-* `優化` 屏幕截圖支持暫時無可用幀時重試, 並減少截圖資源釋放對併發圖像操作的影響
-* `優化` mediainfo 模塊支持 snapshot/capabilities 方法及媒體流計數, 並減少文件詳情查詢耗時
+* `優化` APK 安裝改由 3-Setup Installer 插件提供安裝對話框, 插件不可用時使用系統安裝器, APKS/XAPK 等分包容器需要該插件才能安裝
+* `優化` 插件中心完善在線安裝與更新, 變體選擇, 排序, 插件設置及發行歷史顯示, 並提升列表加載及刷新的流暢度
+* `優化` 官方插件安裝後默認啓用, 主題色, 夜間模式及語言跟隨 AutoJs6 設置
+* `優化` 插件中心臨時置頂新安裝的插件並標出 "新安裝" 或 "啓用失敗"
+* `優化` 主頁插件標籤頁浮動按鈕菜單優先顯示安裝嚮導及插件庫, 長按浮動按鈕可進入插件中心
+* `優化` Rhino 引擎同步上游, 支持 new.target 及 Uint8Array 的 Base64/Hex 轉換等新特性, 並提升腳本啓動效率及兼容性
+* `優化` Rhino 引擎的解構, 展開, 可選鏈, Proxy/Reflect, BigInt 及塊級函數聲明等行為與 ECMAScript 規範一致
+* `優化` 全局 Promise 統一為 Rhino 內建實現, 增加 Promise.any/withResolvers/try 方法, 未處理的拒絕在控制枱輸出錯誤
+* `優化` 移除內置的 com.stardust 兼容類副本, 以 com.stardust 前綴引用的類名改為映射到 AutoJs6 的同名實現 (參閲 項目文檔 > [AutoJs4 運行時](https://docs.autojs6.com/#/autojs4Runtime))
+* `優化` 文件日誌改用內置實現, 保留已文檔化的配置選項及常用 PatternLayout 格式, 其他 Log4j API 不再提供
+* `優化` ocr 模塊默認按 ML Kit/Paddle/Rapid 順序自動選擇已安裝的引擎, Paddle 引擎支持按語種 (profile) 選擇插件及 useCls 文字方向分類選項參數
+* `優化` pinyin/pinyin4j/opencc 模塊支持自定義讀音詞典, 多種羅馬字方案, 批量轉換及鏈式轉換
+* `優化` images.matchTemplate/matchFeatures 等方法支持更多參數, 多點找色, 模板匹配及特徵匹配提升執行效率與結果準確性
+* `優化` images.captureScreen 方法在畫面靜止時及時刷新取幀, images.requestScreenCapture 方法只申請共享整個屏幕, 避免 Android 14+ 選擇單個應用後截圖與座標不對應
+* `優化` runtime.loadJar 方法支持藉助 DEX Compiler 插件加載 JAR 文件 (實驗性, 默認關閉)
 * `優化` KeyCode 方法提升參數兼容性並支持使用 Shizuku 權限發送鍵碼指令 _[`issue #492`](http://issues.autojs6.com/492)_
-* `優化` shell 函數支持 adb 選項, 用於經 Shizuku 執行命令 (兼容 Auto.js Pro); arguments 中的 adb 鍵不再轉為 --adb 參數, 需要該參數時寫作 "--adb"
-* `優化` 無障礙服務支持使用 Shizuku 自動啓用, 並支持與官方伴生插件同步啓停狀態
-* `優化` auto.registerEvent 回調的 source 節點改為按需解析 (Android 13 以下需在回調內讀取)
-* `優化` 無障礙窗口查詢跳過不可用根節點, 並完善不同安卓版本的節點回收策略
-* `優化` automator.captureScreen 方法完善資源回收及系統限頻重試, 避免截圖請求長時間未結束
-* `優化` 全局選擇器與集合選擇器的整數參數統一四捨五入, 並提升多線程查詢及超時中斷的穩定性
-* `優化` 選擇器及 Flow 等待支持事件輔助輪詢, 無障礙事件到達時提前重試 (通過 auto.setFlags 的 eventAssistedPolling 標誌啓用)
+* `優化` shell 函數支持 adb 選項, 用於經 Shizuku 執行命令 (兼容 Auto.js Pro)
+* `優化` 無障礙服務支持使用 Shizuku 自動啓用
+* `優化` device.getAndroidId 方法支持 useSystemId 參數, 用於在 Android 8.0+ 上通過 Shizuku/Root 獲取系統值
 * `優化` 恢復 console.rawInput/input 方法, 支持通過控制枱輸入欄讀取文本或求值表達式
-* `優化` 各控制枱分別記憶時間顯示及格式, 同名腳本重新運行時替換原有浮動窗口
-* `優化` media.playMusic 方法支持前台播放, 音頻焦點及通知欄控制, 並在腳本結束時清理播放資源
-* `優化` web.newInjectableWebView 創建的 WebView 在腳本結束時如未顯示在界面上則隨之銷燬
-* `優化` 移除內置的 com.stardust 兼容類副本, 腳本以 com.stardust 前綴引用的類名改為映射到 AutoJs6 的同名實現 (218 個類完整映射, 90 個類部分映射, 其餘 46 個無對應物的類不再提供), 使 new 與 instanceof 等按類名的用法與 runtime 對象一致 (參閲 項目文檔 > [AutoJs4 運行時](https://docs.autojs6.com/#/autojs4Runtime))
-* `優化` 示例代碼增加 3-Block Compose, 3-Macaw Speech 語音, 自動化流程, 控制枱交互及電子書操作示例, 並完善屏幕 OCR 示例
 * `優化` 控制枱浮動窗口增加統一操作菜單, 支持調整大小及配置時間, 着色, 字號與透明度
-* `優化` 代碼編輯器統一主題配色及菜單佈局, 並完善字體, 只讀模式與文本選擇體驗
-* `優化` 代碼編輯器運行腳本後將運行按鈕切換為停止按鈕
-* `優化` 代碼編輯器完善字體下載提示, 跳轉行號校正及文件編碼檢測與保存
-* `優化` 程式碼編輯器開啟檔案時的頁面顯示速度
-* `優化` 文件管理器安裝包信息按需加載, 完善大型安裝包及清單信息展示
-* `優化` 文件管理器統一文件預覽及插件操作入口, 列表按差異刷新並保留滾動位置
-* `優化` 高權限文件編輯備份支持集中查看, 復原及清理, 可按每個文件的數量和空間目標自動保留 (默認最多 5 份, 空間目標 64 MiB, 至少保留最新 1 份), 正在使用, 內容已變更或結果未確認的復原資料不會自動清理
-* `優化` 文件管理器通過其他應用打開一般可讀文件時優先原地讀取, 受限文件的唯讀按需讀取支持大於 1 GiB 文件及影片跳轉 (需要系統支持); 兼容方式完整複製前顯示所需及可用臨時空間並請求確認, 複製時顯示進度且支持取消
-* `優化` 版本歷史避免重複快照, 文件覆蓋前保留原有內容, 回收站恢復到新路徑時同步遷移版本歷史
-* `優化` 回收站完善容量提示, 損壞條目恢復與錯誤提示, 列表按差異刷新
-* `優化` 佈局層次分析支持屬性摘要, 父級高亮, 橫向滾動及逐級選擇父控件
-* `優化` 佈局層次分析頁面去除層級彩色豎線, 展開/收起標識移至控件文字左側並區分可展開, 已展開及無子節點三種狀態
-* `優化` 佈局分析節點信息對話框以主題色標識多選項, 複製方式支持 "總是詢問/複製對象選擇器/複製鏈式選擇器" 並跨會話記憶
-* `優化` 無障礙服務及連接管理器統一分組佈局, 支持逐級展開, 收起及獨立設置
-* `優化` 任務列表及腳本運行日誌使用工作目錄等路徑簡稱, 並保留實際入口文件名與擴展名
-* `優化` 浮動按鈕及相關窗口跟隨應用語言與夜間模式, 菜單信息使用後台加載
-* `優化` 主頁抽屜的 "連接到電腦" 分組更名為 "遠程連接"
-* `優化` 默認顏色庫的亮色與暗色窗口背景合併為 "背景色" 一項, 可選擇亮色, 暗色, 自動跟隨或自動反色, 升級前的選擇保持不變
-* `優化` 主題色設置頁面支持定位自建顏色庫中的顏色及當前智能顏色庫, 搜索範圍擴展到自建顏色庫的顏色及智能顏色庫的組
-* `優化` APK 安裝改由 3-Setup Installer 插件提供安裝對話框, 插件不可用時交給系統安裝器並提示安裝插件; apks/xapk/apkm/apkz 分包容器需要該插件才能安裝
-* `優化` VSCode 插件連接增加心跳檢測及數據長度校驗, 避免失效連接與異常數據影響通信 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
+* `優化` media.playMusic 方法支持前台播放, 音頻焦點及通知欄控制
+* `優化` 原生 Android XML 佈局中無法設置的屬性改為跳過並在控制枱警告, 不再導致整個佈局加載失敗
+* `優化` 代碼編輯器統一主題配色及菜單佈局, 提升打開文件時的顯示速度, 運行腳本後運行按鈕切換為停止按鈕
+* `優化` 文件管理器統一文件預覽及插件操作入口, 列表刷新時保留滾動位置
+* `優化` 版本歷史避免重複快照, 回收站恢復到新路徑時同步遷移版本歷史
+* `優化` 佈局分析層次視圖支持屬性摘要, 父級高亮及逐級選擇父控件
+* `優化` 主頁抽屜的 "連接到計算機" 分組更名為 "遠程連接"
+* `優化` 浮動按鈕及相關窗口跟隨應用語言與夜間模式
+* `優化` 默認顏色庫的亮色與暗色窗口背景合併為 "背景色" 一項, 可選擇自動跟隨或自動反色, 升級前的選擇保持不變
+* `優化` VSCode 插件連接增加心跳檢測及數據長度校驗 _[`issue #333`](http://issues.autojs6.com/333)_ _[`issue #523`](http://issues.autojs6.com/523)_
 * `優化` VSCode 插件保存文件時支持按相對目錄結構保存到工作目錄 _[`vscode-ext issue #37`](http://vscext-project.autojs6.com/issues/37)_
-* `優化` 客户端模式二維碼連接提升識別效率並調整入口至地址對話框菜單
-* `優化` Gradle 構建支持動態匹配 Kotlin/KSP/AGP/R8 兼容版本, 並降低啓動內存佔用及清理編譯警告
-* `優化` Gradle 平台兼容數據及更新任務遷移至 AutoJs6-Gradle-Platform-Versions, Scrapers 工具支持跨倉庫同步
-* `優化` device.getAndroidId 支持 useSystemId 布爾參數, 在 Android 8.0+ 上通過 Shizuku/Root 獲取運行應用所屬 Android 用户的系統值, 權限或讀取失敗時拋出異常, 舊系統忽略此參數
-* `優化` cX/cY/cXy/cYx 支援明確指定 auto 模式, 統一驗證座標和基數, 並避免有限大數換算被截斷至 Long 範圍
-* `優化` 原生 Android XML 佈局中無法設置或未知的屬性改為跳過並在控制枱警告一次, 不再導致整個佈局加載失敗
-* `優化` UI 佈局屬性按書寫順序應用, 後寫的屬性覆蓋先寫的屬性 (如 padding 之後的 paddingHorizontal)
-* `優化` Bun 宿主呼叫支援預算內排隊和取消等待, 使短時間重疊觸發的任務依序執行
-* `優化` Java 物件快照使用物件識別, 避免隱含執行 toString 並觸發回調
+* `優化` 示例代碼增加 3-Block Compose, 語音, 自動化流程, 控制枱交互及電子書操作示例
+* `優化` Gradle 構建支持動態匹配 Kotlin/KSP/AGP/R8 兼容版本, 平台兼容數據遷移至 AutoJs6-Gradle-Platform-Versions 項目
 * `依賴` 模塊化 Android AXML
 * `依賴` 模塊化 Android ARSC Editor
 * `依賴` 模塊化 APK Signer
@@ -525,14 +209,15 @@
 * `依賴` 附加 AndroidX Test Ext JUnit 版本 1.3.0
 * `依賴` 附加 ZXing Android Embedded 版本 4.3.0
 * `依賴` 附加 Android Hidden API Bypass 版本 6.1
-* `依賴` 附加 NDK 版本 28.2.13676358 與 CMake 版本 3.22.1, 用於構建高權限文件操作的本地組件
+* `依賴` 附加 NDK 版本 28.2.13676358 與 CMake 版本 3.22.1
+* `依賴` 替換 Desugar JDK Libs 版本 2.1.5 為 Desugar JDK Libs NIO 版本 2.1.5
 * `依賴` 升級 Android SDK 版本 36 -> 37
 * `依賴` 升級 Gradle 9 版本 9.4.0 -> 9.7.1
 * `依賴` 升級 AndroidX Lifecycle 版本 2.6.2 -> 2.9.4
 * `依賴` 升級 AndroidX SavedState 版本 1.2.1 -> 1.3.2
 * `依賴` 升級 AndroidX Emoji2 版本 1.3.0 -> 1.4.0
 * `依賴` 升級 AndroidX Window 版本 1.0.0 -> 1.5.0
-* `依賴` 升級 Rhino 版本 2.0.0-SNAPSHOT (上游快照 2025/12/22 -> 2026/10/23)
+* `依賴` 升級 Rhino 版本 2.0.0-SNAPSHOT (上游快照 2025/12/22 -> 2026/10/31)
 * `依賴` 移除 Android Annotations 版本 4.8.0
 * `依賴` 移除 Android dx 版本 1.14
 * `依賴` 移除 AndroidX AppCompat (Legacy) 版本 1.0.2
