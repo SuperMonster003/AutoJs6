@@ -14,6 +14,7 @@ import org.autojs.autojs.script.PythonProjectLaunchError
 import org.autojs.autojs.script.PythonProjectLaunchException
 import org.autojs.autojs.script.PythonProjectLaunchPolicy
 import org.autojs.autojs.script.ScriptLaunchSourceFactory
+import org.autojs.autojs.util.EnvironmentUtils
 import org.autojs.autojs.util.IntentUtils
 import org.autojs.autojs.util.WorkingDirectoryUtils
 import org.json.JSONException
@@ -70,6 +71,7 @@ object ScriptIntents {
             sourceKind = it.optIntentString(EXTRA_KEY_SOURCE_KIND) ?: sourceKind
             projectRoot = it.optIntentString(EXTRA_KEY_PROJECT_ROOT) ?: projectRoot
         }
+        path = path?.let { EnvironmentUtils.remapLegacySdcardPath(it) }
         enforceDefaultOffPythonIntentBoundary(context, intent, path)
 
         val persistedContextDeclared = intent.hasExtra(EXTRA_KEY_SOURCE_KIND) ||
