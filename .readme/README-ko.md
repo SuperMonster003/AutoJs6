@@ -845,30 +845,42 @@ AutoJs6 프로젝트 개발에 참여한 모든 기여자분들께 감사합니�
     # --------------------------------------------------------------#
     # Before committing and pushing to the remote GitHub repository #
     # --------------------------------------------------------------#
-    - IDE
-        - The summary of the latest changelog for committing to Git [ DO NOT commit or push ]
     - $projectDir/version.properties
         - Remove the part like [ alpha / beta / ... ] of VERSION_NAME
+        - Builds no longer update VERSION_BUILD or BUILD_TIME [ gradle.properties: autojs.gradle.build.*.enabled=false ], so set both by hand in the release commit:
+          VERSION_BUILD = commit count of the release commit [ git rev-list --count HEAD, plus 1 ], BUILD_TIME = build time in milliseconds
     - $projectDir/.changelog/lang_zh-Hans.json
-        - Update version name and released date
-        - Translate into other languages
-        - Update TypeScript declarations according to section `dependency` if needed
-    - $projectDir/.readme/template_readme.md
-        - Update Rhino badge
-        - Update Android Studio and IntelliJ IDEA badges [ link: aj6mdgen ]
-        - Update contribution section: [ h3_contribution ] [ link: aj6scrapers ]
-    - $projectDir/.readme/common.json
-        - Update android studio download links and version names [ link: aj6scrapers ]
-        - Update contribution section: var_date_contribution_table_data_updated [ link: aj6scrapers ]
+        - Update version name and released date [ the "Last Active" cell of the AutoJs6 row in the related projects table follows this date ]
+        - Translate into other languages, then run .python/check_translations.py --record-sync after the review
+        - Credit ported or superseded pull requests with "by" and "pr #" references
+    - $projectDir/.utils [ link: aj6scrapers ]
+        - Run single scripts with node instead of run-scrapers.bat when only README data is needed; npm ci first, GITHUB_TOKEN goes in .utils/.env
+        - scrape-and-update-readme-template-contributors-table.mjs: contribution table and var_date_contribution_table_data_updated;
+          pull requests credited without a GitHub merge go into CREDITED_PULL_REQUESTS of fetch-and-parse-autojs6-merged-pr-commits-statistics.mjs
+        - sync-platform-version-data.mjs: Android Studio download links and version names [ reads ../AutoJs6-Gradle-Platform-Versions, run its scrapers first if stale ]
+        - scrape-and-inject-rhino-engine-data.mjs: Rhino badge and var_date_rhino_engine_latest_committed
+        - Skip the Gradle wrapper, foojay resolver and Android version code scrapers at release time, they change build inputs
+        - The scrapers drop the trailing newline of .readme/common.json, restore it
     - $projectDir/.python/generate_markdown.py
-        - Re-generate markdown by running the python script [ link: aj6mdgen ]
-    - Others
-        - Re-generate documentation by running the python script [ link: aj6docgen ]
-        - Check the two-way versions for AutoJs6 and VSCode ext, then publish the ext to Microsoft if needed
-        - Run Gradle task "app:assembleInrtRelease" [ shortcut: C+A+0#- ]
-        - Build APK to determine the final VERSION_BUILD field [ shortcut: C+A+0#A ]
-        - Run Gradle task "app:appendDigestToReleasedFiles" [ shortcut: C+A+0#= ]
-        - Check VERSION_BUILD in version.properties with released apks
-        - Commit and push to GitHub
-        - Publish the latest release with signed APKs
+        - Re-generate markdown [ link: aj6mdgen ], then run it with --check and run py -m unittest discover -s .python -p "test_markdown*.py"
+        - Android Studio and IntelliJ IDEA badges follow MIN_SUPPORTED_*_IDE_VERSION in version.properties when present
+    - Related repositories
+        - Documentation: re-generate only when its sources changed after the last generation [ link: aj6docgen ];
+          push AutoJs6-Documentation and AutoJs6-Plugin-Offline-Docs after the host release is public
+        - VSCode extension: check the two-way versions, VSCODE_EXT_REQUIRED_VERSION in version.properties against the Marketplace version
+          and requiredClientVersionCode of the extension against the host versionCode; publish the extension to Microsoft only if needed
+    - Build
+        - Skip app:assembleInrtRelease: app APKs do not bundle the inrt template [ autojs.apkBuilder.includeBuiltInTemplate=false ],
+          the Release Runtime Kit workflow builds it from the pushed tag
+        - Build signed APKs from a clean checkout of the release commit with app:assembleAppRelease and sign.properties
+          [ arm64-v8a, armeabi-v7a, x86, x86_64, universal ]
+        - Copy app/build/outputs/apk/app/release/*.apk to app/app/release, then run app:appendDigestToReleasedFiles [ output: app/app/releases ]
+        - Check versionName, versionCode [ VERSION_BUILD + VERSION_CODE_OFFSET ] and the signing certificate of the APKs against the previous release
+    - Publish
+        - Run prepush_check.py, push master, then check Android CI and Markdown integrity
+        - Create the GitHub release with tag vX.Y.Z on the release commit: title "X.Y.Z @ YYYY/MM/DD", notes from the zh-Hans changelog of that version
+          with the dependency entries folded into one CHANGELOG.md link [ same as the latest release history in README ], assets from app/app/releases
+        - The tag runs .github/workflows/release-runtime-kit.yml, which uploads autojs6-runtime-kit-*.zip to the same release
+          and dispatches the APK Builder Template plugin repository; check that run
+        - Close the issues that the release notes or comments promised to close after the release
 )
