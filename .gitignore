@@ -119,6 +119,9 @@ CLAUDE.md
 !/tools/paddle-ocr-v3/
 !/tools/paddle-ocr-v3/**
 /tools/paddle-ocr-v3/__pycache__/
+!/tools/screen-capture/
+!/tools/screen-capture/**
+/tools/screen-capture/__pycache__/
 
 /gradle/wrappers/backup/
 
