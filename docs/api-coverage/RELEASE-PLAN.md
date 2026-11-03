@@ -8,6 +8,8 @@
 
 2026-11-02 15:3x 维护者拍板: 宿主暂无 push 计划 (Q274), P7.2 现在推送除宿主外的全部仓库 (步骤 3 ~ 9), Node / Bun 只推不发版; 步骤 1 / 2 / 10 等宿主有 push 计划后再做.
 
+2026-11-03 更新: 宿主改写历史 (作者邮箱改为 noreply) 后已强制推到 public/master (`AutoJs6`), 之后的提交按快进推送; AutoJs6-Private 不再使用并已删除 (完整镜像已在本地备份). 下文提到的 private 远端均不再适用: 步骤 1 改为推 public/master, 步骤 2 只剩打 tag v6.8.0, 步骤 10 在 `AutoJs6` 上运行.
+
 数字取样于 2026-11-02 15:0x ~ 15:3x. 各仓库先 `git fetch --quiet <remote>` 再算, 所以比 FINAL 第 7 节新. 宿主 HEAD 取 caca8faa7, 本清单提交后领先数 +1. 执行前用 B 段末尾的命令重算一次, 其他主题可能又有新提交.
 
 先看这 6 条, 它们是 FINAL 与 ROADMAP 没写到的:
@@ -92,10 +94,10 @@ git -C D:/idea-projects/AutoJs6 rev-list --count private/master..HEAD
 | 9 | 官方插件: Offline Docs; Python, Java, Kotlin, Lua; Folio, Stamp | `language_runtimes.py` 比对文档与四个语言运行时 (Q110), `check-runtime-epub.mjs` / `check-runtime-mail.mjs` 读 Folio / Stamp (它们的 3 笔是否为通过门禁所必需没有验证, 一起推最稳). Offline Docs 的内容来自步骤 3 | Offline Docs `Markdown integrity` 在 B6 完成前红 |
 | 10 | 手动重跑宿主 `Script API coverage` | 到这里 15 个仓库的默认分支才都到位 | 这一次必须绿, 是本主题远端门禁的验收 |
 
-最后一步的命令 (`-R` 按 Q274 的结果选 AutoJs6-Private 或 AutoJs6):
+最后一步的命令 (Q274 已决: 宿主在 AutoJs6 公开):
 
 ```bash
-gh workflow run api-coverage.yml -R SuperMonster003/AutoJs6-Private --ref master
+gh workflow run api-coverage.yml -R SuperMonster003/AutoJs6 --ref master
 ```
 
 `api-coverage.yml` 每一步读哪些仓库, 以及对应仓库未推时的结果 (按代码读取路径判断, 没有实跑模拟):
@@ -178,7 +180,7 @@ P7.2 每完成一个仓库填一行, 不改已填的行.
 | Q271 | Node / Bun 发布版本号: 不改名, 还是 2.1.1 / 0.22.1 | 已决 (a) 不改名 |
 | Q272 | Bun 最低宿主 5278 是否保持 (与 Node 的 Q206 对称) | 已决 (a) 保持 5278 |
 | Q273 | TS 声明是否发 npm | 已决 (a) 发 4.87.0 |
-| Q274 | 宿主 6.8.0 公开方式 | 已决: 暂无 push 计划, 公开方式届时再定 |
+| Q274 | 宿主 6.8.0 公开方式 | 已决: 暂无 push 计划, 公开方式届时再定; 2026-11-03 改为: 改写历史后强制推到 public (AutoJs6), private 停用并删除 |
 | Q275 | Node `unit` 作业长期失败, 推送前修不修 | 已决 (a) 推 Node 前修 |
 | Q281 | Ace 2.49.0 现在发版, 还是等宿主 6.8.0 公开 | 已决 (b) 现在发, v2.49.0 已发布 |
 | Q282 | Offline Docs 6.8.40 现在发版, 还是等宿主 6.8.0 公开 | 已决 (b) 现在发, v6.8.40 已发布 |
