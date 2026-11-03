@@ -158,7 +158,7 @@ Compared to the final open-source version `4.1.1 Alpha2` of Auto.js, the main up
 * Theme color adaptation [ Grouping / Location / Search / History / Automatic Adaptation of Brightness and Contrast / ... ]
 * Night mode adaptation [ Settings page / Documentation page / Layout analysis page / Floating window / ... ]
 * [VSCode plugin](http://vscext-project.autojs6.com) supports both client (LAN) and server (LAN/ADB) connection methods
-* [Rhino](https://github.com/mozilla/rhino/) engine upgraded from [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) to [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (Updated on Oct 15, 2026)
+* [Rhino](https://github.com/mozilla/rhino/) engine upgraded from [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) to [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (Updated on Nov 3, 2026)
     * Unicode [code point](https://developer.mozilla.org/en-US/docs/Glossary/Code_point) escape support for [supplementary plane](https://en.wikipedia.org/wiki/Plane_(Unicode)#Supplementary_Multilingual_Plane) characters
        ```js
        '\u{1D160}'; /* stands for "𝅘𝅥𝅮", traditional method: '\uD834\uDD60'. */

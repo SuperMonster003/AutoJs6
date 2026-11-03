@@ -158,7 +158,7 @@ AutoJs4 同時是 AutoJs6 的行為基準: 除少數特定情況外, 能在 Auto
 * 主題色適配 [ 分組 / 定位 / 搜索 / 歷史記錄 / 亮度及對比度自動適配 / ... ]
 * 夜間模式適配 [ 設置頁面 / 文檔頁面 / 佈局分析頁面 / 浮動窗口 / ... ]
 * [VSCode 插件](http://vscext-project.autojs6.com) 支持客户端 (LAN) 及服務端 (LAN/ADB) 連接方式
-* [Rhino](https://github.com/mozilla/rhino/) 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升級至 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (更新於 2026 年 10 月 15 日)
+* [Rhino](https://github.com/mozilla/rhino/) 引擎由 [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) 升級至 [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (更新於 2026 年 11 月 3 日)
     * Unicode [碼位](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) 轉義支持 [輔助平面](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2) 字符
        ```js
        '\u{1D160}'; /* 表示 "𝅘𝅥𝅮", 傳統方式: '\uD834\uDD60'. */

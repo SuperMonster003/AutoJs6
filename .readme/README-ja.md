@@ -158,7 +158,7 @@ Auto.js の最終オープンソースバージョン `4.1.1 Alpha2` と比較�
 * テーマカラーの適応 [ グループ化 / ロケーション / 検索 / 履歴 / 明るさとコントラストの自動適応 / ... ]
 * ナイトモード対応 [ 設定ページ / ドキュメントページ / レイアウト分析ページ / 浮動ウィンドウ / ... ]
 * [VSCodeプラグイン](http://vscext-project.autojs6.com)がクライアント (LAN)とサーバ (LAN/ADB) 接続方法をサポート
-* [Rhino](https://github.com/mozilla/rhino/)エンジンが [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) から [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (2026 年 10 月 15 日 更新) にアップグレードされました
+* [Rhino](https://github.com/mozilla/rhino/)エンジンが [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) から [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (2026 年 11 月 3 日 更新) にアップグレードされました
     * Unicode [コードポイント](https://developer.mozilla.org/ja/docs/Glossary/Code_point)エスケープのサポート [補助平面](https://ja.wikipedia.org/wiki/多言語面#補助平面) 文字
        ```js
        '\u{1D160}'; /* を表します "𝅘𝅥𝅮", 従来の方法: '\uD834\uDD60'. */

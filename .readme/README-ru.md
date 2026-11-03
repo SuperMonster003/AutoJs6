@@ -158,7 +158,7 @@ AutoJs4 также служит эталоном поведения для AutoJ
 * Адаптация темы [ Группировка / Локация / Поиск / История / Автоматическая адаптация яркости и контрастности / ... ]
 * Поддержка ночного режима [ страница настроек / страница документации / страница анализа макета / плавающее окно / ... ]
 * Плагин [VSCode](http://vscext-project.autojs6.com) поддерживает варианты подключения клиента (LAN) и сервера (LAN/ADB)
-* Движок [Rhino](https://github.com/mozilla/rhino/) обновлен с версии [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) до версии [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (обновлено 15 October 2026 года)
+* Движок [Rhino](https://github.com/mozilla/rhino/) обновлен с версии [v1.7.7.2](https://github.com/mozilla/rhino/releases/tag/Rhino1_7_7_2_Release) до версии [v2.0.0-SNAPSHOT](http://rhino.autojs6.com/blob/master/gradle.properties#L3) (обновлено 3 November 2026 года)
     * Поддержка Unicode для [экранирования кодовых точек](https://developer.mozilla.org/zh-CN/docs/Glossary/Code_point) и символов [в дополнительных плоскостях](https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84#%E7%AC%AC%E4%B8%80%E8%BC%94%E5%8A%A9%E5%B9%B3%E9%9D%A2)
        ```js
        '\u{1D160}'; /* означает "𝅘𝅥𝅮", традиционный метод: '\uD834\uDD60'. */
