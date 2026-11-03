@@ -25,6 +25,26 @@ const EXCLUDED_LOGINS = (process.env.EXCLUDED_LOGINS || OWNER)
     .map(s => s.trim())
     .filter(Boolean);
 
+/**
+ * Pull requests that GitHub does not show as merged, but whose changes were ported into the codebase
+ * or were already in place, so they count as contributions in the same way as merged pull requests.
+ * After the history rewrite on 2026-11-03 their commit lists on GitHub span the whole old history,
+ * so the author's commit count and latest commit time are recorded here as they were in the pull request.<br>
+ * zh-CN:<br>
+ * GitHub 未显示为已合并, 但改动已移植到代码中 (或已有相同修复) 的 Pull Request, 与已合并的 Pull Request 同样计入贡献.
+ * 2026-11-03 历史改写后, 它们在 GitHub 上的提交列表包含整段旧历史,
+ * 因此这里按原 Pull Request 记录作者的提交数与最近提交时间.
+ *
+ * @type {CreditedPullRequest[]}
+ */
+const CREDITED_PULL_REQUESTS = [
+    { number: 556, login: 'djbclark', commitCount: 2, latestCommitAt: '2026-07-14T04:15:52Z' },
+    { number: 557, login: 'djbclark', commitCount: 1, latestCommitAt: '2026-07-14T04:15:14Z' },
+    { number: 558, login: 'djbclark', commitCount: 2, latestCommitAt: '2026-07-14T04:42:23Z' },
+    { number: 571, login: 'DeanTMaxim', commitCount: 1, latestCommitAt: '2026-08-21T06:07:45Z' },
+    { number: 573, login: 'DeanTMaxim', commitCount: 1, latestCommitAt: '2026-08-21T15:29:20Z' },
+];
+
 /** @type {import('http').OutgoingHttpHeaders} */
 const headers = {
     'accept': 'application/vnd.github+json',
@@ -303,8 +323,14 @@ export async function fetchStatistics(concurrency = 6) {
 
     // Collect all authors first, then fetch profiles in bulk (with concurrency limit + memory cache).
     // zh-CN: 先收集所有作者, 再批量获取资料 (并发受限 + 内存缓存).
+    // A credited pull request that has since been merged on GitHub is counted once, from GitHub.
+    // zh-CN: 已在 GitHub 上合并的记录项只按 GitHub 数据计数一次.
+    const mergedNumbers = new Set(mergedPRs.map(pr => pr.number));
+    const creditedPRs = CREDITED_PULL_REQUESTS.filter(c => !mergedNumbers.has(c.number));
+
     const allLogins = prWithStats
         .map(({ pr }) => pr.user?.login)
+        .concat(creditedPRs.map(c => c.login))
         .filter(Boolean);
     const profileMap = await fetchProfilesForLogins(allLogins, concurrency);
 
@@ -314,26 +340,32 @@ export async function fetchStatistics(concurrency = 6) {
      * @type {Map<string, StatisticsEntry>}
      */
     const byAuthor = new Map();
-    for (const { pr, commitCount, latestCommitAt } of prWithStats) {
-        const user = pr.user;
-        if (!user?.login) continue;
-
+    const addContribution = (login, commitCount, latestCommitAt, credited) => {
         /** @type {StatisticsEntry} */
-        const entry = byAuthor.get(user.login) || {
-            login: user.login,
-            name: profileMap.get(user.login)?.name || null,
-            htmlUrl: `https://github.com/${user.login}`,
+        const entry = byAuthor.get(login) || {
+            login: login,
+            name: profileMap.get(login)?.name || null,
+            htmlUrl: `https://github.com/${login}`,
             totalCommitsInMergedPRs: 0,
             latestCommitAt: null,
+            hasCreditedPRs: false,
         };
 
         entry.totalCommitsInMergedPRs += commitCount;
+        entry.hasCreditedPRs ||= credited;
 
         if (latestCommitAt && (!entry.latestCommitAt || new Date(latestCommitAt) > new Date(entry.latestCommitAt))) {
             entry.latestCommitAt = latestCommitAt;
         }
 
-        byAuthor.set(user.login, entry);
+        byAuthor.set(login, entry);
+    };
+    for (const { pr, commitCount, latestCommitAt } of prWithStats) {
+        if (!pr.user?.login) continue;
+        addContribution(pr.user.login, commitCount, latestCommitAt, false);
+    }
+    for (const c of creditedPRs) {
+        addContribution(c.login, c.commitCount, c.latestCommitAt, true);
     }
 
     // Sort by latest commit in descending order.
@@ -357,9 +389,11 @@ class Statistics {
         this.htmlUrl = entry.htmlUrl;
         this.totalCommitsInMergedPRs = entry.totalCommitsInMergedPRs;
         this.latestCommitAt = entry.latestCommitAt;
+        // Credited pull requests are closed rather than merged, so the list for such an author is not limited to merged ones.
+        // zh-CN: 计入贡献的 Pull Request 处于关闭而非合并状态, 因此这类作者的列表不限定为已合并.
         this.prListLink = `https://github.com/${OWNER}/${REPO}/pulls?q=`
             + 'is' + '%3A' + 'pr' + '+'
-            + 'is' + '%3A' + 'merged' + '+'
+            + (entry.hasCreditedPRs ? '' : 'is' + '%3A' + 'merged' + '+')
             + 'author' + '%3A' + encodeURIComponent(entry.login);
     }
 

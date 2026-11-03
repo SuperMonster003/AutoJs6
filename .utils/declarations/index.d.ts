@@ -29,6 +29,14 @@ interface StatisticsEntry {
     htmlUrl: string;
     totalCommitsInMergedPRs: number;
     latestCommitAt: string | null;
+    hasCreditedPRs: boolean;
+}
+
+interface CreditedPullRequest {
+    number: number;
+    login: string;
+    commitCount: number;
+    latestCommitAt: string;
 }
 
 interface DebugRecord {
