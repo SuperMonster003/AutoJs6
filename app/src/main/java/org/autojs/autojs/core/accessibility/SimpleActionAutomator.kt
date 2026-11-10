@@ -5,10 +5,13 @@ package org.autojs.autojs.core.accessibility
 import android.accessibilityservice.AccessibilityService.GestureResultCallback
 import android.accessibilityservice.GestureDescription
 import android.content.Context
+import android.graphics.Path
+import android.graphics.PathMeasure
 import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.util.Log
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.RequiresApi
@@ -59,7 +62,12 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     }
 
     init {
-        accessibilityBridge.tap = AccessibilityBridge.Tap { x, y -> mGlobalActionAutomatorForDevicePixels.click(x, y) }
+        // UiObject.clickBounds() falls back to a device-pixel tap; on a virtual display it must go
+        // to that display instead of the accessibility gesture service (main display only).
+        accessibilityBridge.tap = AccessibilityBridge.Tap { x, y ->
+            if (scriptRuntime.displayRoute.isVirtual) scriptRuntime.displayRoute.tap(x, y)
+            else mGlobalActionAutomatorForDevicePixels.click(x, y)
+        }
     }
 
     private val isRunningPackageSelf
@@ -125,13 +133,13 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     fun appendText(target: ActionTarget, text: String) = performAction(target.createAction(UiObject.ACTION_APPEND_TEXT, text))
 
     @ScriptInterface
-    fun back() = mGlobalActionAutomator.back()
+    fun back() = virtualKey(KeyEvent.KEYCODE_BACK) ?: mGlobalActionAutomator.back()
 
     @ScriptInterface
-    fun home() = mGlobalActionAutomator.home()
+    fun home() = virtualKey(KeyEvent.KEYCODE_HOME) ?: mGlobalActionAutomator.home()
 
     @ScriptInterface
-    fun recents() = mGlobalActionAutomator.recents()
+    fun recents() = virtualKey(KeyEvent.KEYCODE_APP_SWITCH) ?: mGlobalActionAutomator.recents()
 
     @ScriptInterface
     fun notifications() = mGlobalActionAutomator.notifications()
@@ -152,7 +160,7 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     fun takeScreenshot() = mGlobalActionAutomator.takeScreenshot()
 
     @ScriptInterface
-    fun headsethook() = mGlobalActionAutomator.headsethook()
+    fun headsethook() = virtualKey(KeyEvent.KEYCODE_HEADSETHOOK) ?: mGlobalActionAutomator.headsethook()
 
     @ScriptInterface
     fun switchToInputMethod(packageName: String): Boolean {
@@ -195,30 +203,56 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
     fun dismissNotificationShade() = mGlobalActionAutomator.dismissNotificationShade()
 
     @ScriptInterface
-    fun gesture(start: Long, duration: Long, points: Array<IntArray>) = mGlobalActionAutomatorForGesture.gesture(start, duration, *points)
+    fun gesture(start: Long, duration: Long, points: Array<IntArray>): Boolean =
+        if (scriptRuntime.displayRoute.isVirtual) dispatchPolyline(duration, points)
+        else mGlobalActionAutomatorForGesture.gesture(start, duration, *points)
 
     @ScriptInterface
     @JvmOverloads
-    fun gestureAsync(start: Long, duration: Long, points: Array<IntArray>, callback: GestureResultCallback? = null) = mGlobalActionAutomatorForGesture.gestureAsync(start, duration, points, callback)
+    fun gestureAsync(start: Long, duration: Long, points: Array<IntArray>, callback: GestureResultCallback? = null) {
+        if (scriptRuntime.displayRoute.isVirtual) {
+            val ok = dispatchPolyline(duration, points)
+            completeGesture(callback, ok, points)
+            return
+        }
+        mGlobalActionAutomatorForGesture.gestureAsync(start, duration, points, callback)
+    }
 
     @ScriptInterface
-    fun gestures(strokes: Array<GestureDescription.StrokeDescription>) = mGlobalActionAutomatorForGesture.gestures(*strokes)
+    fun gestures(strokes: Array<GestureDescription.StrokeDescription>): Boolean =
+        if (scriptRuntime.displayRoute.isVirtual) strokes.all { dispatchStroke(it) }
+        else mGlobalActionAutomatorForGesture.gestures(*strokes)
 
     @ScriptInterface
     @JvmOverloads
-    fun gesturesAsync(strokes: Array<GestureDescription.StrokeDescription>, callback: GestureResultCallback? = null) = mGlobalActionAutomatorForGesture.gesturesAsync(strokes, callback)
+    fun gesturesAsync(strokes: Array<GestureDescription.StrokeDescription>, callback: GestureResultCallback? = null) {
+        if (scriptRuntime.displayRoute.isVirtual) {
+            val ok = strokes.all { dispatchStroke(it) }
+            completeGesture(callback, ok)
+            return
+        }
+        mGlobalActionAutomatorForGesture.gesturesAsync(strokes, callback)
+    }
 
     @ScriptInterface
-    fun click(x: Int, y: Int) = mGlobalActionAutomatorForGesture.click(x, y)
+    fun click(x: Int, y: Int): Boolean =
+        if (scriptRuntime.displayRoute.isVirtual) scriptRuntime.displayRoute.tap(x, y)
+        else mGlobalActionAutomatorForGesture.click(x, y)
 
     @ScriptInterface
-    fun press(x: Int, y: Int, duration: Int) = mGlobalActionAutomatorForGesture.press(x, y, duration)
+    fun press(x: Int, y: Int, duration: Int): Boolean =
+        if (scriptRuntime.displayRoute.isVirtual) scriptRuntime.displayRoute.longPress(x, y, duration.coerceAtLeast(1))
+        else mGlobalActionAutomatorForGesture.press(x, y, duration)
 
     @ScriptInterface
-    fun longClick(x: Int, y: Int) = mGlobalActionAutomatorForGesture.longClick(x, y)
+    fun longClick(x: Int, y: Int): Boolean =
+        if (scriptRuntime.displayRoute.isVirtual) scriptRuntime.displayRoute.longPress(x, y, 600)
+        else mGlobalActionAutomatorForGesture.longClick(x, y)
 
     @ScriptInterface
-    fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, duration: Int) = mGlobalActionAutomatorForGesture.swipe(x1, y1, x2, y2, duration.toLong())
+    fun swipe(x1: Int, y1: Int, x2: Int, y2: Int, duration: Int): Boolean =
+        if (scriptRuntime.displayRoute.isVirtual) scriptRuntime.displayRoute.swipe(x1, y1, x2, y2, duration.coerceAtLeast(1))
+        else mGlobalActionAutomatorForGesture.swipe(x1, y1, x2, y2, duration.toLong())
 
     @ScriptInterface
     fun paste(target: ActionTarget) = performAction(target.createAction(AccessibilityNodeInfo.ACTION_PASTE))
@@ -269,14 +303,69 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
         AccessibilityService.removeAllAccessibilityEventCallbacks(mA11yEventOwnerId)
     }
 
+    /** null = not a virtual-screen run, so the caller keeps using the accessibility global action. */
+    private fun virtualKey(keyCode: Int): Boolean? =
+        if (scriptRuntime.displayRoute.isVirtual) scriptRuntime.displayRoute.key(keyCode) else null
+
+    /** Splits a polyline gesture into straight swipes on the virtual display. */
+    private fun dispatchPolyline(duration: Long, points: Array<IntArray>): Boolean {
+        val route = scriptRuntime.displayRoute
+        if (points.isEmpty()) return false
+        if (points.size == 1) {
+            return route.tap(points[0].getOrElse(0) { 0 }, points[0].getOrElse(1) { 0 })
+        }
+        val segment = (duration / (points.size - 1)).coerceAtLeast(1L).toInt()
+        return points.asList().zipWithNext().all { (from, to) ->
+            route.swipe(
+                from.getOrElse(0) { 0 }, from.getOrElse(1) { 0 },
+                to.getOrElse(0) { 0 }, to.getOrElse(1) { 0 },
+                segment,
+            )
+        }
+    }
+
+    /** Approximates one accessibility stroke by its start/end points (PathMeasure samples the path). */
+    private fun dispatchStroke(stroke: GestureDescription.StrokeDescription): Boolean {
+        val measure = PathMeasure(stroke.path, false)
+        val start = FloatArray(2)
+        val end = FloatArray(2)
+        measure.getPosTan(0f, start, null)
+        measure.getPosTan(measure.length, end, null)
+        return scriptRuntime.displayRoute.swipe(
+            start[0].toInt(), start[1].toInt(), end[0].toInt(), end[1].toInt(),
+            stroke.duration.coerceIn(1L, Int.MAX_VALUE.toLong()).toInt(),
+        )
+    }
+
+    /** Async gesture APIs still need their callback, even when the injection was synchronous. */
+    private fun completeGesture(callback: GestureResultCallback?, ok: Boolean, points: Array<IntArray>? = null) {
+        if (callback == null) return
+        val first = points?.firstOrNull()
+        val x = first?.getOrElse(0) { 0 }?.toFloat() ?: 0f
+        val y = first?.getOrElse(1) { 0 }?.toFloat() ?: 0f
+        val path = Path().apply { moveTo(x, y); lineTo(x, y) }
+        val description = GestureDescription.Builder()
+            .addStroke(GestureDescription.StrokeDescription(path, 0L, 1L))
+            .build()
+        if (ok) callback.onCompleted(description) else callback.onCancelled(description)
+    }
+
     private fun performAction(simpleAction: SimpleAction): Boolean {
         ensureService()
-        if (AccessibilityConfig.isUnintendedGuardEnabled() && isRunningPackageSelf) {
-            return false
+        val roots = accessibilityBridge.windowRoots()
+        if (AccessibilityConfig.isUnintendedGuardEnabled()) {
+            // The usage-stats / shell "foreground package" describes the physical screen. On a
+            // virtual display the guard must look at the windows the scoped query actually sees.
+            // zh-CN: 使用情况/ shell 得到的「前台包名」描述的是物理主屏; 虚拟屏上保护模式应看作用域内实际窗口.
+            val selfInFront = if (scriptRuntime.displayRoute.isVirtual) {
+                roots.any { root -> DeveloperUtils.isSelfPackage("${root.packageName}") }
+            } else {
+                isRunningPackageSelf
+            }
+            if (selfInFront) return false
         }
-        return accessibilityBridge.windowRoots().let { roots ->
-            roots.isNotEmpty() && roots.map { root -> simpleAction.perform(UiObject.createRoot(root)) }.all { it /* == true */ }
-        }
+        return roots.isNotEmpty() &&
+            roots.map { root -> simpleAction.perform(UiObject.createRoot(root)) }.all { it /* == true */ }
     }
 
     fun setScreenMetrics(metrics: ScreenMetrics) {
@@ -285,6 +374,11 @@ class SimpleActionAutomator(private val accessibilityBridge: AccessibilityBridge
 
     @RequiresApi(Build.VERSION_CODES.R)
     fun captureScreen(): ScriptPromiseAdapter {
+        // A virtual display owns its ImageReader surface, so MediaProjection (default display only)
+        // must not be involved. Return the same ImageWrapper type as the accessibility screenshot.
+        if (scriptRuntime.displayRoute.isVirtual) {
+            return ScriptPromiseAdapter().also { it.resolve(scriptRuntime.displayRoute.capture()) }
+        }
         ScriptRuntime.requiresApi(Build.VERSION_CODES.R)
         ensureService()
 

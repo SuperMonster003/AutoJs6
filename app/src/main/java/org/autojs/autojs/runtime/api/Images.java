@@ -302,6 +302,12 @@ public class Images {
     }
 
     public ScriptPromiseAdapter requestScreenCapture(int orientation, int width, int height, boolean isAsync) {
+        // A virtual display is captured through its own ImageReader surface, so no MediaProjection
+        // permission dialog is needed (and MediaProjection can only mirror the default display).
+        // zh-CN: 虚拟屏由自身的 ImageReader surface 截图, 无需 MediaProjection 授权.
+        if (mScriptRuntime.displayRoute.isVirtual()) {
+            return alreadyGrantedScreenCaptureRequest();
+        }
         final ScriptPromiseAdapter waiter = new ScriptPromiseAdapter();
         final ScreenCapturer.Options options = new ScreenCapturer.Options(
                 width, height, orientation, ScreenMetrics.getDeviceScreenDensity(), isAsync
@@ -401,7 +407,7 @@ public class Images {
     }
 
     public synchronized boolean hasActiveScreenCapturer() {
-        return mScreenCapturer != null && !mScreenCapturer.isReleased();
+        return mScriptRuntime.displayRoute.isVirtual() || (mScreenCapturer != null && !mScreenCapturer.isReleased());
     }
 
     private ScriptPromiseAdapter alreadyGrantedScreenCaptureRequest() {
@@ -412,6 +418,11 @@ public class Images {
 
     @Nullable
     public ImageWrapper captureScreen() {
+        if (mScriptRuntime.displayRoute.isVirtual()) {
+            // Latest frame of the virtual display, as an ImageWrapper so all images.* helpers work.
+            // zh-CN: 取虚拟屏最新帧并包装为 ImageWrapper, images.* 的找色/找图能力可直接使用.
+            return mScriptRuntime.displayRoute.capture();
+        }
         synchronized (this) {
             ScreenCapturer screenCapturer = mScreenCapturer;
             if (screenCapturer == null || screenCapturer.isReleased()) {

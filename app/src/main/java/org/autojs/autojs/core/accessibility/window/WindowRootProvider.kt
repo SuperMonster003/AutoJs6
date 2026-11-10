@@ -18,7 +18,18 @@ typealias A11yWindowRootPolicy = WindowRootPolicy<AccessibilityWindowInfo>
  *
  * Created by SuperMonster003 on Sep 5, 2026.
  */
-class WindowRootProvider(private val service: () -> AccessibilityService?) {
+class WindowRootProvider(
+    /**
+     * When true the window list comes from `service.windowsOnAllDisplays` (all displays) instead
+     * of `service.windows` (default display only). Used by runtimes bound to a virtual display.
+     * zh-CN: 为 true 时窗口列表取自 `service.windowsOnAllDisplays` (所有屏幕), 而非只含默认屏的
+     * `service.windows`; 供绑定虚拟屏的运行时使用.
+     */
+    private val allDisplays: Boolean = false,
+    // Last on purpose: the existing `WindowRootProvider { service }` call sites keep working.
+    // zh-CN: 刻意放在最后, 使原有 `WindowRootProvider { service }` 调用形式保持可用.
+    private val service: () -> AccessibilityService?,
+) {
 
     private val resolver = WindowRootResolver(ServiceSource()) { message, error -> Log.w(TAG, message, error) }
 
@@ -36,7 +47,9 @@ class WindowRootProvider(private val service: () -> AccessibilityService?) {
 
     private inner class ServiceSource : WindowRootResolver.Source<AccessibilityWindowInfo, AccessibilityNodeInfo> {
 
-        override fun windows(): List<AccessibilityWindowInfo>? = service()?.windows
+        override fun windows(): List<AccessibilityWindowInfo>? = service()?.let {
+            if (allDisplays) it.windowsOnAllDisplays else it.windows
+        }
 
         override fun rootOf(window: AccessibilityWindowInfo): AccessibilityNodeInfo? = window.root
 

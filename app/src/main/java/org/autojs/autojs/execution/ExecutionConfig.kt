@@ -19,6 +19,27 @@ data class ExecutionConfig(
     var scriptConfig: ScriptConfig = ScriptConfig(),
 ) : Parcelable {
 
+    /**
+     * Task-level virtual screen mode. FOLLOW falls back to the global setting / project feature;
+     * ON and OFF override both. This is a launch option, not a script API: an existing script runs
+     * unchanged on the virtual display (docs/virtual-screen/README.md).
+     *
+     * These properties deliberately stay outside the primary constructor: adding them there would
+     * change the signature of the generated data-class `copy()`, which the `com.stardust` Rhino
+     * alias still exposes to existing scripts (see stardust-alias-snapshot.json). Callers that use
+     * `copy()` must carry these options over explicitly.
+     *
+     * zh-CN: 任务级虚拟屏模式. 这些属性刻意不放进主构造函数, 否则 data class 生成的 copy() 签名会变化,
+     * 破坏 com.stardust Rhino 别名对存量脚本的兼容承诺; 使用 copy() 的调用方需显式带上这些选项.
+     */
+    var virtualScreenMode: Int = VIRTUAL_SCREEN_MODE_FOLLOW
+    /** 0 = follow the physical screen. zh-CN: 0 表示跟随物理屏幕尺寸. */
+    var virtualScreenWidth: Int = 0
+    var virtualScreenHeight: Int = 0
+    var virtualScreenDensity: Int = 0
+    /** 0 = create a new display; a positive id reuses an existing virtual display. */
+    var virtualScreenDisplayId: Int = 0
+
     private val mArguments = HashMap<String, Any>()
 
     /** Monotonic host launch measurements; neither script arguments nor parcel input. */
@@ -41,13 +62,19 @@ data class ExecutionConfig(
         get() = mArguments
 
     constructor(parcel: Parcel) : this(
-        parcel.readString().orEmpty(),
-        parcel.createStringArray().orEmpty(),
-        parcel.readInt(),
-        parcel.readLong(),
-        parcel.readLong(),
-        parcel.readInt()
-    )
+        workingDirectory = parcel.readString().orEmpty(),
+        envPath = parcel.createStringArray().orEmpty(),
+        intentFlags = parcel.readInt(),
+        delay = parcel.readLong(),
+        interval = parcel.readLong(),
+        loopTimes = parcel.readInt(),
+    ) {
+        virtualScreenMode = parcel.readInt()
+        virtualScreenWidth = parcel.readInt()
+        virtualScreenHeight = parcel.readInt()
+        virtualScreenDensity = parcel.readInt()
+        virtualScreenDisplayId = parcel.readInt()
+    }
 
     fun setArgument(key: String, `object`: Any) {
         mArguments[key] = `object`
@@ -73,6 +100,11 @@ data class ExecutionConfig(
         if (delay != other.delay) return false
         if (interval != other.interval) return false
         if (loopTimes != other.loopTimes) return false
+        if (virtualScreenMode != other.virtualScreenMode) return false
+        if (virtualScreenWidth != other.virtualScreenWidth) return false
+        if (virtualScreenHeight != other.virtualScreenHeight) return false
+        if (virtualScreenDensity != other.virtualScreenDensity) return false
+        if (virtualScreenDisplayId != other.virtualScreenDisplayId) return false
         if (mArguments != other.mArguments) return false
 
         return true
@@ -85,6 +117,11 @@ data class ExecutionConfig(
         delay,
         interval,
         loopTimes,
+        virtualScreenMode,
+        virtualScreenWidth,
+        virtualScreenHeight,
+        virtualScreenDensity,
+        virtualScreenDisplayId,
         mArguments,
     ).toHashCode()
 
@@ -96,6 +133,11 @@ data class ExecutionConfig(
             writeLong(delay)
             writeLong(interval)
             writeInt(loopTimes)
+            writeInt(virtualScreenMode)
+            writeInt(virtualScreenWidth)
+            writeInt(virtualScreenHeight)
+            writeInt(virtualScreenDensity)
+            writeInt(virtualScreenDisplayId)
         }
     }
 
@@ -119,6 +161,13 @@ data class ExecutionConfig(
 
         @Suppress("ConstPropertyName")
         const val tag = "execution.config"
+
+        const val VIRTUAL_SCREEN_MODE_FOLLOW = 0
+        const val VIRTUAL_SCREEN_MODE_ON = 1
+        const val VIRTUAL_SCREEN_MODE_OFF = 2
+
+        /** project.json feature that turns the run mode on for a whole project. */
+        const val FEATURE_VIRTUAL_SCREEN = "virtualScreen"
 
         @JvmStatic
         fun getTag() = tag

@@ -144,6 +144,32 @@ object Scripts {
         null
     }
 
+    /**
+     * Runs [file] on a fresh background virtual display without touching its JavaScript source.
+     * The display is created by the runtime when the script starts and released when it exits.
+     *
+     * zh-CN: 让 [file] 在新的后台虚拟屏上运行, 无需修改脚本源码. 虚拟屏在脚本启动时创建, 退出时释放.
+     */
+    @JvmStatic
+    fun runOnVirtualScreen(context: Context, file: ScriptFile): ScriptExecution? = try {
+        val launchStartedAt = android.os.SystemClock.elapsedRealtime()
+        val persisted = ScriptLaunchSourceFactory.capturePersistedLaunchContext(file.path)
+        val launch = ScriptLaunchSourceFactory.createPersistedPathLaunch(
+            path = file.path,
+            sourceKind = persisted.sourceKind,
+            projectRoot = persisted.projectRoot,
+        )
+        val config = launch.createExecutionConfig().apply {
+            nodeLaunchStartedAtMs = launchStartedAt
+            virtualScreenMode = ExecutionConfig.VIRTUAL_SCREEN_MODE_ON
+        }
+        executeLaunch(context, launch, config)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        ViewUtils.showToast(context, e.message, true)
+        null
+    }
+
     /** Runs a user-selected file and may show the foreground Python plugin availability prompt. */
     @JvmStatic
     fun runInteractive(context: Context, file: ScriptFile): ScriptExecution? = try {

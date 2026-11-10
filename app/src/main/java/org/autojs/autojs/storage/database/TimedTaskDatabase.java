@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import org.autojs.autojs.execution.ExecutionConfig;
 import org.autojs.autojs.timing.TimedTask;
 
 /**
@@ -22,7 +23,7 @@ import org.autojs.autojs.timing.TimedTask;
  */
 public class TimedTaskDatabase extends Database<TimedTask> {
 
-    public static final int VERSION = 5;
+    public static final int VERSION = 6;
     private static final String NAME = "TimedTaskDatabase";
     public static final String FILE_NAME = NAME + ".db";
 
@@ -46,6 +47,7 @@ public class TimedTaskDatabase extends Database<TimedTask> {
         values.put("end_mode", model.getEndMode());
         values.put("end_value", model.getEndValue());
         values.put("finished_times", model.getFinishedTimes());
+        values.put("virtual_screen_mode", model.getVirtualScreenMode());
         values.put("day_of_month", model.getDayOfMonth());
         values.put("month_of_year", model.getMonthOfYear());
         return values;
@@ -66,6 +68,7 @@ public class TimedTaskDatabase extends Database<TimedTask> {
         task.setEndMode(getInt(cursor, "end_mode", TimedTask.END_MODE_FOREVER));
         task.setEndValue(getLong(cursor, "end_value", 0));
         task.setFinishedTimes(getInt(cursor, "finished_times", 0));
+        task.setVirtualScreenMode(getInt(cursor, "virtual_screen_mode", ExecutionConfig.VIRTUAL_SCREEN_MODE_FOLLOW));
         task.setDayOfMonth(getInt(cursor, "day_of_month", 0));
         task.setMonthOfYear(getInt(cursor, "month_of_year", 0));
         task.setSourceKind(getString(cursor, "source_kind"));
@@ -112,7 +115,8 @@ public class TimedTaskDatabase extends Database<TimedTask> {
                     "`day_of_month` INTEGER DEFAULT 0, " +
                     "`month_of_year` INTEGER DEFAULT 0, " +
                     "`source_kind` TEXT, " +
-                    "`project_root` TEXT);");
+                    "`project_root` TEXT, " +
+                    "`virtual_screen_mode` INTEGER DEFAULT 0);");
         }
 
         @Override
@@ -128,6 +132,9 @@ public class TimedTaskDatabase extends Database<TimedTask> {
             if (oldVersion < 5) {
                 addColumn(db, "source_kind", "TEXT");
                 addColumn(db, "project_root", "TEXT");
+            }
+            if (oldVersion < 6) {
+                addColumn(db, "virtual_screen_mode", "INTEGER DEFAULT 0");
             }
         }
 

@@ -78,6 +78,7 @@ import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.settings.TrashAndVersionHistorySettingsActivity
 import org.autojs.autojs.ui.storage.TrashActivity
 import org.autojs.autojs.ui.storage.VersionHistoryActivity
+import org.autojs.autojs.ui.virtualscreen.VirtualScreenViewerActivity
 import org.autojs.autojs.ui.wizard.SetupWizards
 import org.autojs.autojs.util.ActivityLaunchOptions
 import org.autojs.autojs.util.IntentUtils.App.exit
@@ -160,6 +161,7 @@ open class DrawerFragment : Fragment() {
     private lateinit var mTrashItem: DrawerMenuShortcutItem
     private lateinit var mVersionHistoryItem: DrawerMenuShortcutItem
     private lateinit var mAboutAppAndDevItem: DrawerMenuShortcutItem
+    private lateinit var mVirtualScreenViewerItem: DrawerMenuShortcutItem
 
     private lateinit var mA11yTool: AccessibilityTool
     private lateinit var mScreenColorPickerTool: ScreenColorPickerTool
@@ -770,6 +772,14 @@ open class DrawerFragment : Fragment() {
         }
         TerminalPluginStateMonitor.addListener(mContext, terminalPluginStateListener)
 
+        mVirtualScreenViewerItem = DrawerMenuShortcutItem(
+            icon = R.drawable.ic_ali_fullscreen,
+            title = R.string.text_virtual_screen_viewer,
+        ).apply {
+            setAction { VirtualScreenViewerActivity.launch(mContext) }
+            subtitle = mContext.getString(R.string.summary_virtual_screen_viewer)
+        }
+
         mThemeColorItem = DrawerMenuShortcutItem(
             icon = R.drawable.ic_personalize_thicker,
             title = R.string.text_theme_color,
@@ -1044,6 +1054,7 @@ open class DrawerFragment : Fragment() {
             mAccessibilityServiceItem,
             mForegroundServiceItem,
             DrawerMenuGroup(R.string.text_tools),
+            mVirtualScreenViewerItem,
             mFloatingButtonItem,
             mPointerLocationItem,
             mScreenColorPickerItem,

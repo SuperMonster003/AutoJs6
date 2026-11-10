@@ -1134,6 +1134,12 @@ fn util.toRegular	attributes=4 global="NONE" length=1 aliases=[] builtIn=[] buil
 fn util.toRegularAndApply	attributes=4 global="NONE" length=0 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-(v)
 fn util.toRegularAndCall	attributes=4 global="NONE" length=0 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-(v)
 fn util.unwrapJavaObject	attributes=4 global="NONE" length=1 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-(r)
+fn virtualScreen.create	attributes=4 global="NONE" length=0 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-(o)
+fn virtualScreen.release	attributes=4 global="NONE" length=1 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-(r)
+fn virtualScreen.releaseAll	attributes=4 global="NONE" length=0 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-()
+fn virtualScreen.screens	attributes=4 global="NONE" length=0 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-()
+fn virtualScreen.session	attributes=4 global="NONE" length=1 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-(r)
+fn virtualScreen.state	attributes=4 global="NONE" length=0 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-()
 fn web.newInjectableWebClient	attributes=4 global="ALSO" length=0 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-()
 fn web.newInjectableWebView	attributes=4 global="ALSO" length=0 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-(oo)
 fn web.newWebSocket	attributes=4 global="ALSO" length=1 aliases=[] builtIn=[] builtInOnly=false toStringRole="NONE" overloads=-(ro)
@@ -1937,6 +1943,7 @@ module toast	names=["toast","$toast"] aliases=[] attributes=4 dollarPrefix=true 
 module tts	names=["tts","$tts"] aliases=[] attributes=4 dollarPrefix=true eager=false emitter=false assign=false proxy=false builtIn=null prototype=null install=null invoke=true construct=false installsComputed=false
 module ui	names=["ui","$ui"] aliases=[] attributes=0 dollarPrefix=true eager=false emitter=false assign=false proxy=true builtIn=null prototype="prototype" install="install" invoke=false construct=false installsComputed=false
 module util	names=["util","$util"] aliases=[] attributes=4 dollarPrefix=true eager=false emitter=false assign=false proxy=false builtIn=null prototype="prototype" install=null invoke=false construct=false installsComputed=false
+module virtualScreen	names=["virtualScreen","$virtualScreen"] aliases=[] attributes=4 dollarPrefix=true eager=false emitter=false assign=false proxy=false builtIn=null prototype=null install=null invoke=false construct=false installsComputed=false
 module web	names=["web","$web"] aliases=[] attributes=4 dollarPrefix=true eager=false emitter=false assign=false proxy=false builtIn=null prototype=null install=null invoke=false construct=false installsComputed=false
 module workManager	names=["workManager","$workManager","work_manager","$work_manager"] aliases=["work_manager"] attributes=4 dollarPrefix=true eager=false emitter=false assign=false proxy=false builtIn=null prototype=null install=null invoke=false construct=false installsComputed=false
 module yolo	names=["yolo","$yolo"] aliases=[] attributes=4 dollarPrefix=true eager=false emitter=false assign=false proxy=false builtIn=null prototype=null install=null invoke=false construct=false installsComputed=false

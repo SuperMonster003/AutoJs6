@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.shizuku;
 
 import android.os.ParcelFileDescriptor;
+import android.view.Surface;
 import org.autojs.autojs.core.shizuku.IRemoteShellProcess;
 
 interface IUserService {
@@ -31,5 +32,22 @@ interface IUserService {
     // The host process token: the service ends what it started and exits once every attached host died,
     // and exits 30 s after it started when no host attached (docs/shizuku-oom/ROADMAP.md D5).
     oneway void attachHost(IBinder host) = 41;
+
+    // ---- Virtual screen (docs/virtual-screen/README.md) ----
+    // The display is owned by this shell-uid process: it dies with the process, so it must not be
+    // created by a one-shot execCommand. `surface` is an ImageReader surface in the app process.
+    int createVirtualDisplay(in Surface surface, int width, int height, int dpi, int flags) = 51;
+    boolean releaseVirtualDisplay(int displayId) = 52;
+    String listVirtualDisplays() = 53;
+    String virtualDisplayInfo(int displayId) = 54;
+    int launchOnDisplay(int displayId, String packageName, String component, boolean clearTask) = 55;
+    boolean tapOnDisplay(int displayId, int x, int y) = 56;
+    boolean swipeOnDisplay(int displayId, int x1, int y1, int x2, int y2, int durationMs) = 57;
+    boolean keyOnDisplay(int displayId, int keyCode) = 58;
+    boolean textOnDisplay(int displayId, String text) = 59;
+    boolean forceStopOnDisplay(int displayId, String packageName) = 60;
+    // ACTION_VIEW app links (e.g. example://...) must also be launched on the virtual display;
+    // app.openUrl() alone would resolve them on the default display.
+    int launchUriOnDisplay(int displayId, String uri) = 61;
 
 }

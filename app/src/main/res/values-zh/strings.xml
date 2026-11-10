@@ -3339,4 +3339,57 @@
     <string name="warning_apk_native_page_alignment_unsupported">原生库 %1$s 的对齐值为 %2$d 字节. 生成的 APK 可能无法在页大小为 16 KB 的设备上运行. 请升级原生库或插件.</string>
     <string name="ui_preview_window_function_ignored">ui.%1$s 在 3-Block Compose 预览中无效 (预览没有 Activity 窗口)</string>
     <string name="ui_preview_default_label">3-Block Compose 预览</string>
+
+    <string name="text_run_on_virtual_screen">在虚拟屏幕运行</string>
+    <string name="text_virtual_screen_run_mode">在虚拟屏幕运行脚本</string>
+    <string name="summary_virtual_screen_run_mode">让所有脚本运行在后台虚拟屏上. 截图、点击、手势、控件操作与应用启动都会自动作用于该虚拟屏, 已有脚本无需修改. 需要 Shizuku 及 Android 12 或更高版本.</string>
+
+    <!-- 虚拟屏幕查看器 (docs/virtual-screen/README.md) -->
+    <string name="text_virtual_screen_viewer">虚拟屏幕查看器</string>
+    <string name="summary_virtual_screen_viewer">实时查看并操作后台虚拟屏</string>
+    <string name="text_vs_new">新建屏幕</string>
+    <string name="text_vs_switch">切换屏幕</string>
+    <string name="text_vs_release">释放屏幕</string>
+    <string name="text_vs_back">返回</string>
+    <string name="text_vs_home">主页</string>
+    <string name="text_vs_recents">多任务</string>
+    <string name="text_vs_power">电源</string>
+    <string name="text_vs_input">输入文本</string>
+    <string name="text_vs_launch">启动应用</string>
+    <string name="text_vs_save">保存截图</string>
+    <string name="text_vs_pause">暂停预览</string>
+    <string name="text_vs_resume">继续预览</string>
+    <string name="text_vs_grant">授权 Shizuku</string>
+    <string name="text_vs_no_screen">当前没有虚拟屏幕. 可以新建一块, 或先用「在虚拟屏幕运行」启动脚本再回到这里.</string>
+    <string name="text_vs_waiting_frame">正在等待第一帧. 若屏幕是空的, 点「启动应用」放一个应用上去, 或点「刷新画面」重试.</string>
+    <string name="text_vs_shizuku_required">Shizuku 未就绪: 请先启动 Shizuku 并为本应用授权.</string>
+    <string name="text_vs_status_idle">没有活动的虚拟屏</string>
+    <string name="text_vs_status">屏幕 %1$d · %2$d×%3$d @ %4$ddpi · %5$d fps · %6$s</string>
+    <string name="text_vs_created">虚拟屏幕 %1$d 已创建</string>
+    <string name="text_vs_released">虚拟屏幕 %1$d 已释放</string>
+    <string name="text_vs_saved">已保存到 %1$s</string>
+    <string name="text_vs_action_failed">操作失败: %1$s</string>
+    <string name="text_vs_input_hint">要输入的 ASCII 文本</string>
+    <string name="text_vs_launch_hint">包名或 包名/Activity</string>
+    <string name="text_vs_release_confirm">释放这块虚拟屏幕? 屏上运行的应用会被一并关闭.</string>
+    <string name="text_vs_screen_choices">选择虚拟屏幕</string>
+    <string name="text_vs_preview_paused">预览已暂停</string>
+    <string name="text_vs_detached">独立屏</string>
+    <string name="text_vs_script_bound">脚本持有</string>
+    <string name="text_vs_error">错误: %1$s</string>
+    <string name="text_vs_release_title">释放虚拟屏幕</string>
+    <string name="text_vs_ok">确定</string>
+    <string name="text_vs_cancel">取消</string>
+    <string name="text_vs_refresh">刷新画面</string>
+    <string name="text_vs_frame_error">取帧失败: %1$s</string>
+    <string name="text_vs_created_hint">屏幕 %1$d 已创建, 已自动打开「设置」. 点「启动应用」可换其他应用.</string>
+    <string name="text_vs_auto_launch_failed">屏幕已创建, 但自动启动应用失败, 请点「启动应用」手动选择.</string>
+
+    <!-- 定时任务: 任务级虚拟屏幕模式 -->
+    <string name="text_timed_task_virtual_screen_mode">本任务在虚拟屏幕运行</string>
+    <string name="summary_timed_task_virtual_screen_mode">选择这个定时任务运行时使用的屏幕. 「强制开启」需要 Shizuku 与 Android 12+.</string>
+    <string name="text_vs_mode_follow">跟随全局设置</string>
+    <string name="text_vs_mode_on">强制开启 (虚拟屏)</string>
+    <string name="text_vs_mode_off">强制关闭 (物理主屏)</string>
+
 </resources>

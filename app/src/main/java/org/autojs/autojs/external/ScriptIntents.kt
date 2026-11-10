@@ -37,6 +37,14 @@ object ScriptIntents {
     const val EXTRA_KEY_SOURCE_KIND = "source_kind"
     const val EXTRA_KEY_PROJECT_ROOT = "project_root"
 
+    // Task-level virtual screen launch options (docs/virtual-screen/README.md).
+    // 0 = follow the global setting, 1 = force on, 2 = force off.
+    const val EXTRA_KEY_VIRTUAL_SCREEN_MODE = "virtual_screen_mode"
+    const val EXTRA_KEY_VIRTUAL_SCREEN_WIDTH = "virtual_screen_width"
+    const val EXTRA_KEY_VIRTUAL_SCREEN_HEIGHT = "virtual_screen_height"
+    const val EXTRA_KEY_VIRTUAL_SCREEN_DENSITY = "virtual_screen_density"
+    const val EXTRA_KEY_VIRTUAL_SCREEN_DISPLAY_ID = "virtual_screen_display_id"
+
     data class PreparedLaunch(
         val launch: ScriptLaunchSourceFactory.Launch,
         val config: ExecutionConfig,
@@ -289,6 +297,18 @@ object ScriptIntents {
             delay = intent.getLongExtra(EXTRA_KEY_DELAY, 0)
             loopTimes = intent.getIntExtra(EXTRA_KEY_LOOP_TIMES, 1)
             interval = intent.getLongExtra(EXTRA_KEY_LOOP_INTERVAL, 0)
+            virtualScreenMode = intent.getIntExtra(EXTRA_KEY_VIRTUAL_SCREEN_MODE, ExecutionConfig.VIRTUAL_SCREEN_MODE_FOLLOW)
+            virtualScreenWidth = intent.getIntExtra(EXTRA_KEY_VIRTUAL_SCREEN_WIDTH, 0)
+            virtualScreenHeight = intent.getIntExtra(EXTRA_KEY_VIRTUAL_SCREEN_HEIGHT, 0)
+            virtualScreenDensity = intent.getIntExtra(EXTRA_KEY_VIRTUAL_SCREEN_DENSITY, 0)
+            virtualScreenDisplayId = intent.getIntExtra(EXTRA_KEY_VIRTUAL_SCREEN_DISPLAY_ID, 0)
+            intent.readLaunchJsonOrNull()?.let { json ->
+                virtualScreenMode = json.optInt(EXTRA_KEY_VIRTUAL_SCREEN_MODE, virtualScreenMode)
+                virtualScreenWidth = json.optInt(EXTRA_KEY_VIRTUAL_SCREEN_WIDTH, virtualScreenWidth)
+                virtualScreenHeight = json.optInt(EXTRA_KEY_VIRTUAL_SCREEN_HEIGHT, virtualScreenHeight)
+                virtualScreenDensity = json.optInt(EXTRA_KEY_VIRTUAL_SCREEN_DENSITY, virtualScreenDensity)
+                virtualScreenDisplayId = json.optInt(EXTRA_KEY_VIRTUAL_SCREEN_DISPLAY_ID, virtualScreenDisplayId)
+            }
             if (shouldExposeAndroidIntentArgument(engineName)) {
                 setArgument("intent", intent)
             }

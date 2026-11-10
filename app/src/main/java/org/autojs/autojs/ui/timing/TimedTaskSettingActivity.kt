@@ -107,6 +107,7 @@ class TimedTaskSettingActivity : BaseActivity() {
     private lateinit var mRepeatEndCount: RadioButton
     private lateinit var mRepeatUntilDate: TextView
     private lateinit var mRepeatCount: EditText
+    private lateinit var mVirtualScreenModeGroup: RadioGroup
 
     private val mDayOfWeekCheckBoxes: MutableList<CheckBox> = ArrayList()
 
@@ -227,12 +228,14 @@ class TimedTaskSettingActivity : BaseActivity() {
         mCountdownTaskMinutes = binding.countdownTaskMinutes.apply {
             setUpCountdownInput()
         }
+        mVirtualScreenModeGroup = binding.virtualScreenModeGroup
 
         loadTaskFromIntent()
         setToolbarAsBack(R.string.text_timed_task)
         mToolbar.subtitle = mScriptFile.name
 
         setUpTaskSettings()
+        setUpVirtualScreenMode()
         updateRepeatEndVisibility()
         updateRepeatEndInputState()
 
@@ -369,6 +372,25 @@ class TimedTaskSettingActivity : BaseActivity() {
             return
         }
         mDailyTaskRadio.isChecked = true
+    }
+
+    /** Restores the persisted task-level virtual screen mode (FOLLOW for a new task). */
+    private fun setUpVirtualScreenMode() {
+        val mode = mTimedTask?.virtualScreenMode ?: ExecutionConfig.VIRTUAL_SCREEN_MODE_FOLLOW
+        mVirtualScreenModeGroup.check(
+            when (mode) {
+                ExecutionConfig.VIRTUAL_SCREEN_MODE_ON -> R.id.virtual_screen_mode_on
+                ExecutionConfig.VIRTUAL_SCREEN_MODE_OFF -> R.id.virtual_screen_mode_off
+                else -> R.id.virtual_screen_mode_follow
+            },
+        )
+    }
+
+    /** The launch mode written into the task Intent as [ScriptIntents.EXTRA_KEY_VIRTUAL_SCREEN_MODE]. */
+    private fun selectedVirtualScreenMode(): Int = when (mVirtualScreenModeGroup.checkedRadioButtonId) {
+        R.id.virtual_screen_mode_on -> ExecutionConfig.VIRTUAL_SCREEN_MODE_ON
+        R.id.virtual_screen_mode_off -> ExecutionConfig.VIRTUAL_SCREEN_MODE_OFF
+        else -> ExecutionConfig.VIRTUAL_SCREEN_MODE_FOLLOW
     }
 
     private fun setUpTime(timedTask: TimedTask) {
@@ -596,6 +618,7 @@ class TimedTaskSettingActivity : BaseActivity() {
             task.sourceKind = preservedContext.sourceKind
             task.projectRoot = preservedContext.projectRoot
         }
+        task.virtualScreenMode = selectedVirtualScreenMode()
         return task
     }
 

@@ -10,7 +10,9 @@ import android.os.Process
 import android.os.ParcelFileDescriptor
 import android.os.RemoteException
 import android.util.Log
+import android.view.Surface
 import androidx.annotation.Keep
+import org.autojs.autojs.core.virtualscreen.ShellVirtualDisplay
 import org.autojs.autojs.model.explorer.PrivilegedExplorerDirectoryService
 import org.autojs.autojs.model.explorer.PrivilegedFileEngine
 import org.autojs.autojs.model.explorer.PrivilegedFileNative
@@ -33,6 +35,16 @@ class UserService : IUserService.Stub {
     private var mContext: Context? = null
     private val explorerDirectories = PrivilegedExplorerDirectoryService()
     private val lifecycle = UserServiceLifecycle(MainThreadScheduler, ::exitProcessFor)
+
+    /**
+     * Virtual displays live in this shell-uid process for their whole lifetime. A one-shot command
+     * cannot own a VirtualDisplay, so the capability is exposed through this service's AIDL.
+     * zh-CN: 虚拟显示屏在其整个生命周期内都由本 shell 身份进程持有, 一次性命令无法持有 VirtualDisplay.
+     */
+    private var virtualDisplays: ShellVirtualDisplay? = null
+
+    private fun displays(): ShellVirtualDisplay =
+        virtualDisplays ?: ShellVirtualDisplay(mContext).also { virtualDisplays = it }
 
     init {
         lifecycle.start()
@@ -74,6 +86,8 @@ class UserService : IUserService.Stub {
      */
     override fun destroy() {
         Log.i(TAG, "destroy")
+        // DESTROY_CONTENT_ON_REMOVAL ends the activities left on every display before the process dies.
+        virtualDisplays?.releaseAll()
         lifecycle.shutdown(UserServiceLifecycle.REASON_DESTROY)
     }
 
@@ -82,6 +96,35 @@ class UserService : IUserService.Stub {
     override fun exit() {
         lifecycle.shutdown(UserServiceLifecycle.REASON_EXIT)
     }
+
+    // ---- Virtual screen: shell-side implementation (docs/virtual-screen/README.md) ----
+
+    override fun createVirtualDisplay(surface: Surface?, width: Int, height: Int, dpi: Int, flags: Int): Int =
+        displays().create(surface, width, height, dpi, flags)
+
+    override fun releaseVirtualDisplay(displayId: Int): Boolean = displays().release(displayId)
+
+    override fun listVirtualDisplays(): String = displays().list()
+
+    override fun virtualDisplayInfo(displayId: Int): String = displays().info(displayId)
+
+    override fun launchOnDisplay(displayId: Int, packageName: String?, component: String?, clearTask: Boolean): Int =
+        displays().launch(displayId, packageName ?: "", component, clearTask)
+
+    override fun tapOnDisplay(displayId: Int, x: Int, y: Int): Boolean = displays().tap(displayId, x, y)
+
+    override fun swipeOnDisplay(displayId: Int, x1: Int, y1: Int, x2: Int, y2: Int, durationMs: Int): Boolean =
+        displays().swipe(displayId, x1, y1, x2, y2, durationMs)
+
+    override fun keyOnDisplay(displayId: Int, keyCode: Int): Boolean = displays().key(displayId, keyCode)
+
+    override fun textOnDisplay(displayId: Int, text: String?): Boolean = displays().text(displayId, text ?: "")
+
+    override fun forceStopOnDisplay(displayId: Int, packageName: String?): Boolean =
+        displays().forceStop(displayId, packageName ?: "")
+
+    override fun launchUriOnDisplay(displayId: Int, uri: String?): Int =
+        displays().launchUri(displayId, uri ?: "")
 
     override fun attachHost(host: IBinder?) {
         if (host == null || !lifecycle.attachHost(host)) return

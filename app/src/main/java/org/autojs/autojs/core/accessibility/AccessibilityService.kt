@@ -1,6 +1,7 @@
 package org.autojs.autojs.core.accessibility
 
 import android.content.Intent
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -10,6 +11,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityEvent.TYPE_VIEW_FOCUSED
 import android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
 import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityWindowInfo
 import org.autojs.autojs.core.accessibility.AccessibilityTool.Companion.DEFAULT_A11Y_SERVICE_START_TIMEOUT
 import org.autojs.autojs.core.accessibility.AccessibilityTool.Companion.DEFAULT_A11Y_SERVICE_STOP_TIMEOUT
 import org.autojs.autojs.core.accessibility.SimpleActionAutomator.Companion.AccessibilityEventCallback
@@ -165,6 +167,49 @@ open class AccessibilityService : android.accessibilityservice.AccessibilityServ
 
     override fun getRootInActiveWindow(): AccessibilityNodeInfo? {
         return runCatching { super.getRootInActiveWindow() }.getOrNull()
+    }
+
+    /**
+     * Windows of **every** display, flattened from `getWindowsOnAllDisplays()` (API 30+).
+     *
+     * `AccessibilityService.getWindows()` only reports the windows of `Display.DEFAULT_DISPLAY`
+     * (AOSP `AccessibilityInteractionClient#getWindows` takes just the default display's entry of
+     * the all-displays map). A task running on a virtual display therefore sees an empty window
+     * list, and every `selector()` / `UiObject` / `auto.windows()` lookup finds nothing. This
+     * property is the multi-display source such tasks are rooted in. It requires the service to
+     * opt into `FLAG_RETRIEVE_INTERACTIVE_WINDOWS`, which the manifest already does.
+     *
+     * Falls back to the default-display list on API < 30 or when the framework call fails, so the
+     * classic behaviour is never lost.
+     *
+     * zh-CN: **所有**显示屏的窗口, 由 `getWindowsOnAllDisplays()` (API 30+) 展开而来.
+     * `AccessibilityService.getWindows()` 只报告默认屏的窗口 (AOSP 的 `AccessibilityInteractionClient#getWindows`
+     * 只取全屏窗口映射里默认屏那一项), 因此在虚拟屏上运行的任务看到的窗口列表为空, 所有 `selector()` /
+     * `UiObject` / `auto.windows()` 查找都找不到元素. 本属性即这类任务的根节点来源, 需服务声明
+     * `FLAG_RETRIEVE_INTERACTIVE_WINDOWS` (Manifest 已声明). API < 30 或框架调用失败时回退到默认屏列表,
+     * 不破坏原有行为.
+     */
+    val windowsOnAllDisplays: List<AccessibilityWindowInfo>
+        get() {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return defaultDisplayWindows()
+            return try {
+                val byDisplay = getWindowsOnAllDisplays()
+                buildList {
+                    for (i in 0 until byDisplay.size()) {
+                        val perDisplay = byDisplay.valueAt(i) ?: continue
+                        addAll(perDisplay)
+                    }
+                }
+            } catch (error: Throwable) {
+                Log.w(TAG, "getWindowsOnAllDisplays failed; using the default display only", error)
+                defaultDisplayWindows()
+            }
+        }
+
+    private fun defaultDisplayWindows(): List<AccessibilityWindowInfo> = try {
+        windows
+    } catch (_: Throwable) {
+        emptyList()
     }
 
     override fun onDestroy() {

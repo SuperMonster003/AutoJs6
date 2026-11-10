@@ -75,6 +75,9 @@ public class TimedTask extends BaseModel {
 
     int mFinishedTimes = 0;
 
+    /** Task-level virtual screen mode; FOLLOW uses the global switch / project feature. */
+    int mVirtualScreenMode = ExecutionConfig.VIRTUAL_SCREEN_MODE_FOLLOW;
+
     int mDayOfMonth = 0;
 
     int mMonthOfYear = 0;
@@ -92,6 +95,7 @@ public class TimedTask extends BaseModel {
         mDelay = config.getDelay();
         mLoopTimes = config.getLoopTimes();
         mInterval = config.getInterval();
+        mVirtualScreenMode = config.getVirtualScreenMode();
         mRepeatMode = inferRepeatMode(timeFlag);
         captureLaunchContext();
     }
@@ -354,6 +358,14 @@ public class TimedTask extends BaseModel {
         mFinishedTimes = finishedTimes;
     }
 
+    public int getVirtualScreenMode() {
+        return mVirtualScreenMode;
+    }
+
+    public void setVirtualScreenMode(int virtualScreenMode) {
+        mVirtualScreenMode = virtualScreenMode;
+    }
+
     public int getDayOfMonth() {
         return mDayOfMonth;
     }
@@ -382,7 +394,8 @@ public class TimedTask extends BaseModel {
                 .putExtra(ScriptIntents.EXTRA_KEY_PATH, mScriptPath)
                 .putExtra(ScriptIntents.EXTRA_KEY_DELAY, mDelay)
                 .putExtra(ScriptIntents.EXTRA_KEY_LOOP_TIMES, mLoopTimes)
-                .putExtra(ScriptIntents.EXTRA_KEY_LOOP_INTERVAL, mInterval);
+                .putExtra(ScriptIntents.EXTRA_KEY_LOOP_INTERVAL, mInterval)
+                .putExtra(ScriptIntents.EXTRA_KEY_VIRTUAL_SCREEN_MODE, mVirtualScreenMode);
         if (mSourceKind != null) {
             intent.putExtra(ScriptIntents.EXTRA_KEY_SOURCE_KIND, mSourceKind);
         }
@@ -412,6 +425,7 @@ public class TimedTask extends BaseModel {
                 ", mEndMode=" + mEndMode +
                 ", mEndValue=" + mEndValue +
                 ", mFinishedTimes=" + mFinishedTimes +
+                ", mVirtualScreenMode=" + mVirtualScreenMode +
                 ", mDayOfMonth=" + mDayOfMonth +
                 ", mMonthOfYear=" + mMonthOfYear +
                 ", mScriptPath='" + mScriptPath + '\'' +

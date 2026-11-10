@@ -100,8 +100,8 @@ class App(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
             when (obj) {
                 is String -> when {
                     !options.isJsNullish() -> throw IllegalArgumentException("Method app.startActivity can only have one argument when argument[0] is String")
-                    obj.contains("://") -> openUrlRhino(obj)
-                    rexWebSiteWithoutProtocol.matches(obj) -> openUrlRhino("http://$obj")
+                    obj.contains("://") -> openUrlOnCurrentDisplay(scriptRuntime, obj)
+                    rexWebSiteWithoutProtocol.matches(obj) -> openUrlOnCurrentDisplay(scriptRuntime, "http://$obj")
                     else -> runCatching {
                         startActivityWithGlobalContext(Intent(GlobalAppContext.get(), ActivityShortForm.valueOf(obj.uppercase()).classType))
                     }.getOrElse {
@@ -131,7 +131,7 @@ class App(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
                 }
                 is Uri, is URI -> when {
                     !options.isJsNullish() -> throw IllegalArgumentException("Method app.startActivity can only have one argument when argument[0] is URI")
-                    else -> openUrlRhino(obj.toString())
+                    else -> openUrlOnCurrentDisplay(scriptRuntime, obj.toString())
                 }
                 is NativeObject -> {
                     val opt = when {
@@ -502,7 +502,24 @@ class App(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun openUrl(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) {
-            openUrlRhino(it)
+            openUrlOnCurrentDisplay(scriptRuntime, it)
+        }
+
+        /**
+         * Resolves a URL on the display this runtime is bound to. Without this, `app.openUrl()`
+         * (and the URL form of `app.startActivity`) always opens on the DEFAULT display and would
+         * pull a virtual-screen task's app link onto the physical screen.
+         *
+         * zh-CN: 把 URL 打开到本运行时绑定的屏幕. 否则 `app.openUrl()` 永远落在默认屏,
+         * 会把虚拟屏任务的 applink 拉到物理主屏上.
+         */
+        private fun openUrlOnCurrentDisplay(scriptRuntime: ScriptRuntime, url: Any?): Undefined = undefined {
+            val target = coerceString(url)
+            if (scriptRuntime.displayRoute.isVirtual) {
+                scriptRuntime.displayRoute.launchUri(target)
+            } else {
+                openUrlInternal(target)
+            }
         }
 
         @JvmStatic
@@ -632,8 +649,8 @@ class App(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         fun launchPackage(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { o ->
             when {
                 o.isJsNullish() -> false
-                o is PresetApp -> scriptRuntime.app.launchPackage(o.packageName)
-                else -> scriptRuntime.app.launchPackage(getAppByAliasRhino(o)?.packageName ?: Context.toString(o))
+                o is PresetApp -> launchOnCurrentDisplay(scriptRuntime, o.packageName)
+                else -> launchOnCurrentDisplay(scriptRuntime, getAppByAliasRhino(o)?.packageName ?: Context.toString(o))
             }
         }
 
@@ -654,14 +671,25 @@ class App(scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         fun launchApp(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Boolean = ensureArgumentsOnlyOne(args) { o ->
             when {
                 o.isJsNullish() -> false
-                o is PresetApp -> scriptRuntime.app.launchApp(o.getAppName())
+                o is PresetApp -> launchByAppName(scriptRuntime, o.getAppName())
                 else -> getAppByAliasRhino(o)?.let {
                     // @Hint by SuperMonster003 on May 23, 2024.
                     //  ! Much more efficient to launch with package name.
                     //  ! zh-CN: 使用包名启动应用将会高效得多.
-                    scriptRuntime.app.launchPackage(it.packageName)
-                } ?: scriptRuntime.app.launchApp(Context.toString(o))
+                    launchOnCurrentDisplay(scriptRuntime, it.packageName)
+                } ?: launchByAppName(scriptRuntime, Context.toString(o))
             }
+        }
+
+        /** Launching an app must target the task's display, not the default one. */
+        private fun launchOnCurrentDisplay(scriptRuntime: ScriptRuntime, packageName: String): Boolean =
+            if (scriptRuntime.displayRoute.isVirtual) scriptRuntime.displayRoute.launch(packageName)
+            else scriptRuntime.app.launchPackage(packageName)
+
+        private fun launchByAppName(scriptRuntime: ScriptRuntime, appName: String): Boolean {
+            if (!scriptRuntime.displayRoute.isVirtual) return scriptRuntime.app.launchApp(appName)
+            val packageName = scriptRuntime.app.getPackageName(appName) ?: return false
+            return scriptRuntime.displayRoute.launch(packageName)
         }
 
         @JvmStatic
