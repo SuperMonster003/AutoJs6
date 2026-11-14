@@ -57,6 +57,8 @@ class VirtualScreenViewerActivity : BaseActivity(), VirtualScreenView.GestureLis
     private var requestedDisplayId = 0
     private var previewPaused = false
     private var lastFrameCount = 0L
+    /** Only our own subscription is removed on stop; the floating window may still be watching. */
+    private var previewToken: Any? = null
 
     private val statusTask = object : Runnable {
         override fun run() {
@@ -92,12 +94,13 @@ class VirtualScreenViewerActivity : BaseActivity(), VirtualScreenView.GestureLis
 
     override fun onStop() {
         mainHandler.removeCallbacks(statusTask)
-        // Only the frame feed is stopped; the display itself stays alive across activities.
-        session?.stopPreview()
+        // Only our own subscription is dropped; the display and any other preview stay alive.
+        stopPreviewToken()
         super.onStop()
     }
 
     override fun onDestroy() {
+        stopPreviewToken()
         io.shutdownNow()
         binding.preview.attach(null)
         super.onDestroy()
@@ -106,7 +109,7 @@ class VirtualScreenViewerActivity : BaseActivity(), VirtualScreenView.GestureLis
     // ---- Attachment & preview ----
 
     private fun attach(target: VirtualScreenSession?) {
-        session?.stopPreview()
+        stopPreviewToken()
         session = target?.takeIf { !it.isReleased() }
         // Keep the selection across background/foreground cycles.
         requestedDisplayId = session?.getDisplayId() ?: 0
@@ -121,16 +124,22 @@ class VirtualScreenViewerActivity : BaseActivity(), VirtualScreenView.GestureLis
 
     private fun startPreview() {
         val target = session ?: return
-        val ok = runCatching {
-            target.startPreview {
+        stopPreviewToken()
+        previewToken = runCatching {
+            target.addPreviewObserver {
                 mainHandler.post {
                     binding.preview.renderFrame()
                     if (binding.tvHint.visibility != View.GONE) refreshHint()
                 }
             }
-        }.onFailure { showError(it) }.getOrDefault(false)
-        if (!ok) toast(getString(R.string.text_vs_frame_error, target.previewError().orEmpty()))
+        }.onFailure { showError(it) }.getOrNull()
+        if (previewToken == null) toast(getString(R.string.text_vs_frame_error, target.previewError().orEmpty()))
         refreshStatus()
+    }
+
+    private fun stopPreviewToken() {
+        session?.removePreviewObserver(previewToken)
+        previewToken = null
     }
 
     // ---- Status ----
@@ -228,7 +237,7 @@ class VirtualScreenViewerActivity : BaseActivity(), VirtualScreenView.GestureLis
         } else {
             previewPaused = true
             binding.btnPause.text = getString(R.string.text_vs_resume)
-            live.stopPreview()
+            stopPreviewToken()
         }
         refreshHint()
         refreshStatus()

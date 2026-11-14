@@ -3392,4 +3392,20 @@
     <string name="text_vs_mode_on">强制开启 (虚拟屏)</string>
     <string name="text_vs_mode_off">强制关闭 (物理主屏)</string>
 
+    <!-- 首页悬浮小窗 -->
+    <string name="text_vs_floating_window">虚拟屏悬浮小窗</string>
+    <string name="summary_vs_floating_window">在首页右下角实时显示虚拟屏小窗. 拖动标题可移动, 点击可打开完整查看器. 仅在 AutoJs6 界面内可见.</string>
+    <string name="text_vs_float_idle">暂无虚拟屏</string>
+    <string name="text_vs_float_waiting">#%1$d · 等待画面</string>
+    <string name="text_vs_float_status">#%1$d · %2$d×%3$d · %4$d fps</string>
+    <string name="text_vs_float_hint_idle">点击打开查看器</string>
+    <string name="text_vs_float_hint_waiting">等待画面…</string>
+    <string name="text_vs_float_frame_error">取帧失败: %1$s</string>
+    <string name="text_vs_float_bubble">VS</string>
+    <string name="text_vs_float_open">打开完整查看器</string>
+    <string name="text_vs_float_collapse">收起预览</string>
+    <string name="text_vs_float_expand">展开预览</string>
+    <string name="text_vs_float_open_symbol">↗</string>
+    <string name="text_vs_float_collapse_symbol">−</string>
+
 </resources>

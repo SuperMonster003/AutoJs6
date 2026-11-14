@@ -32,12 +32,19 @@
 
 侧边栏「工具」分组里的**虚拟屏幕查看器**提供实时预览、点击/滑动/长按手势、返回/主页/多任务/电源键、输入文本、启动应用、保存 PNG、新建/切换/释放屏幕等操作；Activity 为 `exported=false`。
 
+### 首页悬浮小窗
+
+主界面右下角（避开主 FAB）常驻一个应用内悬浮预览：显示当前存活虚拟屏的实时画面、displayId、尺寸与 FPS；拖动标题可移动，点 `−` 收起成 `VS` 小浮标，点击画面打开完整查看器。它是加到 `android.R.id.content` 的普通 View，**不需要 `SYSTEM_ALERT_WINDOW` 权限**，也只在 AutoJs6 界面内可见；设置页 `virtual_screen_floating_window` 开关默认开启。
+
+帧源与完整查看器共享：`VirtualScreenSession` 用 `PreviewObserverRegistry` 维护多个订阅者，第一个订阅者启动唯一的 `VirtualScreenFramePump`，最后一个离开时才停泵。因此打开/关闭查看器不会让小窗黑屏，反之亦然；脚本截图仍从帧泵的复用 Bitmap 复制。小窗跟随 `VirtualScreenManager.liveSessions()`，脚本、定时任务或查看器创建的屏出现/释放时自动切换，Activity 进入后台即停止订阅以免耗电。
+
 ## 架构
 
 ```
 ScriptRuntime.initPrologue()
   └─ DisplayRoute.apply(ExecutionConfig)   ← 任务级屏幕作用域
        ├─ VirtualScreenManager / Session   ← app 侧：ImageReader surface、截图、生命周期
+       │    ├─ PreviewObserverRegistry → VirtualScreenFramePump ← 唯一取帧者，小窗 / 查看器共享
        │    └─ Shizuku UserService (AIDL 51–61) ← shell 侧：建屏、输入、启动、释放
        ├─ accessibilityBridge.setDisplayScope(displayId)
        └─ runtime property "virtualScreen.displayId"
@@ -69,10 +76,10 @@ ScriptRuntime.initPrologue()
 
 ## 验证状态
 
-- `:app:compileAppDebugKotlin` 与 `:app:assembleAppDebug` 通过；与本次改动相关的 7 个测试类（虚拟屏标志位、坐标映射、窗口作用域、模块顺序、API surface 门禁、静态引用白名单、Rhino 别名兼容）共 46 个用例全部通过。KSP/API surface baseline 与静态引用白名单均已同步更新。
+- `:app:compileAppDebugKotlin` 与 `:app:assembleAppDebug` 通过；与本次改动相关的 9 个测试类（虚拟屏标志位、坐标映射、窗口作用域、悬浮窗几何、多预览观察者、模块顺序、API surface 门禁、静态引用白名单、Rhino 别名兼容）共 55 个用例全部通过。KSP/API surface baseline 与静态引用白名单均已同步更新。
 - 全量 `:app:testAppDebugUnitTest` 在本机另有 20 个与虚拟屏代码无关的既有基线失败：macOS 把 `/var` 规范化成 `/private/var` 引发的路径断言，以及中文 locale 下 Rhino 错误消息与英文断言不一致。Linux + 英文 locale 的 CI 上不会出现。
 - 任务级主链路（建屏、Settings 落到虚拟屏、截图、输入、释放、与主屏隔离）在一台 Android 17 / API 37 设备上验证通过。
-- **尚未在真机复验**：查看器预览与手势、定时任务建屏、applink 落到虚拟屏、截图与预览并发、控件查找修复后的完整链路。提交前请在目标设备上按上述清单补测。
+- **尚未在真机复验**：查看器预览与手势、定时任务建屏、applink 落到虚拟屏、截图与预览并发、控件查找修复后的完整链路，以及悬浮小窗的画面、拖动/折叠、与查看器同时打开时的双订阅共存。提交前请在目标设备上按上述清单补测。
 
 ## 已知限制
 

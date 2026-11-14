@@ -267,6 +267,13 @@
 
         <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
             app:layout="@layout/preference_custom"
+            app:key="virtual_screen_floating_window"
+            app:defaultValue="true"
+            app:title="@string/text_vs_floating_window"
+            app:summary="@string/summary_vs_floating_window" />
+
+        <org.autojs.autojs.theme.preference.ThemeColorSwitchPreference
+            app:layout="@layout/preference_custom"
             app:key="@string/key_use_volume_control_running"
             app:defaultValue="@bool/pref_use_volume_control_running"
             app:title="@string/text_use_volume_key_to_control_script_running"

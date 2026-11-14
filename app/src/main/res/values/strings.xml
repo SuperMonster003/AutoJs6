@@ -3392,4 +3392,20 @@
     <string name="text_vs_mode_on">Always on (virtual display)</string>
     <string name="text_vs_mode_off">Always off (physical display)</string>
 
+    <!-- Home-screen floating mini preview -->
+    <string name="text_vs_floating_window">Floating virtual screen preview</string>
+    <string name="summary_vs_floating_window">Show a live mini preview in the bottom-right corner of the home screen. Drag its title to move it, tap it to open the full viewer. Only visible inside AutoJs6.</string>
+    <string name="text_vs_float_idle">No virtual screen</string>
+    <string name="text_vs_float_waiting">#%1$d · waiting for frame</string>
+    <string name="text_vs_float_status">#%1$d · %2$d×%3$d · %4$d fps</string>
+    <string name="text_vs_float_hint_idle">Tap to open the viewer</string>
+    <string name="text_vs_float_hint_waiting">Waiting for frame…</string>
+    <string name="text_vs_float_frame_error">Frame error: %1$s</string>
+    <string name="text_vs_float_bubble">VS</string>
+    <string name="text_vs_float_open">Open full viewer</string>
+    <string name="text_vs_float_collapse">Collapse preview</string>
+    <string name="text_vs_float_expand">Expand preview</string>
+    <string name="text_vs_float_open_symbol">↗</string>
+    <string name="text_vs_float_collapse_symbol">−</string>
+
 </resources>

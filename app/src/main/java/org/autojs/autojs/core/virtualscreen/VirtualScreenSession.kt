@@ -51,6 +51,7 @@ class VirtualScreenSession internal constructor(
     private val alive = AtomicBoolean(true)
     private val frameTimeNanos = AtomicLong(0L)
     private val previewLock = Any()
+    private val previewObservers = PreviewObserverRegistry()
 
     @Volatile
     private var pump: VirtualScreenFramePump? = null
@@ -125,26 +126,56 @@ class VirtualScreenSession internal constructor(
     // ---- Live preview (viewer) ----
 
     /**
-     * Starts the frame feed. [onFrame] is called on a background HandlerThread, so the caller must
-     * hop to the main thread before invalidating a view. Returns false when the listener cannot be
-     * attached (the viewer then falls back to polling [snapshotBitmap]).
+     * Subscribes to the frame feed and returns an opaque token; null when the pump could not start.
+     * [onFrame] is called on a background HandlerThread, so the caller must hop to the main thread
+     * before invalidating a view. Multiple surfaces (viewer + floating window) may subscribe at
+     * once: they share the single ImageReader consumer, and [removePreviewObserver] stops the pump
+     * only when the last subscriber leaves.
+     *
+     * zh-CN: 订阅帧流并返回令牌, 泵启动失败返回 null. 回调在后台线程触发, 刷新 View 前须切回主线程.
+     * 查看器与悬浮小窗可同时订阅、共用唯一的帧泵, 只有最后一个订阅者离开时才停泵.
      */
-    fun startPreview(onFrame: () -> Unit): Boolean {
+    fun addPreviewObserver(onFrame: () -> Unit): Any? {
         ensureAlive()
         return synchronized(previewLock) {
-            pump?.let { return@synchronized true }
-            val created = VirtualScreenFramePump(reader, width, height, onFrame)
-            if (created.start()) {
-                pump = created
-                true
+            val token = previewObservers.add(onFrame)
+            if (pump == null) {
+                val created = VirtualScreenFramePump(reader, width, height) { previewObservers.dispatch() }
+                if (created.start()) {
+                    pump = created
+                    token
+                } else {
+                    previewObservers.remove(token)
+                    null
+                }
             } else {
-                false
+                token
             }
         }
     }
 
+    /** Removes one subscriber; the pump is stopped when none are left. Safe for a null token. */
+    fun removePreviewObserver(token: Any?) {
+        if (token == null) return
+        synchronized(previewLock) {
+            if (!previewObservers.remove(token)) return@synchronized
+            if (previewObservers.size() == 0) {
+                pump?.stop()
+                pump = null
+            }
+        }
+    }
+
+    /**
+     * Legacy single-consumer entry point. Prefer the token API when more than one surface may be
+     * previewing: [stopPreview] clears *all* subscribers.
+     */
+    fun startPreview(onFrame: () -> Unit): Boolean = addPreviewObserver(onFrame) != null
+
+    /** Stops the frame feed and drops every subscriber. */
     fun stopPreview() {
         synchronized(previewLock) {
+            previewObservers.clear()
             pump?.stop()
             pump = null
         }

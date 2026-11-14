@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Home-screen floating preview of the background virtual display. Added to the Activity's
+  android.R.id.content container by VirtualScreenFloatingWindow, so it needs no overlay permission.
+  zh-CN: 首页虚拟屏悬浮预览. 由 VirtualScreenFloatingWindow 添加到 Activity 的 content 容器, 无需悬浮窗权限.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/floating_root"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_vs_floating_card"
+    android:clickable="true"
+    android:elevation="8dp"
+    android:focusable="false">
+
+    <LinearLayout
+        android:id="@+id/card"
+        android:layout_width="148dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/title_bar"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp">
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:text="@string/text_vs_float_idle"
+                android:textColor="#FFFFFFFF"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/btn_open"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_vs_float_open"
+                android:gravity="center"
+                android:text="@string/text_vs_float_open_symbol"
+                android:textColor="#FFFFFFFF"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/btn_collapse"
+                android:layout_width="24dp"
+                android:layout_height="28dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/text_vs_float_collapse"
+                android:gravity="center"
+                android:text="@string/text_vs_float_collapse_symbol"
+                android:textColor="#FFFFFFFF"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/frame"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:background="#FF101114"
+            android:clickable="true">
+
+            <org.autojs.autojs.ui.virtualscreen.VirtualScreenView
+                android:id="@+id/preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="false" />
+
+            <TextView
+                android:id="@+id/tv_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/text_vs_float_hint_idle"
+                android:textColor="#CCFFFFFF"
+                android:textSize="11sp" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/bubble"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_vs_floating_bubble"
+        android:contentDescription="@string/text_vs_float_expand"
+        android:gravity="center"
+        android:text="@string/text_vs_float_bubble"
+        android:textColor="#FFFFFFFF"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+</FrameLayout>
