@@ -84,10 +84,6 @@ class ProjectConfigActivity : BaseActivity() {
         mVersionCode = binding.versionCode
         mMainFileName = binding.mainFileName
 
-        binding.defaultStableMode.apply {
-            ThemeColorHelper.setThemeColorPrimary(this, true)
-        }
-
         mIcon = binding.appIcon.apply {
             setOnClickListener { selectIcon() }
         }
