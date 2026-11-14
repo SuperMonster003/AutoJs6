@@ -9,8 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.Strictness;
 import com.google.gson.annotations.SerializedName;
 import org.autojs.autojs.annotation.DeserializedMethodName;
@@ -203,18 +201,6 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     })
     @DeserializedMethodName(method = "normalizeSignatureScheme", parameterTypes = {String.class})
     private String mSignatureScheme = "V1 + V2";
-
-    // @Commented by SuperMonster003 on Jan 20, 2025.
-    //  ! Unused config options: "scripts".
-    //  ! zh-CN: 未使用的配置选项: "scripts".
-    //  # @SerializedName("scriptConfigs")
-    //  # @SerializedNameCompatible(with = {
-    //  #         @With(value = "scriptsConfigs"),
-    //  #         @With(value = "scriptsConfig"),
-    //  #         @With(value = "scriptConfig"),
-    //  #         @With(value = "scripts", target = {"AutoJs4", "AutoX"}),
-    //  # })
-    //  # private final Map<String, ScriptConfig> mScriptConfigs = new HashMap<>();
 
     @Nullable
     private transient KeyStore mKeyStore = null;
@@ -709,13 +695,6 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
         return this;
     }
 
-    // @Commented by SuperMonster003 on Jan 20, 2025.
-    //  ! Unused config options: "scripts".
-    //  ! zh-CN: 未使用的配置选项: "scripts".
-    //  # public Map<String, ScriptConfig> getScriptConfigs() {
-    //  #     return mScriptConfigs;
-    //  # }
-
     public ProjectConfig setMainScriptFileName(String mainScriptFileName) {
         mMainScriptFileName = mainScriptFileName;
         return this;
@@ -771,85 +750,9 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     }
 
     public String toJson(boolean detectConflicts) {
-        // Serialize first using canonical keys, then rename keys to preserve the original ones.
-        // zh-CN: 先按 canonical key 序列化, 再重命名 key 以保留原始 key.
-        JsonElement tree = sGson.toJsonTree(this);
-        if (!tree.isJsonObject()) {
-            return sGson.toJson(this);
-        }
-
-        JsonObject obj = tree.getAsJsonObject();
-
-        // Rename canonical keys to original keys if needed.
-        // zh-CN: 如有需要, 将 canonical key 重命名为原始 key.
-        for (Map.Entry<String, String> entry : mOriginalJsonKeys.entrySet()) {
-            String canonicalKey = entry.getKey();
-            String originalKey = entry.getValue();
-
-            if (canonicalKey == null || originalKey == null) {
-                continue;
-            }
-            if (canonicalKey.equals(originalKey)) {
-                continue;
-            }
-            if (!obj.has(canonicalKey)) {
-                continue;
-            }
-
-            if (obj.has(originalKey)) {
-                // Detect or resolve conflicts depending on the flag.
-                // zh-CN: 根据开关选择检测或静默解决冲突.
-                if (detectConflicts) {
-                    throw new IllegalStateException("Conflicting keys when serializing: \"" + canonicalKey + "\" and \"" + originalKey + "\"");
-                }
-                // Keep the existing original key and drop canonical key silently.
-                // zh-CN: 静默保留原始 key, 丢弃 canonical key.
-                obj.remove(canonicalKey);
-                continue;
-            }
-
-            JsonElement value = obj.remove(canonicalKey);
-            obj.add(originalKey, value);
-        }
-
-        applyNestedOriginalKeys(obj, detectConflicts);
-
-        return sGson.toJson(obj);
-    }
-
-    private void applyNestedOriginalKeys(@NonNull JsonObject root, boolean detectConflicts) {
-        applyNestedOriginalKeysForLaunchConfig(root, detectConflicts);
-        applyNestedOriginalKeysForBuildInfo(root, detectConflicts);
-    }
-
-    private void applyNestedOriginalKeysForLaunchConfig(@NonNull JsonObject root, boolean detectConflicts) {
-        if (mLaunchConfig == null) {
-            return;
-        }
-        String key = resolveTopLevelJsonKey("launchConfig");
-        JsonElement launchElement = root.get(key);
-        if (launchElement == null || !launchElement.isJsonObject()) {
-            return;
-        }
-        mLaunchConfig.applyOriginalJsonKeys(launchElement.getAsJsonObject(), detectConflicts);
-    }
-
-    private void applyNestedOriginalKeysForBuildInfo(@NonNull JsonObject root, boolean detectConflicts) {
-        if (mBuildInfo == null) {
-            return;
-        }
-        String key = resolveTopLevelJsonKey("build");
-        JsonElement buildElement = root.get(key);
-        if (buildElement == null || !buildElement.isJsonObject()) {
-            return;
-        }
-        mBuildInfo.applyOriginalJsonKeys(buildElement.getAsJsonObject(), detectConflicts);
-    }
-
-    @NonNull
-    private String resolveTopLevelJsonKey(@NonNull String canonicalKey) {
-        String original = mOriginalJsonKeys.get(canonicalKey);
-        return original == null || original.isBlank() ? canonicalKey : original;
+        // Always serialize with canonical keys: legacy keys are upgraded on save.
+        // zh-CN: 始终按 canonical key 序列化, 旧字段在保存时自动升级为规范字段.
+        return sGson.toJson(this);
     }
 
     public String getIconPath() {
@@ -903,21 +806,6 @@ public class ProjectConfig implements FuzzyDeserializer.OriginalJsonKeyAware {
     public List<String> getFeatures() {
         return mFeatures;
     }
-
-    // @Commented by SuperMonster003 on Jan 20, 2025.
-    //  ! Unused config options: "scripts".
-    //  ! zh-CN: 未使用的配置选项: "scripts".
-    //  # public ScriptConfig getScriptConfig(String scriptKeyName) {
-    //  #     ScriptConfig scriptConfig = Objects.requireNonNull(mScriptConfigs.getOrDefault(scriptKeyName, new ScriptConfig()));
-    //  #     List<String> combinedFeatures = new ArrayList<>(
-    //  #             new HashSet<>() {{
-    //  #                 addAll(scriptConfig.getFeatures());
-    //  #                 addAll(mFeatures);
-    //  #             }}
-    //  #     );
-    //  #     scriptConfig.setFeatures(combinedFeatures);
-    //  #     return scriptConfig;
-    //  # }
 
     public void setFeatures(@NonNull List<String> features) {
         mFeatures = features;

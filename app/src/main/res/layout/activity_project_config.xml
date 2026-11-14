@@ -210,12 +210,6 @@
 
                     </org.autojs.autojs.theme.widget.ThemeColorTextInputLayout>
 
-                    <org.autojs.autojs.core.ui.widget.JsCheckBox
-                        android:id="@+id/default_stable_mode"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/text_stable_mode" />
-
                 </LinearLayout>
 
             </LinearLayout>

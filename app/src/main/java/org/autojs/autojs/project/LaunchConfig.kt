@@ -80,13 +80,6 @@ class LaunchConfig : FuzzyDeserializer.OriginalJsonKeyAware {
     )
     var slug = mContext.getString(R.string.text_powered_by_autojs)
 
-    // @SerializedName("permissions")
-    // @field:SerializedNameCompatible(
-    //     With(value = "permission"),
-    //     With(value = "permissionList"),
-    // )
-    // var permissions = emptyList<String>()
-
     override fun recordOriginalJsonKey(canonicalKey: String, originalKey: String) {
         mOriginalJsonKeys[canonicalKey] = originalKey
     }
