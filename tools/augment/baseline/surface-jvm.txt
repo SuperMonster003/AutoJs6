@@ -63,6 +63,7 @@ $timers	EW-	object [object Object] proto=[object JavaObject] org.autojs.autojs.r
 $toast	EW-	function name='toast' length=0
 $tts	EW-	function name='tts' length=1
 $util	EW-	object [object Object] proto=[object JavaObject] org.autojs.autojs.runtime.api.Util > [object Object] ctor=Object Object.prototype
+$virtualScreen	EW-	object [object Object] proto=[object Object] ctor=Object Object.prototype
 $web	EW-	object [object Object] proto=[object Object] ctor=Object Object.prototype
 $workManager	EW-	object [object Object] proto=[object Object] ctor=Object Object.prototype
 $work_manager	EW-	object [object Object] proto=[object Object] ctor=Object Object.prototype
@@ -131,6 +132,7 @@ $zip	EW-	function name='zip' length=1
 @alias.$toast	same
 @alias.$tts	same
 @alias.$util	same
+@alias.$virtualScreen	same
 @alias.$web	same
 @alias.$workManager	same
 @alias.$work_manager	same
@@ -9836,6 +9838,31 @@ verbose	EW-	function name='verbose' length=0
 verbose.arity	--C	number '0'
 verbose.length	--C	number '0'
 verbose.name	--C	string 'verbose'
+virtualScreen	EW-	object [object Object] proto=[object Object] ctor=Object Object.prototype
+virtualScreen.create	EW-	function name='create' length=0
+virtualScreen.create.arity	--C	number '0'
+virtualScreen.create.length	--C	number '0'
+virtualScreen.create.name	--C	string 'create'
+virtualScreen.release	EW-	function name='release' length=1
+virtualScreen.release.arity	--C	number '1'
+virtualScreen.release.length	--C	number '1'
+virtualScreen.release.name	--C	string 'release'
+virtualScreen.releaseAll	EW-	function name='releaseAll' length=0
+virtualScreen.releaseAll.arity	--C	number '0'
+virtualScreen.releaseAll.length	--C	number '0'
+virtualScreen.releaseAll.name	--C	string 'releaseAll'
+virtualScreen.screens	EW-	function name='screens' length=0
+virtualScreen.screens.arity	--C	number '0'
+virtualScreen.screens.length	--C	number '0'
+virtualScreen.screens.name	--C	string 'screens'
+virtualScreen.session	EW-	function name='session' length=1
+virtualScreen.session.arity	--C	number '1'
+virtualScreen.session.length	--C	number '1'
+virtualScreen.session.name	--C	string 'session'
+virtualScreen.state	EW-	function name='state' length=0
+virtualScreen.state.arity	--C	number '0'
+virtualScreen.state.length	--C	number '0'
+virtualScreen.state.name	--C	string 'state'
 visibleToUser	EWC	function name='visibleToUser' length=0
 visibleToUser.arity	--C	number '0'
 visibleToUser.length	--C	number '0'

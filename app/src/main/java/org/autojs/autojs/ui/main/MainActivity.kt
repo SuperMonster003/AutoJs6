@@ -51,6 +51,7 @@ import org.autojs.autojs.ui.main.scripts.ExplorerFragment
 import org.autojs.autojs.ui.main.task.TaskManagerFragment
 import org.autojs.autojs.ui.settings.PreferencesActivity
 import org.autojs.autojs.ui.shortcut.ShortcutBackupReconciler
+import org.autojs.autojs.ui.virtualscreen.VirtualScreenFloatingWindow
 import org.autojs.autojs.ui.widget.DrawerAutoClose
 import org.autojs.autojs.ui.widget.SearchViewItem
 import org.autojs.autojs.ui.wizard.SetupWizards
@@ -132,6 +133,7 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     private var threeStoveAgentGuide: org.autojs.autojs.ui.settings.ThreeStoveAgentGuide? = null
     private val mA11yTool = AccessibilityTool(this)
     private val shortcutBackup = ShortcutBackupReconciler(this)
+    private var mVirtualScreenFloatingWindow: VirtualScreenFloatingWindow? = null
 
     private val isCurrentPageDocs: Boolean
         get() {
@@ -200,6 +202,11 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         // zh-CN: 启动时不主动申请权限: 欢迎 Snackbar 在用户作出选择前提供设置向导, 之后的启动仅提醒缺少的权限.
         SetupWizards.onHomeCreated(this, savedInstanceState)
         threeStoveAgentGuide = org.autojs.autojs.ui.settings.ThreeStoveAgentGuide(this).also { it.handleForegroundRequest(intent) }
+
+        // Bottom-right live preview of the background virtual display. In-app overlay only, so no
+        // SYSTEM_ALERT_WINDOW permission is needed. The switch in Settings can turn it off.
+        // zh-CN: 右下角虚拟屏实时小窗, 应用内浮层无需悬浮窗权限; 可在设置中关闭.
+        mVirtualScreenFloatingWindow = VirtualScreenFloatingWindow(this).also { it.attach() }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -225,6 +232,14 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
         //  ! 避免在应用启动时绑定 Shizuku user service.
         //  ! IDE "Run" (force-stop + relaunch) 期间可能反复拉起 root user-service 进程.
         //  # WrappedShizuku.bindUserServiceIfNeeded()
+        mVirtualScreenFloatingWindow?.resume()
+    }
+
+    override fun onStop() {
+        // Stop consuming frames while this page is in the background; the full viewer (if open)
+        // keeps its own subscription to the same pump.
+        mVirtualScreenFloatingWindow?.pause()
+        super.onStop()
     }
 
     private fun recreateIfNeeded() {
@@ -542,6 +557,8 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     }
 
     override fun onDestroy() {
+        mVirtualScreenFloatingWindow?.detach()
+        mVirtualScreenFloatingWindow = null
         super.onDestroy()
         mSearchViewItem = null
     }

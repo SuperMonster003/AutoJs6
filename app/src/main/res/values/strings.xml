@@ -3339,4 +3339,73 @@
     <string name="warning_apk_native_page_alignment_unsupported">Native library %1$s has %2$d byte alignment. The generated APK may not run on devices with 16 KB pages. Update the library or plugin.</string>
     <string name="ui_preview_window_function_ignored">ui.%1$s has no effect in the 3-Block Compose preview, which has no Activity window</string>
     <string name="ui_preview_default_label">3-Block Compose preview</string>
+
+    <string name="text_run_on_virtual_screen">Run on a virtual screen</string>
+    <string name="text_virtual_screen_run_mode">Run scripts on a virtual screen</string>
+    <string name="summary_virtual_screen_run_mode">Run every script on a background virtual display. Screenshots, taps, gestures, controls and app launches are all scoped to it, so existing scripts need no changes. Requires Shizuku and Android 12 or later.</string>
+
+    <!-- Virtual screen viewer (docs/virtual-screen/README.md) -->
+    <string name="text_virtual_screen_viewer">Virtual screen viewer</string>
+    <string name="summary_virtual_screen_viewer">See and control a background virtual display in real time</string>
+    <string name="text_vs_new">New screen</string>
+    <string name="text_vs_switch">Switch</string>
+    <string name="text_vs_release">Release</string>
+    <string name="text_vs_back">Back</string>
+    <string name="text_vs_home">Home</string>
+    <string name="text_vs_recents">Recents</string>
+    <string name="text_vs_power">Power</string>
+    <string name="text_vs_input">Text</string>
+    <string name="text_vs_launch">Launch app</string>
+    <string name="text_vs_save">Save PNG</string>
+    <string name="text_vs_pause">Pause</string>
+    <string name="text_vs_resume">Resume</string>
+    <string name="text_vs_grant">Grant Shizuku</string>
+    <string name="text_vs_no_screen">No virtual screen yet. Create one, or run a script with the Run on a virtual screen option first.</string>
+    <string name="text_vs_waiting_frame">Waiting for the first frame. If the screen is empty, tap "Launch app" to put an app on it, or tap "Retry frame".</string>
+    <string name="text_vs_shizuku_required">Shizuku is not ready: start Shizuku and grant permission to this app.</string>
+    <string name="text_vs_status_idle">No active display</string>
+    <string name="text_vs_status">Display %1$d · %2$d×%3$d @ %4$ddpi · %5$d fps · %6$s</string>
+    <string name="text_vs_created">Virtual screen %1$d created</string>
+    <string name="text_vs_released">Virtual screen %1$d released</string>
+    <string name="text_vs_saved">Saved to %1$s</string>
+    <string name="text_vs_action_failed">Action failed: %1$s</string>
+    <string name="text_vs_input_hint">ASCII text to type</string>
+    <string name="text_vs_launch_hint">Package name or package/activity</string>
+    <string name="text_vs_release_confirm">Release this virtual screen? Apps running on it will be closed.</string>
+    <string name="text_vs_screen_choices">Choose a virtual screen</string>
+    <string name="text_vs_preview_paused">Preview paused</string>
+    <string name="text_vs_detached">standalone</string>
+    <string name="text_vs_script_bound">script-bound</string>
+    <string name="text_vs_error">Error: %1$s</string>
+    <string name="text_vs_release_title">Release virtual screen</string>
+    <string name="text_vs_ok">OK</string>
+    <string name="text_vs_cancel">Cancel</string>
+    <string name="text_vs_refresh">Retry frame</string>
+    <string name="text_vs_frame_error">Frame error: %1$s</string>
+    <string name="text_vs_created_hint">Screen %1$d created and Settings opened on it. Use "Launch app" to switch apps.</string>
+    <string name="text_vs_auto_launch_failed">Screen created, but no app could be launched automatically. Tap "Launch app".</string>
+
+    <!-- Timed task: task-level virtual screen mode -->
+    <string name="text_timed_task_virtual_screen_mode">Virtual screen (this task)</string>
+    <string name="summary_timed_task_virtual_screen_mode">Choose which display this scheduled task runs on. "Always on" requires Shizuku and Android 12+.</string>
+    <string name="text_vs_mode_follow">Follow global setting</string>
+    <string name="text_vs_mode_on">Always on (virtual display)</string>
+    <string name="text_vs_mode_off">Always off (physical display)</string>
+
+    <!-- Home-screen floating mini preview -->
+    <string name="text_vs_floating_window">Floating virtual screen preview</string>
+    <string name="summary_vs_floating_window">Show a live mini preview in the bottom-right corner of the home screen. Drag its title to move it, tap it to open the full viewer. Only visible inside AutoJs6.</string>
+    <string name="text_vs_float_idle">No virtual screen</string>
+    <string name="text_vs_float_waiting">#%1$d · waiting for frame</string>
+    <string name="text_vs_float_status">#%1$d · %2$d×%3$d · %4$d fps</string>
+    <string name="text_vs_float_hint_idle">Tap to open the viewer</string>
+    <string name="text_vs_float_hint_waiting">Waiting for frame…</string>
+    <string name="text_vs_float_frame_error">Frame error: %1$s</string>
+    <string name="text_vs_float_bubble">VS</string>
+    <string name="text_vs_float_open">Open full viewer</string>
+    <string name="text_vs_float_collapse">Collapse preview</string>
+    <string name="text_vs_float_expand">Expand preview</string>
+    <string name="text_vs_float_open_symbol">↗</string>
+    <string name="text_vs_float_collapse_symbol">−</string>
+
 </resources>

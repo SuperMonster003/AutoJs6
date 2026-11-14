@@ -607,6 +607,12 @@
 
         <activity android:name="org.autojs.autojs.ui.project.ProjectConfigActivity" />
 
+        <!-- Live preview and direct control of a background virtual display. Not exported. -->
+        <activity
+            android:name="org.autojs.autojs.ui.virtualscreen.VirtualScreenViewerActivity"
+            android:theme="@style/AppTheme.Settings"
+            android:exported="false" />
+
         <activity android:name="org.autojs.autojs.ui.keystore.ManageKeyStoreActivity" />
 
         <activity

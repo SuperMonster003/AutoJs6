@@ -1,11 +1,15 @@
 package org.autojs.autojs.core.accessibility
 
 import android.content.Context
+import android.os.SystemClock
+import android.util.Log
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import org.autojs.autojs.annotation.ScriptInterface
 import org.autojs.autojs.core.accessibility.event.A11yEventPulse
+import org.autojs.autojs.core.accessibility.window.A11yWindowFacts
 import org.autojs.autojs.core.accessibility.window.A11yWindowRootPolicy
+import org.autojs.autojs.core.accessibility.window.DisplayWindowScope
 import org.autojs.autojs.core.accessibility.window.WindowRootPolicy
 import org.autojs.autojs.core.accessibility.window.WindowRootProvider
 import org.autojs.autojs.core.activity.ActivityInfoProvider
@@ -26,7 +30,10 @@ import org.autojs.autojs6.R
  * - [windowRoots] and [getRootInCurrentWindow] honour the window filter; without one they resolve
  *   to the active window root of the current mode.
  * - [getRootInActiveWindow] ignores the window filter and always resolves to the active window root
- *   of the current mode.
+ *   of the current mode, except while a display scope is bound (see below).
+ * - A display scope bound by [setDisplayScope] (a task configured to run on a virtual screen)
+ *   switches the window source to all displays and pins every query to that display. It cannot be
+ *   removed by a script's `auto.setWindowFilter`; the script filter is applied on top of it.
  * - Neither is affected by the guard mode blacklist ([AccessibilityConfig]); that is applied by
  *   `UiSelector.findImpl` (roots of blacklisted packages are skipped) and by
  *   `SimpleActionAutomator.performAction` (no action while AutoJs6 itself is in front).
@@ -35,7 +42,9 @@ import org.autojs.autojs6.R
  * 类名与 public 签名与 Java 版一致 (脚本可能经 `Packages` 引用); 根节点逻辑本身在 [WindowRootProvider] / [WindowRootPolicy].
  * 三个根节点查询各自遵循的设置不同, 且是有意为之 (作为文档化行为保留):
  * [windowRoots] 与 [getRootInCurrentWindow] 遵循窗口过滤器, 无过滤器时解析为当前模式下的活动窗口根节点;
- * [getRootInActiveWindow] 忽略窗口过滤器, 总是解析为当前模式下的活动窗口根节点;
+ * [getRootInActiveWindow] 忽略窗口过滤器, 总是解析为当前模式下的活动窗口根节点 (绑定 display 作用域时除外);
+ * [setDisplayScope] 绑定的 display 作用域 (被配置为在虚拟屏运行的任务) 会把窗口来源切换到所有屏幕, 并把每次查询
+ * 钉在该屏幕上; 脚本的 `auto.setWindowFilter` 无法解除它, 只能叠加在其之上.
  * 两者都不受保护模式黑名单 ([AccessibilityConfig]) 影响, 黑名单由 `UiSelector.findImpl` (跳过黑名单包名的根节点)
  * 与 `SimpleActionAutomator.performAction` (AutoJs6 自身前置时不执行动作) 应用.
  *
@@ -118,10 +127,24 @@ abstract class AccessibilityBridge(
     // zh-CN: 每次查询时查找服务, 因此 bridge 在服务重启后依然可用.
     private val rootProvider = WindowRootProvider { service }
 
+    // The default-display-only window list cannot contain a virtual display's windows. A scoped
+    // runtime uses this provider instead, whose windows come from getWindowsOnAllDisplays().
+    // zh-CN: 只含默认屏的窗口列表不可能包含虚拟屏窗口; 绑定了作用域的运行时改用这个 provider.
+    private val allDisplayRootProvider = WindowRootProvider(allDisplays = true) { service }
+
+    /** The display this task's accessibility queries are pinned to. zh-CN: 本任务无障碍查询被钉住的显示屏. */
+    private val displayScope = DisplayWindowScope<AccessibilityWindowInfo> { window -> A11yWindowFacts.displayId(window) }
+
+    private fun activeProvider(): WindowRootProvider =
+        if (displayScope.isScoped) allDisplayRootProvider else rootProvider
+
+    @Volatile
+    private var lastEmptyScopeDiagnosticMillis = 0L
+
     /**
-     * The current query settings as one immutable policy; rebuilt by [setMode], [setWindowFilter]
-     * and [flags].
-     * zh-CN: 当前查询设置构成的单个不可变策略; 由 [setMode], [setWindowFilter] 与 [flags] 重建.
+     * The current query settings as one immutable policy; rebuilt by [setMode], [setWindowFilter],
+     * [setDisplayScope] and [flags].
+     * zh-CN: 当前查询设置构成的单个不可变策略; 由 [setMode], [setWindowFilter], [setDisplayScope] 与 [flags] 重建.
      */
     @Volatile
     var windowRootPolicy: A11yWindowRootPolicy = WindowRootPolicy()
@@ -172,30 +195,106 @@ abstract class AccessibilityBridge(
      * zh-CN: 查询所针对的根节点, 不含 `null`: 通过窗口过滤器的窗口的根节点; 否则当前模式下的活动窗口根节点
      * (系统不提供时, 由 [FLAG_APP_WINDOWS_FALLBACK] 决定的代替根节点); 否则为空.
      */
-    fun windowRoots(): List<AccessibilityNodeInfo> = rootProvider.roots(windowRootPolicy)
+    fun windowRoots(): List<AccessibilityNodeInfo> {
+        val roots = activeProvider().roots(windowRootPolicy)
+        // When a virtual-screen task finds nothing, make the distinction visible: is the system
+        // reporting windows for that display at all, or did the selector simply not match?
+        // zh-CN: 虚拟屏任务查不到节点时, 让日志能区分「系统根本没上报该屏窗口」与「选择器条件不匹配」.
+        if (roots.isEmpty() && displayScope.isScoped) logEmptyScopeDiagnostic()
+        return roots
+    }
 
     /**
-     * The service's windows, unfiltered, in the framework's order; empty without a service.
-     * zh-CN: 服务的全部窗口, 未过滤, 按框架的顺序; 无服务时为空.
+     * The service's windows in the framework's order, unfiltered by the script's window filter;
+     * while a display scope is bound, only the windows of that display are returned.
+     * zh-CN: 按框架顺序排列的服务窗口, 不受脚本窗口过滤器影响; 绑定 display 作用域时只返回该屏的窗口.
      */
-    fun windows(): List<AccessibilityWindowInfo> = rootProvider.windows()
+    fun windows(): List<AccessibilityWindowInfo> {
+        val windows = activeProvider().windows()
+        val scope = displayScope.scopedDisplayId
+        if (scope == DisplayWindowScope.NO_SCOPE) return windows
+        return windows.filter { window ->
+            runCatching { A11yWindowFacts.displayId(window) == scope }.getOrDefault(false)
+        }
+    }
 
     /**
      * The first of [windowRoots], resolved lazily (with a window filter, only the windows up to the
      * first one that has a root are queried).
      * zh-CN: [windowRoots] 的首个根节点, 惰性解析 (有窗口过滤器时只查询到首个有根节点的窗口为止).
      */
-    fun getRootInCurrentWindow(): AccessibilityNodeInfo? = rootProvider.currentRoot(windowRootPolicy)
+    fun getRootInCurrentWindow(): AccessibilityNodeInfo? = activeProvider().currentRoot(windowRootPolicy)
 
     /**
      * The active window root of the current mode, ignoring the window filter (unlike
-     * [getRootInCurrentWindow]); [FLAG_APP_WINDOWS_FALLBACK] applies.
+     * [getRootInCurrentWindow]); [FLAG_APP_WINDOWS_FALLBACK] applies. While a display scope is
+     * bound, the framework's active root is the *main* screen's, so the top root of the bound
+     * display is returned instead.
      * zh-CN: 当前模式下的活动窗口根节点, 忽略窗口过滤器 (与 [getRootInCurrentWindow] 不同); [FLAG_APP_WINDOWS_FALLBACK] 生效.
+     * 绑定 display 作用域时, 框架的活动窗口根节点属于**主屏**, 因此改返回绑定屏最上层窗口的根节点.
      */
-    fun getRootInActiveWindow(): AccessibilityNodeInfo? = rootProvider.activeRoot(windowRootPolicy)
+    fun getRootInActiveWindow(): AccessibilityNodeInfo? =
+        // `rootInActiveWindow` is the *default display's* active window and cannot be scoped.
+        // While a task is bound to a virtual display, "the active window" must be the top window
+        // of that display, i.e. the first root passing the scoped filter.
+        // zh-CN: `rootInActiveWindow` 是**默认屏**的活动窗口, 无法限定 display; 任务绑定虚拟屏时,
+        // 「活动窗口」应是该屏的最上层窗口, 即通过作用域过滤器的首个根节点.
+        if (displayScope.isScoped) getRootInCurrentWindow()
+        else activeProvider().activeRoot(windowRootPolicy)
 
+    /**
+     * Installs/replaces the script's own window filter. When a display scope is bound, the filter
+     * is combined with (not substituted for) that scope, so a zero-change script cannot read the
+     * physical screen by accident. zh-CN: 安装/替换脚本自己的窗口过滤器; 已绑定 display 作用域时是叠加而非替换,
+     * 避免零改动脚本意外读到物理主屏.
+     */
     fun setWindowFilter(windowFilter: WindowFilter?) {
-        windowRootPolicy = windowRootPolicy.copy(filter = windowFilter?.let { { info -> it.filter(info) } })
+        displayScope.setScriptFilter(windowFilter?.let { filter -> { info -> filter.filter(info) } })
+        rebuildWindowRootFilter()
+    }
+
+    /**
+     * Binds every accessibility query of this runtime to one display and switches to the
+     * all-displays window source. Called from `ScriptRuntime.initPrologue()` before modules are
+     * mounted, so existing JavaScript needs no changes. Pass [DisplayWindowScope.NO_SCOPE] to clear.
+     *
+     * zh-CN: 把本运行时的所有无障碍查询绑定到某个显示屏, 并切换到全屏窗口来源; 由
+     * `ScriptRuntime.initPrologue()` 在模块挂载前调用, 已有 JS 无需修改. 传 [DisplayWindowScope.NO_SCOPE] 可清除.
+     */
+    fun setDisplayScope(id: Int) {
+        displayScope.setDisplayScope(id)
+        rebuildWindowRootFilter()
+        if (id == DisplayWindowScope.NO_SCOPE) {
+            Log.i(TAG, "Accessibility display scope cleared")
+            return
+        }
+        Log.i(TAG, "Accessibility display scope = $id; windows by display: ${windowsByDisplaySummary()}")
+    }
+
+    private fun rebuildWindowRootFilter() {
+        windowRootPolicy = windowRootPolicy.copy(filter = displayScope.effectiveFilter())
+    }
+
+    private fun windowsByDisplaySummary(): String {
+        if (service == null) return "service not bound"
+        return runCatching {
+            allDisplayRootProvider.windows()
+                .groupingBy { window -> runCatching { A11yWindowFacts.displayId(window) }.getOrDefault(-1) }
+                .eachCount()
+                .toString()
+        }.getOrDefault("unavailable")
+    }
+
+    /** Throttled: selector polling asks for roots many times a second. zh-CN: 节流: 选择器轮询每秒会多次查询根节点. */
+    private fun logEmptyScopeDiagnostic() {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastEmptyScopeDiagnosticMillis < 5_000L) return
+        lastEmptyScopeDiagnosticMillis = now
+        Log.w(
+            TAG,
+            "No accessibility roots on display ${displayScope.scopedDisplayId}; " +
+                "windows by display: ${windowsByDisplaySummary()}",
+        )
     }
 
     abstract val infoProvider: ActivityInfoProvider
@@ -217,6 +316,8 @@ abstract class AccessibilityBridge(
     }
 
     companion object {
+
+        private const val TAG = "AccessibilityBridge"
 
         const val MODE_NORMAL = 0
         const val MODE_FAST = 1

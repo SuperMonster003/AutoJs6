@@ -89,8 +89,9 @@ object WrappedShizuku {
             .processNameSuffix("shizuku-service-for-${pkg.substringAfterLast(".")}")
             // Recreate an older user process when its AIDL implementation changes after an update.
             // The extra revision also replaces a service from an earlier build with the same versionCode
-            // (+ 6: attachHost, docs/shizuku-oom/ROADMAP.md D5).
-            .version(BuildConfig.VERSION_CODE + 6)
+            // (+ 6: attachHost, docs/shizuku-oom/ROADMAP.md D5; + 7: virtual screen AIDL,
+            // docs/virtual-screen/README.md). Bump it again whenever IUserService.aidl changes.
+            .version(BuildConfig.VERSION_CODE + 8)
             .daemon(false)
     }
 

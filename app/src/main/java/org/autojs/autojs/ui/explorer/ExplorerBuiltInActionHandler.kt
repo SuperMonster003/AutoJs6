@@ -73,6 +73,11 @@ internal class ExplorerBuiltInActionHandler(
                 host.notifyItemOperated()
                 host.hideHostDialog()
             }
+            R.id.action_run_on_virtual_screen -> {
+                Scripts.runOnVirtualScreen(host.context, host.selectedItem!!.toScriptFile())
+                host.notifyItemOperated()
+                host.hideHostDialog()
+            }
             R.id.action_run_repeatedly -> {
                 ScriptLoopDialog(host.context, host.selectedItem!!.toScriptFile()).show()
                 host.notifyItemOperated()

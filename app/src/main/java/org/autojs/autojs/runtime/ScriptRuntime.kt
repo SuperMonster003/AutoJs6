@@ -23,7 +23,9 @@ import org.autojs.autojs.core.plugin.r8.AndroidR8CompilerHost
 import org.autojs.autojs.core.plugin.r8.R8CompilerExplicitRuntimeRoute
 import org.autojs.autojs.core.plugin.r8.R8RetraceExplicitRuntimeRoute
 import org.autojs.autojs.core.pref.keys.ExtensibilityKeys
+import org.autojs.autojs.core.virtualscreen.DisplayRoute
 import org.autojs.autojs.engine.RhinoJavaScriptEngine
+import org.autojs.autojs.execution.ExecutionConfig
 import org.autojs.autojs.lang.ThreadCompat
 import org.autojs.autojs.pio.PFiles
 import org.autojs.autojs.pio.UncheckedIOException
@@ -132,6 +134,14 @@ class ScriptRuntime private constructor(builder: Builder) {
     val coroutineContext = coroutineScope.coroutineContext
 
     val ownerId = "runtime@${System.identityHashCode(this)}"
+
+    /**
+     * Screen scope of this execution (docs/virtual-screen/README.md). All screen-facing APIs read
+     * it, so a task configured to run on a virtual display needs no changes to its JavaScript.
+     * zh-CN: 本次执行的屏幕作用域. 所有面向屏幕的 API 都读取它, 因此配置为虚拟屏运行的任务无需修改 JS 源码.
+     */
+    @JvmField
+    val displayRoute = DisplayRoute(this)
 
     private var mUiHandlerAppContext: Context
     private val mProperties = ConcurrentHashMap<String, Any>()
@@ -515,6 +525,21 @@ class ScriptRuntime private constructor(builder: Builder) {
     }
 
     fun initPrologue() {
+        // Resolve the task's display before any screen-facing module is mounted. The engine carries
+        // ExecutionConfig as a tag (RunnableScriptExecution#execute), so no launch path needs changing.
+        // zh-CN: 在挂载任何屏幕相关模块前先解析本次任务的 display. ExecutionConfig 已作为 engine tag 传递, 无需改动任何启动链路.
+        val config = runCatching { engines.myEngine().getTag(ExecutionConfig.tag) as? ExecutionConfig }.getOrNull()
+        displayRoute.apply(config)
+        if (displayRoute.isVirtual) {
+            // selector(), UiObject, auto.windows() and node actions are rooted in service.windows,
+            // which only reports the DEFAULT display. Pin the bridge to this display and switch it
+            // to getWindowsOnAllDisplays(); a plain window filter cannot help when the virtual
+            // display's windows are not in the list at all.
+            // zh-CN: 控件查找的根节点来自 service.windows, 而它只报告默认屏. 必须把 bridge 钉在本 display
+            // 并切换到 getWindowsOnAllDisplays(); 窗口根本不在列表里时, 普通窗口过滤器无济于事.
+            accessibilityBridge.setDisplayScope(displayRoute.displayId)
+        }
+
         LooperHelper.prepare()
         mThread = Thread.currentThread()
         threads = ApiThreads(this)

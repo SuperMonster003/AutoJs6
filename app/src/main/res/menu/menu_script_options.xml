@@ -45,6 +45,9 @@
         android:id="@+id/action_edit_by_other_apps"
         android:title="@string/text_edit_by_other_apps" />
     <item
+        android:id="@+id/action_run_on_virtual_screen"
+        android:title="@string/text_run_on_virtual_screen" />
+    <item
         android:id="@+id/action_run_repeatedly"
         android:title="@string/text_run_repeatedly" />
     <item

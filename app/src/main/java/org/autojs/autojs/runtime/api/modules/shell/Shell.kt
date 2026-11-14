@@ -345,26 +345,43 @@ class Shell(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun Text(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) {
-            undefined { compatShell(scriptRuntime).Text(coerceString(it)) }
+            undefined {
+                val value = coerceString(it)
+                if (scriptRuntime.displayRoute.isVirtual) scriptRuntime.displayRoute.text(value)
+                else compatShell(scriptRuntime).Text(value)
+            }
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun Input(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) {
-            undefined { compatShell(scriptRuntime).Text(coerceString(it)) }
+            undefined {
+                val value = coerceString(it)
+                if (scriptRuntime.displayRoute.isVirtual) scriptRuntime.displayRoute.text(value)
+                else compatShell(scriptRuntime).Text(value)
+            }
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun Tap(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsLength(args, 2) {
             val (x, y) = it
-            undefined { compatShell(scriptRuntime).Tap(coerceIntNumber(x), coerceIntNumber(y)) }
+            undefined {
+                val px = coerceIntNumber(x)
+                val py = coerceIntNumber(y)
+                if (scriptRuntime.displayRoute.isVirtual) scriptRuntime.displayRoute.tap(px, py)
+                else compatShell(scriptRuntime).Tap(px, py)
+            }
         }
 
         @JvmStatic
         @RhinoRuntimeFunctionInterface
         fun Screencap(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsOnlyOne(args) {
-            undefined { compatShell(scriptRuntime).Screencap(coerceString(it)) }
+            undefined {
+                val path = coerceString(it)
+                if (scriptRuntime.displayRoute.isVirtual) scriptRuntime.displayRoute.captureToFile(path)
+                else compatShell(scriptRuntime).Screencap(path)
+            }
         }
 
         @JvmStatic
@@ -374,6 +391,10 @@ class Shell(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
             val codeNumber = parseKeyCodeNumber(raw)
             require(codeNumber != KeyEvent.KEYCODE_UNKNOWN) {
                 GlobalAppContext.get().getString(R.string.error_unknown_key_code, raw)
+            }
+            if (scriptRuntime.displayRoute.isVirtual) {
+                scriptRuntime.displayRoute.key(codeNumber)
+                return@ensureArgumentsOnlyOne UNDEFINED
             }
             val defaults = defaultsOf(scriptRuntime)
             when {
@@ -413,20 +434,16 @@ class Shell(private val scriptRuntime: ScriptRuntime) : ArgumentGuards() {
         fun Swipe(scriptRuntime: ScriptRuntime, args: Array<out Any?>): Undefined = ensureArgumentsLengthInRange(args, 4..5) {
             val (x1, y1, x2, y2, duration) = it
             undefined {
-                when {
-                    duration.isJsNullish() -> compatShell(scriptRuntime).Swipe(
-                        coerceIntNumber(x1),
-                        coerceIntNumber(y1),
-                        coerceIntNumber(x2),
-                        coerceIntNumber(y2),
-                    )
-                    else -> compatShell(scriptRuntime).Swipe(
-                        coerceIntNumber(x1),
-                        coerceIntNumber(y1),
-                        coerceIntNumber(x2),
-                        coerceIntNumber(y2),
-                        coerceIntNumber(duration),
-                    )
+                val px1 = coerceIntNumber(x1)
+                val py1 = coerceIntNumber(y1)
+                val px2 = coerceIntNumber(x2)
+                val py2 = coerceIntNumber(y2)
+                if (scriptRuntime.displayRoute.isVirtual) {
+                    val ms = if (duration.isJsNullish()) 300 else coerceIntNumber(duration)
+                    scriptRuntime.displayRoute.swipe(px1, py1, px2, py2, ms.coerceAtLeast(1))
+                } else when {
+                    duration.isJsNullish() -> compatShell(scriptRuntime).Swipe(px1, py1, px2, py2)
+                    else -> compatShell(scriptRuntime).Swipe(px1, py1, px2, py2, coerceIntNumber(duration))
                 }
             }
         }

@@ -660,6 +660,7 @@ internal class ExplorerItemViewHolder(
         if (!mExplorerItem.isExecutable) {
             menu.removeItem(R.id.action_create_shortcut)
             menu.removeItem(R.id.action_timed_task)
+            menu.removeItem(R.id.action_run_on_virtual_screen)
             menu.removeItem(R.id.action_run_repeatedly)
             menu.removeItem(R.id.action_floating_run)
         }
